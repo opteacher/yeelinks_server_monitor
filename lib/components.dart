@@ -3,10 +3,12 @@ import 'dart:math';
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:flutter/services.dart';
 import 'package:toast/toast.dart';
 import 'async.dart';
 import 'global.dart' as global;
 import 'pages/home.dart' as home;
+import 'dart:ui' as ui;
 
 class DataCard extends StatelessWidget {
 	final String title;
@@ -18,13 +20,15 @@ class DataCard extends StatelessWidget {
 
 	@override
 	Widget build(BuildContext context) {
-		final titleStyle = TextStyle(fontSize: 30.0, color: Theme.of(context).primaryColor);
-		final dataCard = Card(child: Column(children: <Widget>[
-			Container(height: 50.0, child: Center(child: Text(title, style: titleStyle))),
+		final titleStyle = TextStyle(fontSize: 25.0, color: Theme.of(context).primaryColor);
+		final dataCard = Card(elevation: 0, child: Container(decoration: BoxDecoration(
+			border: Border.all(color: Theme.of(context).primaryColor)
+		), child: Column(children: <Widget>[
+			Container(height: 50.0, color: Theme.of(context).primaryColorLight, child: Center(child: Text(title, style: titleStyle))),
 			// NOTE: 将Divider的高度设为0，可以让分割线的上下间隔去掉
-			Divider(height: 0),
+//			Divider(height: 0),
 			Expanded(child: child)
-		]));
+		])));
 		return height == -1 ? Expanded(flex: flex, child: dataCard) : Container(height: height, child: dataCard);
 	}
 }
@@ -291,16 +295,17 @@ class SimpleTimeSeriesChartState extends State<SimpleTimeSeriesChart> {
 
 	SimpleTimeSeriesChartState(this._name, this._id) {
 		_data = [TimeSeriesSales(DateTime.now(), 0)];
-		global.refreshTimer.register("${_id}_${_name}", TimerJob(getDataFunc(_id), addData, {
+		global.refreshTimer.register("${_id}_$_name", TimerJob(getDataFunc(_id), addData, {
 			TimerJob.PAGE_IDEN: "env"
 		}));
 	}
 
 	Future<dynamic> Function() getDataFunc(String poiId) => () {
-		if (global.currentDevice == null) {
-			return Future(() => null);
-		}
-		return getHumiture(global.currentDevice.id, poiId, _active);
+//		if (global.currentDevice == null) {
+//			return Future(() => null);
+//		}
+//		return getHumiture(global.currentDevice.id, poiId, _active);
+		return Future(() => ResponseInfo([], ""));
 	};
 
 	void addData(dynamic data) {
@@ -364,70 +369,6 @@ const Map<TimeSectionEnum, String> TimeSectionDescs = {
 	TimeSectionEnum.in1Mon: "1 mon",
 	TimeSectionEnum.in1Year: "1 year"
 };
-
-class SelDeviceList extends StatefulWidget {
-	final void Function(Device) _callback;
-
-	SelDeviceList(this._callback);
-
-	@override
-	State createState() => SelDeviceListState(_callback);
-}
-
-class SelDeviceListState extends State<SelDeviceList> {
-	final void Function(Device) _callback;
-	List<Device> _devices = [];
-
-	SelDeviceListState(this._callback);
-
-	_refresh() async {
-		ResponseInfo ri = await getDevices(global.companyCode, global.roomCode);
-		setState(() {
-			_devices = ri.data.toList().cast<Device>();
-			if (_devices.isNotEmpty && global.currentDevice == null) {
-				global.currentDevice = _devices[0];
-				if (_callback != null) {
-					_callback(global.currentDevice);
-				}
-			}
-		});
-		Toast.show(ri.message, context, duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
-	}
-
-	@override
-	void initState() {
-		super.initState();
-		this._refresh();
-	}
-
-	@override
-	Widget build(BuildContext context) => Container(height: 300, child: Column(children: <Widget>[
-		Container(color: Colors.grey[200], child: Row(children: <Widget>[
-			Expanded(child: Padding(padding: EdgeInsets.only(left: 10.0), child: Text("选择设备",
-				style: TextStyle(color: Theme.of(context).primaryColor)
-			))),
-			Align(alignment: Alignment.centerRight, child: FlatButton(child: Icon(Icons.close), onPressed: () {
-				Navigator.of(context).pop();
-			}))
-		])),
-		Expanded(child: ListView(children: _devices.map((dev) => _devListItem(context, dev)).toList()))
-	]));
-
-	Widget _devListItem(BuildContext context, Device device) => ListTile(
-		title: Text(device.name, style: TextStyle(
-			color: global.currentDevice.name == device.name ? Theme.of(context).primaryColor : null
-		)),
-		onTap: global.currentDevice.name != device.name ? () {
-			setState(() {
-				global.currentDevice = device;
-				if (_callback != null) {
-					_callback(device);
-				}
-			});
-			Navigator.of(context).pop();
-		} : null
-	);
-}
 
 class MyDataHeader {
 	final String _key;
@@ -525,33 +466,25 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T> {
 		_values = value;
 	}
 
-	static Future<dynamic> getData() {
-		if (global.currentDevice == null) {
-			return Future(() => null);
-		}
-		return getPointSensor(global.currentDevice.id);
-	}
-
 	static void pcsData(dynamic data) {
-		_callbacks[global.currentPageID](data);
+		if (global.currentPageID != null && _callbacks.isNotEmpty) {
+			_callbacks[global.currentPageID](data);
+		}
 	}
 
 	@protected
 	void collectData(dynamic data) {
 		setState(() {
-			if (global.currentDevice == null) {
-				return;
-			}
 			resetValues();
 			for (var id in _values.keys) {
 				var pointId = global.protocolMapper[id];
 				if (pointId == null) {
 					continue;
 				}
-				for (var val in data["sensors"]) {
+				for (PointVal val in data["sensors"]) {
 					bool exs = false;
-					for (var cmp in global.currentDevice.children) {
-						if (cmp.id == val.compId) {
+					for (var device in global.devices) {
+						if (device.id == val.deviceId) {
 							exs = true;
 							break;
 						}
@@ -564,22 +497,13 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T> {
 			}
 			print(_values);
 		});
-		this.subColData(data);
-	}
-
-	String getCompId(String name) {
-		for (var child in global.currentDevice.children) {
-			if (child.name == name) {
-				return child.id;
-			}
-		}
-		return "";
+		this.subColcData(data);
 	}
 
 	String pageId();
 
 	@protected
-	void subColData(dynamic data) {}
+	void subColcData(dynamic data) {}
 
 	@protected
 	void resetValues() {}
@@ -597,7 +521,7 @@ class TimerJob {
 class RefreshTimer {
 	Timer _timer;
 	Map<String, TimerJob> _jobs = {
-		"pointSensor": TimerJob(BasePageState.getData, BasePageState.pcsData)
+		"pointSensor": TimerJob(getPointSensor, BasePageState.pcsData)
 	};
 
 	void register(String id, TimerJob job) {
@@ -606,7 +530,7 @@ class RefreshTimer {
 
 	void start() {
 		if (_timer == null || !_timer.isActive) {
-			Timer.run(() => _refresh(null));
+//			Timer.run(() => _refresh(null));
 			_timer = Timer.periodic(const Duration(seconds: 2), _refresh);
 		}
 	}
@@ -649,4 +573,140 @@ class PageSwitchRoute extends PageRouteBuilder {
 		Animation<double> secondaryAnimation,
 		Widget child
 	) => FadeTransition(opacity: animation, child: child));
+}
+
+class UpsRunningMod extends StatefulWidget {
+	@override
+	State<StatefulWidget> createState() => UpsRunningModState();
+}
+
+class UpsRunningModState extends State<UpsRunningMod> {
+	ui.Image _imgBYPASS;
+	ui.Image _imgInput;
+	ui.Image _imgACDC;
+	ui.Image _imgDCAC;
+	ui.Image _imgBatt;
+
+	@override
+	Widget build(BuildContext context) => Center(child: CustomPaint(
+		size: Size(300, 300),
+		painter: UpsRunningModPainter(_imgBYPASS, _imgInput, _imgACDC, _imgDCAC, _imgBatt)
+	));
+
+	@override
+	void initState() {
+		super.initState();
+		_loadResources();
+	}
+
+	void _loadResources() async {
+		_imgBYPASS = await _loadImage("images/bypass.png");
+		_imgInput = await _loadImage("images/input.png");
+		_imgACDC = await _loadImage("images/acdc.png");
+		_imgDCAC = await _loadImage("images/dcac.png");
+		_imgBatt = await _loadImage("images/batt.png");
+	}
+
+	Future<ui.Image> _loadImage(String asset) async {
+		ByteData data = await rootBundle.load(asset);
+		ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+		ui.FrameInfo fi = await codec.getNextFrame();
+		return fi.image;
+	}
+}
+
+class UpsRunningModPainter extends CustomPainter {
+	final ui.Image _imgBYPASS;
+	final ui.Image _imgInput;
+	final ui.Image _imgACDC;
+	final ui.Image _imgDCAC;
+	final ui.Image _imgBatt;
+
+	UpsRunningModPainter(this._imgBYPASS, this._imgInput, this._imgACDC, this._imgDCAC, this._imgBatt);
+
+	@override
+	void paint(Canvas canvas, Size size) {
+		if (_imgBYPASS == null || _imgInput == null || _imgACDC == null || _imgDCAC == null || _imgBatt == null) {
+			return;
+		}
+
+		double blkWid = 100;
+		double blkHgt = 50;
+
+		Paint _paint = Paint()
+			..color = Colors.grey[200];
+		double hfWid = size.width / 2;
+		canvas.drawImageRect(_imgBYPASS,
+			Rect.fromLTWH(0, 0, _imgBYPASS.width.toDouble(), _imgBYPASS.height.toDouble()),
+			Rect.fromLTWH(hfWid - blkWid / 2, 0, blkWid, blkHgt),
+			_paint);
+
+		blkWid = 50;
+
+		double ofWid = hfWid / 2;
+		double margin = (ofWid - blkWid) / 2;
+		double otHgt = size.height / 3;
+		canvas.drawImageRect(_imgInput,
+			Rect.fromLTWH(0, 0, _imgInput.width.toDouble(), _imgInput.height.toDouble()),
+			Rect.fromLTWH(margin, otHgt, blkWid, blkHgt),
+			_paint);
+		canvas.drawImageRect(_imgACDC,
+			Rect.fromLTWH(0, 0, _imgACDC.width.toDouble(), _imgACDC.height.toDouble()),
+			Rect.fromLTWH(margin + ofWid, otHgt, blkWid, blkHgt),
+			_paint);
+		canvas.drawImageRect(_imgDCAC,
+			Rect.fromLTWH(0, 0, _imgDCAC.width.toDouble(), _imgDCAC.height.toDouble()),
+			Rect.fromLTWH(margin + hfWid, otHgt, blkWid, blkHgt),
+			_paint);
+		canvas.drawImageRect(_imgInput,
+			Rect.fromLTWH(0, 0, _imgInput.width.toDouble(), _imgInput.height.toDouble()),
+			Rect.fromLTWH(margin + hfWid + ofWid, otHgt, blkWid, blkHgt),
+			_paint);
+
+		canvas.drawImageRect(_imgBatt,
+			Rect.fromLTWH(0, 0, _imgBatt.width.toDouble(), _imgBatt.height.toDouble()),
+			Rect.fromLTWH(hfWid - 25, otHgt * 2, blkWid, blkHgt),
+			_paint);
+
+		Path path = Path();
+		blkWid = 100;
+		double hfBlkWid = blkWid / 2;
+		double hfBlkHgt = blkHgt / 2;
+		path.moveTo(hfWid - hfBlkWid, hfBlkHgt);
+		path.lineTo(ofWid, hfBlkHgt);
+		path.lineTo(ofWid, otHgt + hfBlkHgt);
+		_paint
+			..style = PaintingStyle.stroke
+			..strokeWidth = 10;
+		canvas.drawPath(path, _paint);
+
+		path.reset();
+		double tfWid = ofWid * 3;
+		path.moveTo(hfWid + hfBlkWid, hfBlkHgt);
+		path.lineTo(tfWid, hfBlkHgt);
+		path.lineTo(tfWid, otHgt + hfBlkHgt);
+		canvas.drawPath(path, _paint);
+
+		blkWid = 50;
+		canvas.drawLine(
+			Offset(margin + blkWid, otHgt + hfBlkHgt),
+			Offset(margin + ofWid, otHgt + hfBlkHgt), _paint);
+
+		canvas.drawLine(
+			Offset(hfWid - margin, otHgt + hfBlkHgt),
+			Offset(hfWid + margin, otHgt + hfBlkHgt), _paint);
+
+		canvas.drawLine(
+			Offset(margin + hfWid + blkWid, otHgt + hfBlkHgt),
+			Offset(margin + hfWid + ofWid, otHgt + hfBlkHgt), _paint);
+
+		canvas.drawLine(
+			Offset(hfWid, otHgt + hfBlkHgt),
+			Offset(hfWid, otHgt * 2), _paint);
+	}
+
+	@override
+	bool shouldRepaint(CustomPainter oldDelegate) {
+		return true;
+	}
 }

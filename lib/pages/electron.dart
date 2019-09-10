@@ -135,6 +135,10 @@ class ElectronPageState extends BasePageState<Page> {
 		]))
 	]));
 
+	String getCompId(String name) {
+		return "";
+	}
+
 	@override
 	void collectData(dynamic data) {
 		String mainCode = getCompId("市电输入");

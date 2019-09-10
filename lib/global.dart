@@ -13,7 +13,7 @@ import 'main.dart';
 
 String currentPageID = "home";
 String currentGroup = "AnBKy5wyBwMLNaoc";
-Device currentDevice;
+List<Device> devices = [];
 class ComponentInfo {
 	final String _id;
 	final String _name;

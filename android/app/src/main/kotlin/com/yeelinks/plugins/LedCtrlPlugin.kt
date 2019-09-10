@@ -63,6 +63,7 @@ object LedCtrlPlugin {
                     currentBrightness--
                 }
                 jnielc.ledseek(0xa1, currentBrightness)
+                Thread.sleep(500)
             }
             jnielc.seekstop()
         })

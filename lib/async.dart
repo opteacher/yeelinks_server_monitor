@@ -42,16 +42,14 @@ class ResponseInfo {
 }
 
 const url = "http://10.168.1.95:9090";// "http://test_api.ncpi-om.com"
-final listDevice = RequestInfo("POST", "/api/v1/devices/list", null);
-final getPoiSensor = RequestInfo("GET", "/api/v1/points/sensor", {
-	"id": ""
-});
+final listDevice = RequestInfo("POST", "/api/v1/devices/list", {});
+final getPoiSensor = RequestInfo("GET", "/api/v1/points/sensor", {});
 final humiture = RequestInfo("POST", "/api/v1/points/history", {
 	"device_id": "",
 	"points": [],
 	"time_range": ["2019-07-01", "2019-08-22"]
 });
-final devTypes = RequestInfo("GET", "/api/v1/dictionary/list?type=1", null);
+final devTypes = RequestInfo("GET", "/api/v1/dictionary/list?type=1", {});
 final devProxies = RequestInfo("GET", "/api/v1/protocols/list", {
 	"device_type": ""
 });
@@ -78,29 +76,31 @@ class DeviceComponent {
 class Device {
 	String _id;
 	String _name;
-	List<DeviceComponent> _children;
+	int _type;
+	String _typeStr;
+	String _protocolId;
 
 	Device.fromJSON(Map json):
-		_id = json["id"], _name = json["name"],
-		_children = json["children"] != null ? json["children"].map(
-				(child) => DeviceComponent.fromJSON(child)
-		).toList().cast<DeviceComponent>() : [];
+		_id = json["id"], _name = json["name"], _type = json["type"],
+		_typeStr = json["device_type_str"], _protocolId = json["protocol_id"];
 
-	List<DeviceComponent> get children => _children;
 	String get name => _name;
 	String get id => _id;
+	int get type => _type;
+	String get protocolId => _protocolId;
+	String get typeStr => _typeStr;
 }
 
-class DevCompValue {
-	final String _compId;
+class PointVal {
+	final String _deviceId;
 	final String _pointId;
 	final String _value;
 
-	DevCompValue(this._compId, this._pointId, this._value);
+	PointVal(this._deviceId, this._pointId, this._value);
 
 	String get value => _value;
 	String get pointId => _pointId;
-	String get compId => _compId;
+	String get deviceId => _deviceId;
 }
 
 class EventRecord {
@@ -179,17 +179,20 @@ getDevices(String companyCode, String roomCode) => reqTempFunc(http.post(
 	url + listDevice.path,
 	headers: {"Content-Type": "application/json"},
 	body: jsonEncode(listDevice.body)
-), (dynamic data) => data["devices"].map(
-		(dynDev) => Device.fromJSON(dynDev)
-).toList().cast<Device>());
-
-getPointSensor(String id) => reqTempFunc(http.get(url + getPoiSensor.chgBody("id", id).cmbBodyAsParamIntoPath()), (dynamic data) {
-	if (data["alarms"].isNotEmpty && !global.manualLight) {
-		global.platform.invokeMethod("lightUp", { "color": "RED", "brightness": 50 });
+), (dynamic data) {
+	for (var dynDev in data["devices"]) {
+		global.devices.add(Device.fromJSON(dynDev));
 	}
-	List<EventRecord> ers = [];
+	return global.devices;
+});
+
+Future<dynamic> getPointSensor() => reqTempFunc(http.get(url + getPoiSensor.path), (dynamic data) {
+//	if (data["alarms"].isNotEmpty && !global.manualLight) {
+//		global.platform.invokeMethod("lightUp", { "color": "RED", "brightness": 50 });
+//	}
+	List<EventRecord> alarms = [];
 	for (var ala in data["alarms"]) {
-		ers.add(EventRecord(
+		alarms.add(EventRecord(
 			ala["device_name"].toString(),
 			ala["title"].toString(),
 			ala["content"].toString(),
@@ -197,17 +200,17 @@ getPointSensor(String id) => reqTempFunc(http.get(url + getPoiSensor.chgBody("id
 			ala["time"].toString()
 		));
 	}
-	List<DevCompValue> dcvs = [];
+	List<PointVal> sensors = [];
 	data["sensors"].forEach((_, inf) {
-		dcvs.add(DevCompValue(
+		sensors.add(PointVal(
 			inf["device_id"].toString(),
 			inf["point_id"].toString(),
 			inf["value"].toString()
 		));
 	});
 	return {
-		"alarms": ers,
-		"sensors": dcvs,
+		"alarms": alarms,
+		"sensors": sensors,
 	};
 });
 
