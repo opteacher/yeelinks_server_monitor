@@ -37,14 +37,14 @@ class MyAppState extends State<MyApp> {
 	@override
 	void dispose() {
 		super.dispose();
-		global.refreshTimer.cancel();
+//		global.refreshTimer.cancel();
 //		global.platform.invokeMethod("lightDown");
 	}
 
 	@override
 	void initState() {
 		super.initState();
-		global.refreshTimer.start();
+//		global.refreshTimer.start();
 	}
 }
 
@@ -74,7 +74,7 @@ class MyAppBarState extends State<MyAppBar> {
 	@override
 	void initState() {
 		super.initState();
-		this._refresh();
+//		this._refresh();
 		_timer = Timer.periodic(const Duration(minutes: 1), (Timer t) => setState(() {
 			_time = DateTime.now();
 		}));

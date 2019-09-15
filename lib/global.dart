@@ -6,6 +6,8 @@ import 'pages/electron.dart' as electron;
 import 'pages/ups.dart' as ups;
 import 'pages/aircond.dart' as aircond;
 import 'pages/env.dart' as env;
+import 'pages/warning.dart' as warning;
+import 'pages/history.dart' as history;
 import 'pages/setting.dart' as setting;
 import 'async.dart';
 import 'components.dart';
@@ -32,6 +34,8 @@ final Map<String, ComponentInfo> componentInfos = {
 	"ups":      ComponentInfo("ups", "UPS", Dashboard(ups.Page())),
 	"aircond":  ComponentInfo("aircond", "空调", Dashboard(aircond.Page())),
 	"env":      ComponentInfo("env", "环境", Dashboard(env.Page())),
+	"warning":  ComponentInfo("warning", "告警", Dashboard(warning.Page())),
+	"history":  ComponentInfo("history", "历史", Dashboard(history.Page())),
 	"setting":  ComponentInfo("setting", "设置", Dashboard(setting.Page()))
 };
 void toIdenPage(BuildContext context, String pid) {
