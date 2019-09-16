@@ -6,6 +6,8 @@ import 'pages/electron.dart' as electron;
 import 'pages/ups.dart' as ups;
 import 'pages/aircond.dart' as aircond;
 import 'pages/env.dart' as env;
+import 'pages/warning.dart' as warning;
+import 'pages/history.dart' as history;
 import 'pages/setting.dart' as setting;
 import 'pages/warning.dart' as warning;
 import 'pages/history.dart' as history;

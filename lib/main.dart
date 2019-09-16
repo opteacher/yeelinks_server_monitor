@@ -39,14 +39,14 @@ class MyAppState extends State<MyApp> {
 	@override
 	void dispose() {
 		super.dispose();
-		global.refreshTimer.cancel();
+//		global.refreshTimer.cancel();
 //		global.platform.invokeMethod("lightDown");
 	}
 
 	@override
 	void initState() {
 		super.initState();
-		global.refreshTimer.start();
+//		global.refreshTimer.start();
 	}
 }
 
