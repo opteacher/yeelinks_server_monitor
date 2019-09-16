@@ -131,4 +131,9 @@ class EnvPageState extends BasePageState<Page> {
 
 	@override
 	String pageId() => "env";
+
+	@override
+	void hdlDevices(data) {
+		// TODO: implement hdlDevices
+	}
 }

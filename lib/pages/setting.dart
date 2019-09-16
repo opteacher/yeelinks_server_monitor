@@ -20,4 +20,9 @@ class SettingPageState extends BasePageState<Page> {
 
     @override
     String pageId() => "setting";
+
+	@override
+	void hdlDevices(data) {
+		// TODO: implement hdlDevices
+	}
 }

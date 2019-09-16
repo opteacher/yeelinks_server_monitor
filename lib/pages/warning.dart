@@ -38,4 +38,9 @@ class WarningPageState extends BasePageState<Page> {
 
 	@override
 	String pageId() => "warning";
+
+	@override
+	void hdlDevices(data) {
+		// TODO: implement hdlDevices
+	}
 }

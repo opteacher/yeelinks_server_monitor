@@ -159,4 +159,9 @@ class ElectronPageState extends BasePageState<Page> {
 
 	@override
 	String pageId() => "electron";
+
+	@override
+	void hdlDevices(data) {
+		print(data);
+	}
 }

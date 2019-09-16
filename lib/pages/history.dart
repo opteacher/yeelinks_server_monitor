@@ -88,4 +88,9 @@ class HistoryPageState extends BasePageState<Page> {
 
 	@override
 	String pageId() => "history";
+
+	@override
+	void hdlDevices(data) {
+		// TODO: implement hdlDevices
+	}
 }

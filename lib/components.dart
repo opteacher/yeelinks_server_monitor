@@ -474,7 +474,9 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T> {
 	@override
 	void initState() {
 		super.initState();
-		_callbacks[pageId()] = this.collectData;
+		global.refreshTimer.register("devPageOf${pageId().toUpperCase()}", TimerJob(() {
+			return getDevices(global.componentInfos[pageId()].index);
+		}, hdlDevices));
 	}
 
 	set values(Map<String, String> value) {
@@ -517,6 +519,8 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T> {
 
 	String pageId();
 
+	void hdlDevices(dynamic data);
+
 	@protected
 	void subColcData(dynamic data) {}
 
@@ -536,7 +540,7 @@ class TimerJob {
 class RefreshTimer {
 	Timer _timer;
 	Map<String, TimerJob> _jobs = {
-		"pointSensor": TimerJob(getPointSensor, BasePageState.pcsData)
+//		"pointSensor": TimerJob(getPointSensor, BasePageState.pcsData)
 	};
 
 	void register(String id, TimerJob job) {
@@ -545,7 +549,7 @@ class RefreshTimer {
 
 	void start() {
 		if (_timer == null || !_timer.isActive) {
-//			Timer.run(() => _refresh(null));
+			Timer.run(() => _refresh(null));
 			_timer = Timer.periodic(const Duration(seconds: 2), _refresh);
 		}
 	}

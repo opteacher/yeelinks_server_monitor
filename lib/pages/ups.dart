@@ -201,4 +201,9 @@ class UpsPageState extends BasePageState<Page> {
 
     @override
     String pageId() => "ups";
+
+	@override
+	void hdlDevices(data) {
+		// TODO: implement hdlDevices
+	}
 }

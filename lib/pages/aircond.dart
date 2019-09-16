@@ -303,4 +303,9 @@ class AircondPageState extends BasePageState<Page> {
 
 	@override
 	String pageId() => "aircond";
+
+	@override
+	void hdlDevices(data) {
+		// TODO: implement hdlDevices
+	}
 }

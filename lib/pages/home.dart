@@ -113,4 +113,9 @@ class HomePageState extends BasePageState<Page> {
 
 	@override
 	String pageId() => "home";
+
+	@override
+	void hdlDevices(data) {
+		// TODO: implement hdlDevices
+	}
 }

@@ -39,14 +39,14 @@ class MyAppState extends State<MyApp> {
 	@override
 	void dispose() {
 		super.dispose();
-//		global.refreshTimer.cancel();
+		global.refreshTimer.cancel();
 //		global.platform.invokeMethod("lightDown");
 	}
 
 	@override
 	void initState() {
 		super.initState();
-//		global.refreshTimer.start();
+		global.refreshTimer.start();
 	}
 }
 
@@ -60,18 +60,6 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class MyAppBarState extends State<MyAppBar> {
 	final TextStyle _titleStyle = TextStyle(fontSize: 20.0, color: Colors.white);
-
-	_refresh() async {
-		ResponseInfo ri = await getDevices(global.companyCode, global.roomCode);
-		global.devices = ri.data.toList().cast<Device>();
-		Toast.show(ri.message, context, duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
-	}
-
-	@override
-	void initState() {
-		super.initState();
-//		this._refresh();
-	}
 
 	@override
 	Widget build(BuildContext context) => Ink(
@@ -141,27 +129,4 @@ class Dashboard extends StatelessWidget {
 			)
 		))
 	);
-
-	_buildSideButton(BuildContext context, IconData icon, String label, [String id = "home"]) {
-		var active = global.currentPageID == id;
-		return GestureDetector(
-			onTap: active ? null : () {
-				global.currentPageID = id;
-				global.toIdenPage(context, id);
-			},
-			child: Container(
-				color: active ? Theme.of(context).primaryColor : Colors.white,
-				padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 10.0),
-				margin: const EdgeInsets.symmetric(vertical: 2.5),
-				child: Column(children: <Widget>[
-					Icon(icon, size: 50.0,
-						color: active ? Colors.white : Colors.grey),
-					Text(label,
-						style: TextStyle(
-							color: active ? Colors.white : Colors.grey,
-							fontSize: 20.0)),
-				]),
-			),
-		);
-	}
 }

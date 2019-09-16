@@ -41,8 +41,10 @@ class ResponseInfo {
 	dynamic get data => _data;
 }
 
-const url = "http://10.168.1.95:9090";// "http://test_api.ncpi-om.com"
-final listDevice = RequestInfo("POST", "/api/v1/devices/list", {});
+const url = "http://192.168.1.132:8089";// "http://test_api.ncpi-om.com"
+final listDevice = RequestInfo("GET", "/api/v1/devices/page", {
+	"type": ""
+});
 final getPoiSensor = RequestInfo("GET", "/api/v1/points/sensor", {});
 final humiture = RequestInfo("POST", "/api/v1/points/history", {
 	"device_id": "",
@@ -175,16 +177,9 @@ reqTempFunc(Future<http.Response> requester, dynamic Function(dynamic data) succ
 	return Future(() => ResponseInfo(null, message));
 }
 
-getDevices(String companyCode, String roomCode) => reqTempFunc(http.post(
-	url + listDevice.path,
-	headers: {"Content-Type": "application/json"},
-	body: jsonEncode(listDevice.body)
-), (dynamic data) {
-	for (var dynDev in data["devices"]) {
-		global.devices.add(Device.fromJSON(dynDev));
-	}
-	return global.devices;
-});
+getDevices(int pageIndex) => reqTempFunc(
+	http.get(url + listDevice.chgBody("type", pageIndex.toString()).cmbBodyAsParamIntoPath()
+), (dynamic data) => data);
 
 Future<dynamic> getPointSensor() => reqTempFunc(http.get(url + getPoiSensor.path), (dynamic data) {
 //	if (data["alarms"].isNotEmpty && !global.manualLight) {
