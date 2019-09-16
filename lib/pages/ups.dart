@@ -10,6 +10,8 @@ class Page extends StatefulWidget {
 class UpsPageState extends BasePageState<Page> {
 	bool _showDetail = false;
 
+	final _infoPdg = const EdgeInsets.symmetric(vertical: 10, horizontal: 15);
+
 	UpsPageState() {
 		resetValues();
 	}
@@ -57,90 +59,123 @@ class UpsPageState extends BasePageState<Page> {
 		data[2]["battery"] = data[2]["battery"].replaceFirst("{data}", values["电池更换警告"]);
 		data[2]["others"] = data[2]["others"].replaceFirst("{data}", "0");
 
-		return Container(padding: const EdgeInsets.all(10), child: Column(children: <Widget>[
-			Row(children: <Widget>[
-				Expanded(child: Align(alignment: Alignment.centerRight, child: OutlineButton(
-					child: Text("详细信息", style: TextStyle(color: Theme.of(context).primaryColor)),
-					onPressed: () {
+		return Container(padding: const EdgeInsets.all(10), child: Row(children: <Widget>[
+			Expanded(child: Column(children: <Widget>[
+				DataCard(title: "UPS输入信息", child: Padding(padding: _infoPdg, child: Column(children: <Widget>[
+					DescListItem(
+						DescListItemTitle("输入电压", size: 20.0),
+						DescListItemContent(values["输入电压"], blocked: true)
+					),
+					DescListItem(
+						DescListItemTitle("输入电流", size: 20.0),
+						DescListItemContent("0.0", blocked: true)
+					),
+					DescListItem(
+						DescListItemTitle("输入频率", size: 20.0),
+						DescListItemContent(values["输入频率"], blocked: true)
+					),
+					DescListItem(
+						DescListItemTitle("旁路电压", size: 20.0),
+						DescListItemContent("0.0", blocked: true)
+					)
+				]))),
+				DataCard(title: "UPS输出信息", child: Padding(padding: _infoPdg, child: Column(children: <Widget>[
+					DescListItem(
+						DescListItemTitle("输出电压", size: 20.0),
+						DescListItemContent(values["输出电压"], blocked: true)
+					),
+					DescListItem(
+						DescListItemTitle("输出电流", size: 20.0),
+						DescListItemContent(values["输出电流"], blocked: true)
+					),
+					DescListItem(
+						DescListItemTitle("输出频率", size: 20.0),
+						DescListItemContent(values["输出频率"], blocked: true)
+					)
+				])))
+			])),
+			Expanded(flex: 4, child: Column(children: <Widget>[
+				Expanded(child: Row(children: <Widget>[
+					DataCard(title: "UPS负载率", child: Padding(
+						padding: EdgeInsets.only(top: 20),
+						child: Instrument(radius: 120.0, numScales: 10, max: 120.0, maxScale: 96, suffix: "%")
+					)),
+					DataCard(title: "UPS状态", tailing: IconButton(icon: Icon(Icons.info_outline, color: Theme.of(context).primaryColor), onPressed: () {
 						setState(() {
 							_showDetail = !_showDetail;
 						});
-					})
-				))
-			]),
-			Expanded(child: Row(children: <Widget>[
-				DataCard(title: "UPS负载率", child: Instrument(radius: 80.0, numScales: 10, max: 100.0, suffix: "%")),
-				DataCard(title: "UPS状态", child: !_showDetail ? Column(children: <Widget>[
-					DescListItem(
-						DescListItemTitle("UPS运行模式"),
-						DescListItemContent(values["运行模式"], right: 20.0),
-						titleWidth: 200.0,
-						horizontal: 50.0
-					),
-					DescListItem(
-						DescListItemTitle("电池容量"),
-						DescListItemContent(values["电池容量"], right: 20.0),
-						suffix: DescListItemSuffix(text: "%"),
-						titleWidth: 200.0,
-						horizontal: 50.0
-					),
-					DescListItem(
-						DescListItemTitle("电池剩余时间"),
-						DescListItemContent(values["电池剩余时间"], right: 20.0),
-						suffix: DescListItemSuffix(text: "Min"),
-						titleWidth: 200.0,
-						horizontal: 50.0
-					),
-				]) : ListView(padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0), children: <Widget>[
-					ListTile(
-						title: Text("电池开启"),
-						trailing: Text(values["电池开启"])
-					), Divider(),
-					ListTile(
-						title: Text("旁路功率不稳定"),
-						trailing: Text(values["旁路功率不稳定"])
-					), Divider(),
-					ListTile(
-						title: Text("EEPROM错误"),
-						trailing: Text(values["EEPROM错误"])
-					), Divider(),
-					ListTile(
-						title: Text("输出过载"),
-						trailing: Text(values["输出过载"])
-					), Divider(),
-					ListTile(
-						title: Text("根据用户指令，UPS准备好供电"),
-						trailing: Text(values["根据用户指令，UPS准备好供电"])
-					), Divider(),
-					ListTile(
-						title: Text("已准备供电"),
-						trailing: Text(values["已准备供电"])
-					), Divider(),
-					ListTile(
-						title: Text("电池电量不足"),
-						trailing: Text(values["电池电量不足"])
-					), Divider(),
-					ListTile(
-						title: Text("电池模式"),
-						trailing: Text(values["电池模式"])
-					), Divider(),
-					ListTile(
-						title: Text("在线模式"),
-						trailing: Text(values["在线模式"])
-					), Divider(),
-					ListTile(
-						title: Text("输出电压不良"),
-						trailing: Text(values["输出电压不良"])
-					), Divider(),
-				]))
-			])),
-			DataCard(title: "实时数据", child: MyDataTable({
-				"": MyDataHeader("subject"),
-				"输入": MyDataHeader("input"),
-				"输出": MyDataHeader("output"),
-				"电池": MyDataHeader("battery"),
-				"其他": MyDataHeader("others")
-			}, data, vpadding: 15.0))
+					}), child: !_showDetail ? Column(children: <Widget>[
+						DescListItem(
+							DescListItemTitle("UPS运行模式"),
+							DescListItemContent(values["运行模式"], right: 20.0),
+							titleWidth: 200.0,
+							horizontal: 50.0
+						),
+						DescListItem(
+							DescListItemTitle("电池容量"),
+							DescListItemContent(values["电池容量"], right: 20.0),
+							suffix: DescListItemSuffix(text: "%"),
+							titleWidth: 200.0,
+							horizontal: 50.0
+						),
+						DescListItem(
+							DescListItemTitle("电池剩余时间"),
+							DescListItemContent(values["电池剩余时间"], right: 20.0),
+							suffix: DescListItemSuffix(text: "Min"),
+							titleWidth: 200.0,
+							horizontal: 50.0
+						),
+					]) : ListView(padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0), children: <Widget>[
+						ListTile(
+							title: Text("电池开启"),
+							trailing: Text(values["电池开启"])
+						), Divider(),
+						ListTile(
+							title: Text("旁路功率不稳定"),
+							trailing: Text(values["旁路功率不稳定"])
+						), Divider(),
+						ListTile(
+							title: Text("EEPROM错误"),
+							trailing: Text(values["EEPROM错误"])
+						), Divider(),
+						ListTile(
+							title: Text("输出过载"),
+							trailing: Text(values["输出过载"])
+						), Divider(),
+						ListTile(
+							title: Text("根据用户指令，UPS准备好供电"),
+							trailing: Text(values["根据用户指令，UPS准备好供电"])
+						), Divider(),
+						ListTile(
+							title: Text("已准备供电"),
+							trailing: Text(values["已准备供电"])
+						), Divider(),
+						ListTile(
+							title: Text("电池电量不足"),
+							trailing: Text(values["电池电量不足"])
+						), Divider(),
+						ListTile(
+							title: Text("电池模式"),
+							trailing: Text(values["电池模式"])
+						), Divider(),
+						ListTile(
+							title: Text("在线模式"),
+							trailing: Text(values["在线模式"])
+						), Divider(),
+						ListTile(
+							title: Text("输出电压不良"),
+							trailing: Text(values["输出电压不良"])
+						), Divider(),
+					]))
+				])),
+				DataCard(title: "实时数据", child: MyDataTable({
+					"": MyDataHeader("subject"),
+					"输入": MyDataHeader("input"),
+					"输出": MyDataHeader("output"),
+					"电池": MyDataHeader("battery"),
+					"其他": MyDataHeader("others")
+				}, data, vpadding: 15.0))
+			]))
 		]));
 	}
 

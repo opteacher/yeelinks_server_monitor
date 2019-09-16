@@ -41,66 +41,62 @@ class HomePageState extends BasePageState<Page> {
 		}
 		return Container(padding: const EdgeInsets.all(2.5), child: Column(children: <Widget>[
 			Expanded(child: Row(children: <Widget>[
-				DataCard(title: "PUE", child: Instrument(radius: 90.0, numScales: 4, max: 4.0, maxScale: 3.0)),
-				DataCard(title: "UPS运行模式", child: UpsRunningMod()),
-				DataCard(title: "UPS负载率", child: Instrument(radius: 90.0, numScales: 10, max: 120.0, suffix: "%"))
+				DataCard(title: "PUE", child: Padding(padding: EdgeInsets.only(top: 20), child: Instrument(radius: 110.0, numScales: 4, max: 4.0, maxScale: 3.0))),
+				DataCard(title: "UPS运行模式", child: Padding(padding: EdgeInsets.only(top: 20), child: UpsRunningMod())),
+				DataCard(title: "UPS负载率", child: Padding(padding: EdgeInsets.only(top: 20), child: Instrument(radius: 110.0, numScales: 10, max: 120.0, maxScale: 96, suffix: "%")))
 			])),
 			Expanded(child: Row(children: <Widget>[
-				DataCard(title: "环境信息", child: Row(children: <Widget>[
-					Expanded(child: Padding(padding: EdgeInsets.only(right: 20.0, left: 10.0), child: Column(children: <Widget>[
+				DataCard(title: "环境信息", child: Padding(padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0), child: Row(children: <Widget>[
+					Expanded(child: Column(children: <Widget>[
 						DescListItem(
-							DescListItemTitle("温度", size: 25.0),
-							DescListItemContent(values["温度"], right: 5.0),
-							suffix: DescListItemSuffix(text: "°C"),
-							contentAlign: TextAlign.right
+							DescListItemTitle("冷通道温", size: 20.0),
+							DescListItemContent(values["温度"], blocked: true),
+							contentAlign: TextAlign.center
 						),
 						DescListItem(
-							DescListItemTitle("烟雾", size: 25.0),
-							DescListItemContent(values["烟雾"]),
-							contentAlign: TextAlign.right
+							DescListItemTitle("热通道温", size: 20.0),
+							DescListItemContent(values["烟雾"], blocked: true),
+							contentAlign: TextAlign.center
 						),
 						DescListItem(
-							DescListItemTitle("前门", size: 25.0),
-							DescListItemContent(values["前门"], color: Colors
-								.redAccent),
-							contentAlign: TextAlign.right
-						),
-					]))),
-					VerticalDivider(),
-					Expanded(child: Padding(padding: EdgeInsets.only(right: 20.0), child: Column(children: <Widget>[
-						DescListItem(
-							DescListItemTitle("湿度", size: 25.0),
-							DescListItemContent(values["湿度"], right: 5.0),
-							suffix: DescListItemSuffix(text: "%"),
-							contentAlign: TextAlign.right
+							DescListItemTitle("烟        感", size: 20.0),
+							DescListItemContent(values["烟雾"], color: Colors.redAccent, blocked: true),
+							contentAlign: TextAlign.center
 						),
 						DescListItem(
-							DescListItemTitle("水浸", size: 25.0),
-							DescListItemContent(values["水浸"]),
-							contentAlign: TextAlign.right
+							DescListItemTitle("前        门", size: 20.0),
+							DescListItemContent(values["前门"], color: Colors.redAccent, blocked: true),
+							contentAlign: TextAlign.center
+						),
+					])),
+					VerticalDivider(width: 30),
+					Expanded(child: Column(children: <Widget>[
+						DescListItem(
+							DescListItemTitle("冷通道湿", size: 20.0),
+							DescListItemContent(values["湿度"], blocked: true),
+							contentAlign: TextAlign.center
 						),
 						DescListItem(
-							DescListItemTitle("后门", size: 25.0),
-							DescListItemContent(values["后门"], color: Colors
-								.redAccent),
-							contentAlign: TextAlign.right
+							DescListItemTitle("热通道湿", size: 20.0),
+							DescListItemContent(values["湿度"], blocked: true),
+							contentAlign: TextAlign.center
 						),
-					])))
-				])),
+						DescListItem(
+							DescListItemTitle("水        浸", size: 20.0),
+							DescListItemContent(values["水浸"], blocked: true),
+							contentAlign: TextAlign.center
+						),
+						DescListItem(
+							DescListItemTitle("后        门", size: 20.0),
+							DescListItemContent(values["后门"], color: Colors.redAccent, blocked: true),
+							contentAlign: TextAlign.center
+						),
+					]))
+				]))),
 				DataCard(title: "事件记录", flex: 2, child: ListView(
 					padding: const EdgeInsets.all(10),
 					children: eveRcdList
 				))
-				//			MyDataTable({
-				//				"设备名称": MyDataHeader("name", 0.15),
-				//				"告警名称": MyDataHeader("warning"),
-				//				"告警含义": MyDataHeader("meaning", 0.3),
-				//				"级别": MyDataHeader("level", 0.1),
-				//				"开始时刻": MyDataHeader("start", 0.25)
-				//			}, _eventRecords, vpadding: 5.0, isStriped: true, hasBorder: false,
-				//				headerTxtStyle: const TextStyle(fontSize: 15.0),
-				//				bodyTxtStyle: const TextStyle(fontSize: 15.0, color: Colors.redAccent)
-				//			)
 			]))
 		]));
 	}

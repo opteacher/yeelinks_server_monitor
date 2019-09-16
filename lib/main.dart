@@ -13,6 +13,7 @@ void main() {
 		DeviceOrientation.landscapeLeft,
 		DeviceOrientation.landscapeLeft
 	]);
+	SystemChrome.setEnabledSystemUIOverlays([]);
 	return runApp(MyApp());
 }
 
@@ -28,9 +29,10 @@ class MyAppState extends State<MyApp> {
 		theme: ThemeData(
 			primaryColorLight: const Color(0xffE7F9E9),
 			primaryColor: const Color(0xff3dcd58),
-			primaryColorDark: const Color(0xff009530)
+			primaryColorDark: const Color(0xff009530),
+			dividerColor: const Color(0xffE7F9E9),
 		),
-		home: global.componentInfos["initlize"].page,
+		home: global.componentInfos["home"].page,
 		debugShowCheckedModeBanner: false,
 	);
 
@@ -58,12 +60,6 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class MyAppBarState extends State<MyAppBar> {
 	final TextStyle _titleStyle = TextStyle(fontSize: 20.0, color: Colors.white);
-	final Widget _barDivider = Padding(
-		padding: EdgeInsets.symmetric(vertical: 15, horizontal: 0),
-		child: VerticalDivider(color: Colors.white)
-	);
-	Timer _timer;
-	DateTime _time = DateTime.now();
 
 	_refresh() async {
 		ResponseInfo ri = await getDevices(global.companyCode, global.roomCode);
@@ -74,16 +70,7 @@ class MyAppBarState extends State<MyAppBar> {
 	@override
 	void initState() {
 		super.initState();
-		this._refresh();
-		_timer = Timer.periodic(const Duration(minutes: 1), (Timer t) => setState(() {
-			_time = DateTime.now();
-		}));
-	}
-
-	@override
-	void dispose() {
-		_timer.cancel();
-		super.dispose();
+//		this._refresh();
 	}
 
 	@override
@@ -99,23 +86,13 @@ class MyAppBarState extends State<MyAppBar> {
 			Expanded(child: Row(children: <Widget>[
 				_buildTitleButton(context, "首页", "home", icon: Icons.home),
 				_buildTitleButton(context, "配电", "electron", icon: Icons.flash_on),
+				_buildTitleButton(context, "UPS", "ups", icon: Icons.battery_std),
 				_buildTitleButton(context, "空调", "aircond", icon: Icons.ac_unit),
 				_buildTitleButton(context, "环境", "env", icon: Icons.settings_system_daydream),
 				_buildTitleButton(context, "告警", "warning", icon: Icons.warning),
-				_buildTitleButton(context, "历史", "history", icon: Icons.history),
-				_buildTitleButton(context, "设置", "setting", icon: Icons.settings)
+				_buildTitleButton(context, "历史", "history", icon: Icons.history)
 			])),
-			Padding(
-				padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
-				child: Column(children: <Widget>[
-					Text("${_time.hour.toString().padLeft(2, "0")}:${_time.minute.toString().padLeft(2, "0")}",
-						style: TextStyle(color: Colors.white, fontSize: 30)
-					),
-					Text("${_time.year.toString().padLeft(4, "0")}-${_time.month.toString().padLeft(2, "0")}-${_time.day.toString().padLeft(2, "0")}",
-						style: TextStyle(color: Colors.white, fontSize: 15)
-					)
-				]
-			))
+			_buildTitleButton(context, "", "setting", icon: Icons.settings)
 		]),
 	);
 

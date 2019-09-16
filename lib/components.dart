@@ -13,18 +13,23 @@ import 'dart:ui' as ui;
 class DataCard extends StatelessWidget {
 	final String title;
 	final Widget child;
+	final Widget tailing;
 	final int flex;
 	final double height;
 
-	DataCard({this.title, this.child, this.flex = 1, this.height = -1});
+	DataCard({this.title, this.child, this.tailing = null, this.flex = 1, this.height = -1});
 
 	@override
 	Widget build(BuildContext context) {
 		final titleStyle = TextStyle(fontSize: 25.0, color: Theme.of(context).primaryColor);
 		final dataCard = Card(elevation: 0, child: Container(decoration: BoxDecoration(
 			border: Border.all(color: Theme.of(context).primaryColor)
-		), child: Column(children: <Widget>[
-			Container(height: 50.0, color: Theme.of(context).primaryColorLight, child: Center(child: Text(title, style: titleStyle))),
+		), child: title == null ? Expanded(child: child) : Column(children: <Widget>[
+			Container(padding: EdgeInsets.symmetric(horizontal: 20.0), height: 50.0, color: Theme.of(context).primaryColorLight,
+				child: tailing == null ? Center(child: Text(title, style: titleStyle)) : Row(children: <Widget>[
+					Expanded(child: Text(title, style: titleStyle)), tailing
+				])
+			),
 			// NOTE: 将Divider的高度设为0，可以让分割线的上下间隔去掉
 //			Divider(height: 0),
 			Expanded(child: child)
@@ -38,15 +43,17 @@ class DescListItemTitle {
 	final double size;
 	final Color color;
 
-	DescListItemTitle(this.text, {this.size = 20.0, this.color = Colors.black});
+	DescListItemTitle(this.text, {this.size = 20.0, this.color = const Color(0xFF757575)});
 }
 
 class DescListItemContent {
 	final String text;
+	bool blocked;
 	Color color;
 	EdgeInsets padding;
 
 	DescListItemContent(this.text, {
+		this.blocked = false,
 		this.color = Colors.blueAccent,
 		double left = 0.0, double top = 0.0,
 		double right = 0.0, bottom = 0.0,
@@ -96,11 +103,26 @@ class DescListItem extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) {
 		var ttl = Text(title.text, style: TextStyle(fontSize: title.size, color: title.color));
-		return Expanded(child: Padding(padding: outPadding, child: Row(children: <Widget>[
-			titleWidth == -1 ? Expanded(child: ttl) : Container(width: titleWidth, child: ttl),
+		List<Widget> children = [
+			titleWidth == -1 ? Expanded(child: ttl) : Container(width: titleWidth, child: ttl)
+		];
+		var ctt = [
 			Padding(padding: content.padding, child: Text(content.text, style: TextStyle(fontSize: title.size, color: content.color), textAlign: contentAlign)),
-			suffix.text.isNotEmpty ? Text(suffix.text, style: TextStyle(fontSize: title.size, color: suffix.color), textAlign: contentAlign) : Container(width: 0)
-		])));
+			suffix.text.isNotEmpty ? Text(suffix.text, style: TextStyle(fontSize: title.size, color: suffix.color), textAlign: contentAlign) : Text(" ")
+		];
+		if (content.blocked) {
+			children.add(Container(
+				padding: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+				decoration: BoxDecoration(
+					color: Colors.grey[100],
+					borderRadius: BorderRadius.all(Radius.circular(4))
+				),
+				child: Row(children: ctt)
+			));
+		} else {
+			children.addAll(ctt);
+		}
+		return Expanded(child: Padding(padding: outPadding, child: Row(children: children)));
 	}
 }
 
@@ -160,19 +182,13 @@ class InstrumentState extends State<Instrument> {
 
 	@override
 	Widget build(BuildContext context) => Center(child: Column(children: <Widget>[
-		Container(
-			margin: EdgeInsets.only(top: 15.0),
-			child: CustomPaint(
-				size: Size.fromRadius(radius),
-				painter: _graph,
-			)
+		CustomPaint(
+			size: Size(2 * radius, 1.5 * radius),
+			painter: _graph,
 		),
-		Container(
-			margin: EdgeInsets.only(top: 15.0),
-			child: Text(
-				_value.toStringAsFixed(2) + " $_suffix",
-				style: TextStyle(fontSize: 35.0, color: Colors.blueAccent)
-			)
+		Text(
+			_value.toStringAsFixed(2) + " $_suffix",
+			style: TextStyle(fontSize: 35.0, color: Colors.blueAccent)
 		)
 	]));
 }
@@ -208,7 +224,7 @@ class InstrumentGraph extends CustomPainter {
 		// 绘制背景
 		Paint _paint = Paint()
 			..color = Colors.grey[200];
-		canvas.drawCircle(center, radius, _paint);
+//		canvas.drawCircle(center, radius, _paint);
 		// 绘制总数据段
 		_paint
 			..style = PaintingStyle.stroke
@@ -360,14 +376,13 @@ class TimeSeriesSales {
 }
 
 enum TimeSectionEnum {
-	in1Hour, in24Hours, in1Mon, in1Year
+	in1Hour, in24Hours, in1Mon
 }
 
 const Map<TimeSectionEnum, String> TimeSectionDescs = {
 	TimeSectionEnum.in1Hour: "1 h",
 	TimeSectionEnum.in24Hours: "24 h",
-	TimeSectionEnum.in1Mon: "1 mon",
-	TimeSectionEnum.in1Year: "1 year"
+	TimeSectionEnum.in1Mon: "1 mon"
 };
 
 class MyDataHeader {
@@ -467,7 +482,7 @@ abstract class BasePageState<T extends StatefulWidget> extends State<T> {
 	}
 
 	static void pcsData(dynamic data) {
-		if (global.currentPageID != null && _callbacks.isNotEmpty) {
+		if (global.currentPageID != null && _callbacks.isNotEmpty && _callbacks.containsKey(global.currentPageID)) {
 			_callbacks[global.currentPageID](data);
 		}
 	}
@@ -645,7 +660,7 @@ class UpsRunningModPainter extends CustomPainter {
 
 		double ofWid = hfWid / 2;
 		double margin = (ofWid - blkWid) / 2;
-		double otHgt = size.height / 3;
+		double otHgt = size.height / 4;
 		canvas.drawImageRect(_imgInput,
 			Rect.fromLTWH(0, 0, _imgInput.width.toDouble(), _imgInput.height.toDouble()),
 			Rect.fromLTWH(margin, otHgt, blkWid, blkHgt),

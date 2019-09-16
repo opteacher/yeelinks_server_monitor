@@ -7,6 +7,8 @@ import 'pages/ups.dart' as ups;
 import 'pages/aircond.dart' as aircond;
 import 'pages/env.dart' as env;
 import 'pages/setting.dart' as setting;
+import 'pages/warning.dart' as warning;
+import 'pages/history.dart' as history;
 import 'async.dart';
 import 'components.dart';
 import 'main.dart';
@@ -18,21 +20,26 @@ class ComponentInfo {
 	final String _id;
 	final String _name;
 	final Widget _page;
+	final int _index;
 
-	ComponentInfo(this._id, this._name, this._page);
+	ComponentInfo(this._id, this._name, this._page, this._index);
 
 	Widget get page => _page;
 	String get name => _name;
 	String get id => _id;
+	int get index => _index;
+
 }
 final Map<String, ComponentInfo> componentInfos = {
-	"initlize": ComponentInfo("initlize", "添加设备", initialize.InitializePage()),
-	"home":     ComponentInfo("home", "首页", Dashboard(home.Page())),
-	"electron": ComponentInfo("electron", "配电", Dashboard(electron.Page())),
-	"ups":      ComponentInfo("ups", "UPS", Dashboard(ups.Page())),
-	"aircond":  ComponentInfo("aircond", "空调", Dashboard(aircond.Page())),
-	"env":      ComponentInfo("env", "环境", Dashboard(env.Page())),
-	"setting":  ComponentInfo("setting", "设置", Dashboard(setting.Page()))
+	"initlize": ComponentInfo("initlize", "添加设备", initialize.InitializePage(), 0),
+	"home":     ComponentInfo("home", "首页", Dashboard(home.Page()), 1),
+	"electron": ComponentInfo("electron", "配电", Dashboard(electron.Page()), 2),
+	"ups":      ComponentInfo("ups", "UPS", Dashboard(ups.Page()), 3),
+	"aircond":  ComponentInfo("aircond", "空调", Dashboard(aircond.Page()), 4),
+	"env":      ComponentInfo("env", "环境", Dashboard(env.Page()), 5),
+	"setting":  ComponentInfo("setting", "设置", Dashboard(setting.Page()), 8),
+	"warning":  ComponentInfo("warning", "告警", Dashboard(warning.Page()), 6),
+	"history":  ComponentInfo("history", "历史", Dashboard(history.Page()), 7)
 };
 void toIdenPage(BuildContext context, String pid) {
 	SystemChrome.setEnabledSystemUIOverlays([]);

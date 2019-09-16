@@ -264,9 +264,6 @@ getHumiture(String devId, String poiId, TimeSectionEnum tmRng) {
 		case TimeSectionEnum.in1Mon:
 			startTime = now.subtract(Duration(days: 30));
 			break;
-		case TimeSectionEnum.in1Year:
-			startTime = now.subtract(Duration(days: 365));
-			break;
 		}
 		List<TimeSeriesSales> ret = [];
 		for (var i = data.length - 1; i >= 0; i--) {

@@ -25,7 +25,6 @@ class InitializePageState extends State<InitializePage> {
 			scrollDirection: Axis.vertical,
 			child: Container(margin: _formMargin, child: Column(children: <Widget>[
 				TextField(
-					autofocus: true,
 					decoration: InputDecoration(hintText: "输入设备名称"),
 					onChanged: (str) => setState(() {
 						_devName = str;
