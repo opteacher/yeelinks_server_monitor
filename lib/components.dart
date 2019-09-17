@@ -129,8 +129,8 @@ class DescListItem extends StatelessWidget {
 class Instrument extends StatefulWidget {
 	State<Instrument> _state;
 
-	Instrument({double radius, int numScales, double max, double maxScale = -1, String suffix = ""}) {
-		_state = InstrumentState(radius, numScales, max, maxScale, suffix);
+	Instrument({double radius, int numScales, double max, double maxScale = -1, String suffix = "", double value = 0.0}) {
+		_state = InstrumentState(radius, numScales, max, maxScale, suffix, value);
 	}
 
 	@override
@@ -148,7 +148,7 @@ class InstrumentState extends State<Instrument> {
 //	int _countdown = 50;
 //	bool _increase = true;
 
-	InstrumentState(this.radius, int numScales, this.max, double maxScale, this._suffix) {
+	InstrumentState(this.radius, int numScales, this.max, double maxScale, this._suffix, this._value) {
 		_graph = InstrumentGraph(radius, numScales, max, maxScale)
 			..updateValue(_value);
 		_step = max / 100;
@@ -289,7 +289,7 @@ class InstrumentGraph extends CustomPainter {
 	}
 
 	@override
-	bool shouldRepaint(InstrumentGraph oldDelegate) => oldDelegate._angle != _angle;
+	bool shouldRepaint(InstrumentGraph oldDelegate) => true;
 }
 
 class SimpleTimeSeriesChart extends StatefulWidget {
@@ -311,9 +311,9 @@ class SimpleTimeSeriesChartState extends State<SimpleTimeSeriesChart> {
 
 	SimpleTimeSeriesChartState(this._name, this._id) {
 		_data = [TimeSeriesSales(DateTime.now(), 0)];
-		global.refreshTimer.register("${_id}_$_name", TimerJob(getDataFunc(_id), addData, {
-			TimerJob.PAGE_IDEN: "env"
-		}));
+//		global.refreshTimer.register("${_id}_$_name", TimerJob(getDataFunc(_id), addData, {
+//			TimerJob.PAGE_IDEN: "env"
+//		}));
 	}
 
 	Future<dynamic> Function() getDataFunc(String poiId) => () {
@@ -465,67 +465,23 @@ class MyDataTable extends StatelessWidget {
 }
 
 abstract class BasePageState<T extends StatefulWidget> extends State<T> {
-	static Map<String, void Function(dynamic)> _callbacks = {};
-
-	Map<String, String> _values = {};
-
-	Map<String, String> get values => _values;
-
 	@override
 	void initState() {
 		super.initState();
-		global.refreshTimer.register("devPageOf${pageId().toUpperCase()}", TimerJob(() {
-			return getDevices(global.componentInfos[pageId()].index);
-		}, hdlDevices));
-	}
-
-	set values(Map<String, String> value) {
-		_values = value;
-	}
-
-	static void pcsData(dynamic data) {
-		if (global.currentPageID != null && _callbacks.isNotEmpty && _callbacks.containsKey(global.currentPageID)) {
-			_callbacks[global.currentPageID](data);
-		}
-	}
-
-	@protected
-	void collectData(dynamic data) {
-		setState(() {
-			resetValues();
-			for (var id in _values.keys) {
-				var pointId = global.protocolMapper[id];
-				if (pointId == null) {
-					continue;
-				}
-				for (PointVal val in data["sensors"]) {
-					bool exs = false;
-					for (var device in global.devices) {
-						if (device.id == val.deviceId) {
-							exs = true;
-							break;
-						}
-					}
-					if (val.pointId == pointId && exs) {
-						_values[id] = val.value;
-						break;
-					}
-				}
-			}
-			print(_values);
-		});
-		this.subColcData(data);
+		String pid = pageId();
+		global.refreshTimer.register("devPageOf${pid.toUpperCase()}", TimerJob(() {
+			return getDevices(global.componentInfos[pid].index);
+		}, hdlDevices, { TimerJob.PAGE_IDEN: pid }));
+		global.refreshTimer.register("poiValueOf${pid.toUpperCase()}", TimerJob(() {
+			return getPointSensor(global.idenDevs);
+		}, hdlPointVals, { TimerJob.PAGE_IDEN: pid }));
 	}
 
 	String pageId();
 
 	void hdlDevices(dynamic data);
 
-	@protected
-	void subColcData(dynamic data) {}
-
-	@protected
-	void resetValues() {}
+	void hdlPointVals(dynamic data);
 }
 
 class TimerJob {
@@ -539,9 +495,7 @@ class TimerJob {
 
 class RefreshTimer {
 	Timer _timer;
-	Map<String, TimerJob> _jobs = {
-//		"pointSensor": TimerJob(getPointSensor, BasePageState.pcsData)
-	};
+	Map<String, TimerJob> _jobs = {};
 
 	void register(String id, TimerJob job) {
 		_jobs[id] = job;
@@ -549,8 +503,7 @@ class RefreshTimer {
 
 	void start() {
 		if (_timer == null || !_timer.isActive) {
-			Timer.run(() => _refresh(null));
-			_timer = Timer.periodic(const Duration(seconds: 2), _refresh);
+			_timer = Timer.periodic(const Duration(seconds: 5), _refresh);
 		}
 	}
 
@@ -574,6 +527,10 @@ class RefreshTimer {
 				job._callback(ri.data);
 			}
 		});
+	}
+
+	void manualRefresh() {
+		Timer.run(() => _refresh(null));
 	}
 
 	void cancel() => _timer.cancel();

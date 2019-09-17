@@ -25,4 +25,9 @@ class SettingPageState extends BasePageState<Page> {
 	void hdlDevices(data) {
 		// TODO: implement hdlDevices
 	}
+
+	@override
+	void hdlPointVals(dynamic data) {
+
+	}
 }

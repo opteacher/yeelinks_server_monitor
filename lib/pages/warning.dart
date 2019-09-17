@@ -26,9 +26,8 @@ class WarningPageState extends BasePageState<Page> {
 			"设备": MyDataHeader("name", 0.1),
 			"标题": MyDataHeader("warning", 0.15),
 			"说明": MyDataHeader("meaning", 0.25),
-			"生成时间": MyDataHeader("start"),
-			"确认时间": MyDataHeader("confirm"),
-			"确认者": MyDataHeader("confirmer", 0.1),
+			"生成时间": MyDataHeader("start", 0.175),
+			"确认时间": MyDataHeader("confirm", 0.175),
 			"状态": MyDataHeader("status", 0.1)
 		}, _warningRecords, vpadding: 5.0, isStriped: true, hasBorder: false,
 			headerTxtStyle: const TextStyle(fontSize: 20.0),
@@ -42,5 +41,10 @@ class WarningPageState extends BasePageState<Page> {
 	@override
 	void hdlDevices(data) {
 		// TODO: implement hdlDevices
+	}
+
+	@override
+	void hdlPointVals(dynamic data) {
+
 	}
 }

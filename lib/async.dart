@@ -41,11 +41,13 @@ class ResponseInfo {
 	dynamic get data => _data;
 }
 
-const url = "http://192.168.1.132:8089";// "http://test_api.ncpi-om.com"
+const url = "http://10.168.1.95:8080";// "http://test_api.ncpi-om.com"
 final listDevice = RequestInfo("GET", "/api/v1/devices/page", {
 	"type": ""
 });
-final getPoiSensor = RequestInfo("GET", "/api/v1/points/sensor", {});
+final getPoiSensor = RequestInfo("POST", "/api/v1/points/sensor", {
+	"devices": []
+});
 final humiture = RequestInfo("POST", "/api/v1/points/history", {
 	"device_id": "",
 	"points": [],
@@ -81,6 +83,8 @@ class Device {
 	int _type;
 	String _typeStr;
 	String _protocolId;
+	double _temp = 0.0;
+	double _humi = 0.0;
 
 	Device.fromJSON(Map json):
 		_id = json["id"], _name = json["name"], _type = json["type"],
@@ -91,18 +95,32 @@ class Device {
 	int get type => _type;
 	String get protocolId => _protocolId;
 	String get typeStr => _typeStr;
+	double get humi => _humi;
+	set humi(double value) {
+		_humi = value;
+	}
+	double get temp => _temp;
+	set temp(double value) {
+		_temp = value;
+	}
 }
 
 class PointVal {
+	final String _id;
 	final String _deviceId;
-	final String _pointId;
-	final String _value;
+	final double _value;
+	final String _unit;
 
-	PointVal(this._deviceId, this._pointId, this._value);
+	PointVal(this._id, this._deviceId, this._value, this._unit);
 
-	String get value => _value;
-	String get pointId => _pointId;
+	PointVal.fromJSON(Map json):
+		_id = json["id"].toString(), _deviceId = json["device_id"],
+		_value = double.parse(json["value"].toString()), _unit = json["unit"];
+
+	String get id => _id;
 	String get deviceId => _deviceId;
+	double get value => _value;
+	String get unit => _unit;
 }
 
 class EventRecord {
@@ -181,32 +199,16 @@ getDevices(int pageIndex) => reqTempFunc(
 	http.get(url + listDevice.chgBody("type", pageIndex.toString()).cmbBodyAsParamIntoPath()
 ), (dynamic data) => data);
 
-Future<dynamic> getPointSensor() => reqTempFunc(http.get(url + getPoiSensor.path), (dynamic data) {
-//	if (data["alarms"].isNotEmpty && !global.manualLight) {
-//		global.platform.invokeMethod("lightUp", { "color": "RED", "brightness": 50 });
-//	}
-	List<EventRecord> alarms = [];
-	for (var ala in data["alarms"]) {
-		alarms.add(EventRecord(
-			ala["device_name"].toString(),
-			ala["title"].toString(),
-			ala["content"].toString(),
-			ala["level"].toString(),
-			ala["time"].toString()
-		));
+Future<dynamic> getPointSensor(List<String> devices) => reqTempFunc(http.post(
+	url + getPoiSensor.path,
+	headers: {"Content-Type": "application/json"},
+	body: jsonEncode(getPoiSensor.chgBody("devices", devices).body)
+), (dynamic data) {
+	global.pointValues = [];
+	for (var key in data.keys.toList()) {
+		global.pointValues.add(PointVal.fromJSON(data[key]));
 	}
-	List<PointVal> sensors = [];
-	data["sensors"].forEach((_, inf) {
-		sensors.add(PointVal(
-			inf["device_id"].toString(),
-			inf["point_id"].toString(),
-			inf["value"].toString()
-		));
-	});
-	return {
-		"alarms": alarms,
-		"sensors": sensors,
-	};
+	return global.pointValues;
 });
 
 getHumiture(String devId, String poiId, TimeSectionEnum tmRng) {

@@ -13,16 +13,12 @@ class Page extends StatefulWidget {
 class HomePageState extends BasePageState<Page> {
 	List<Map<String, String>> _eventRecords = [];
 
-	HomePageState() {
-		values = {
-			"温度": "0.0",
-			"湿度": "0.0",
-			"烟雾": "0",
-			"水浸": "0",
-			"前门": "0",
-			"后门": "0",
-		};
-	}
+	double _cloudHumi = 0.0;
+	double _cloudTemp = 0.0;
+	double _hotHumi = 0.0;
+	double _hotTemp = 0.0;
+	double _load = 0.0;
+	double _pue = 0.0;
 
 	@override
 	Widget build(BuildContext context) {
@@ -41,31 +37,50 @@ class HomePageState extends BasePageState<Page> {
 		}
 		return Container(padding: const EdgeInsets.all(2.5), child: Column(children: <Widget>[
 			Expanded(child: Row(children: <Widget>[
-				DataCard(title: "PUE", child: Padding(padding: EdgeInsets.only(top: 20), child: Instrument(radius: 110.0, numScales: 4, max: 4.0, maxScale: 3.0))),
+				DataCard(title: "PUE", child: Padding(
+					padding: EdgeInsets.only(top: 20),
+					child: Instrument(
+						radius: 110.0,
+						numScales: 4,
+						max: 4.0,
+						maxScale: 3.0,
+						value: _pue,
+					)
+				)),
 				DataCard(title: "UPS运行模式", child: Padding(padding: EdgeInsets.only(top: 20), child: UpsRunningMod())),
-				DataCard(title: "UPS负载率", child: Padding(padding: EdgeInsets.only(top: 20), child: Instrument(radius: 110.0, numScales: 10, max: 120.0, maxScale: 96, suffix: "%")))
+				DataCard(title: "UPS负载率", child: Padding(
+					padding: EdgeInsets.only(top: 20),
+					child: Instrument(
+						radius: 110.0,
+						numScales: 10,
+						max: 120.0,
+						maxScale: 96,
+						suffix: "%",
+						value: _load,
+					)
+				))
 			])),
 			Expanded(child: Row(children: <Widget>[
 				DataCard(title: "环境信息", child: Padding(padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0), child: Row(children: <Widget>[
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
 							DescListItemTitle("冷通道温", size: 20.0),
-							DescListItemContent(values["温度"], blocked: true),
+							DescListItemContent(_cloudTemp.toStringAsFixed(2), blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
 							DescListItemTitle("热通道温", size: 20.0),
-							DescListItemContent(values["烟雾"], blocked: true),
+							DescListItemContent(_hotTemp.toStringAsFixed(2), blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
 							DescListItemTitle("烟        感", size: 20.0),
-							DescListItemContent(values["烟雾"], color: Colors.redAccent, blocked: true),
+							DescListItemContent("正常", color: Colors.redAccent, blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
 							DescListItemTitle("前        门", size: 20.0),
-							DescListItemContent(values["前门"], color: Colors.redAccent, blocked: true),
+							DescListItemContent("关闭", color: Colors.redAccent, blocked: true),
 							contentAlign: TextAlign.center
 						),
 					])),
@@ -73,22 +88,22 @@ class HomePageState extends BasePageState<Page> {
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
 							DescListItemTitle("冷通道湿", size: 20.0),
-							DescListItemContent(values["湿度"], blocked: true),
+							DescListItemContent(_cloudHumi.toStringAsFixed(2), blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
 							DescListItemTitle("热通道湿", size: 20.0),
-							DescListItemContent(values["湿度"], blocked: true),
+							DescListItemContent(_hotHumi.toStringAsFixed(2), blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
 							DescListItemTitle("水        浸", size: 20.0),
-							DescListItemContent(values["水浸"], blocked: true),
+							DescListItemContent("正常", blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
 							DescListItemTitle("后        门", size: 20.0),
-							DescListItemContent(values["后门"], color: Colors.redAccent, blocked: true),
+							DescListItemContent("关闭", color: Colors.redAccent, blocked: true),
 							contentAlign: TextAlign.center
 						),
 					]))
@@ -102,20 +117,34 @@ class HomePageState extends BasePageState<Page> {
 	}
 
 	@override
-	void subColcData(dynamic data) {
+	String pageId() => "home";
+
+	@override
+	void hdlDevices(data) {
 		setState(() {
-			_eventRecords = [];
-			for (EventRecord er in data["alarms"].toList().cast<EventRecord>()) {
-				_eventRecords.add(er.toMap());
+			if (data["cloud_humi"] != 0) {
+				_cloudHumi = data["cloud_humi"].toDouble();
+			}
+			if (data["cloud_temp"] != 0) {
+				_cloudTemp = data["cloud_temp"].toDouble();
+			}
+			if (data["hot_humi"] != 0) {
+				_hotHumi = data["hot_humi"].toDouble();
+			}
+			if (data["hot_temp"] != 0) {
+				_hotTemp = data["hot_temp"].toDouble();
+			}
+			if (data["load"] != 0) {
+				_load = data["load"].toDouble();
+			}
+			if (data["pue"] != 0) {
+				_pue = data["pue"].toDouble();
 			}
 		});
 	}
 
 	@override
-	String pageId() => "home";
+	void hdlPointVals(dynamic data) {
 
-	@override
-	void hdlDevices(data) {
-		// TODO: implement hdlDevices
 	}
 }
