@@ -126,71 +126,38 @@ class DescListItem extends StatelessWidget {
 	}
 }
 
-class Instrument extends StatefulWidget {
-	State<Instrument> _state;
-
-	Instrument({double radius, int numScales, double max, double maxScale = -1, String suffix = "", double value = 0.0}) {
-		_state = InstrumentState(radius, numScales, max, maxScale, suffix, value);
-	}
-
-	@override
-	State createState() => _state;
-}
-
-class InstrumentState extends State<Instrument> {
-	final double radius;
-	InstrumentGraph _graph;
-	final double max;
+class Instrument extends StatelessWidget {
+	double _radius;
+	double _max;
+	int _numScales;
+	double _maxScale;
 	double _step;
 	double _value = 0.0;
-	final String _suffix;
-//	Timer _timer;
-//	int _countdown = 50;
-//	bool _increase = true;
+	String _suffix;
 
-	InstrumentState(this.radius, int numScales, this.max, double maxScale, this._suffix, this._value) {
-		_graph = InstrumentGraph(radius, numScales, max, maxScale)
-			..updateValue(_value);
-		_step = max / 100;
-	}
-
-//	@override
-//	void initState() {
-//		super.initState();
-//		_timer = Timer.periodic(const Duration(milliseconds: 200), (Timer t) => setState(() {
-//			if (_countdown > 0) {
-//				_countdown--;
-//				_value += _increase ? _step : -_step;
-//				if (_value > max) {
-//					_value = max;
-//				} else if (_value < 0) {
-//					_value = 0;
-//				}
-//				_graph.updateValue(_value);
-//			} else {
-//				_countdown = Random(DateTime.now().millisecondsSinceEpoch).nextInt(50);
-//				_increase = !_increase;
-//			}
-//		}));
-//	}
-//
-//	@override
-//	void dispose() {
-//		super.dispose();
-//		_timer.cancel();
-//	}
+	Instrument({
+		double radius,
+		int numScales,
+		double max,
+		double maxScale = -1,
+		String suffix = "",
+		double value = 0.0
+	}): _radius = radius, _max = max, _numScales = numScales,
+		_maxScale = maxScale, _value = value, _suffix = suffix;
 
 	@override
 	Widget build(BuildContext context) => Center(child: Column(children: <Widget>[
 		CustomPaint(
-			size: Size(2 * radius, 1.5 * radius),
-			painter: _graph,
+			size: Size(2 * _radius, 1.5 * _radius),
+			painter: InstrumentGraph(_radius, _numScales, _max, _maxScale)
+				..updateValue(_value),
 		),
 		Text(
 			_value.toStringAsFixed(2) + " $_suffix",
 			style: TextStyle(fontSize: 35.0, color: Colors.blueAccent)
 		)
 	]));
+
 }
 
 class InstrumentGraph extends CustomPainter {
@@ -293,50 +260,30 @@ class InstrumentGraph extends CustomPainter {
 }
 
 class SimpleTimeSeriesChart extends StatefulWidget {
-	final String _name;
-	final String _id;
-	SimpleTimeSeriesChartState _state;
-
-	SimpleTimeSeriesChart(this._name, this._id);
-
 	@override
-	State<StatefulWidget> createState() => SimpleTimeSeriesChartState(_name, _id);
+	State<StatefulWidget> createState() => SimpleTimeSeriesChartState();
 }
 
 class SimpleTimeSeriesChartState extends State<SimpleTimeSeriesChart> {
-	final String _name;
-	final String _id;
-	List<TimeSeriesSales> _data;
+	List<TimeSeriesSales> _humis = [TimeSeriesSales(DateTime.now(), 0)];
+	List<TimeSeriesSales> _temps = [TimeSeriesSales(DateTime.now(), 0)];
 	TimeSectionEnum _active = TimeSectionEnum.in1Hour;
 
-	SimpleTimeSeriesChartState(this._name, this._id) {
-		_data = [TimeSeriesSales(DateTime.now(), 0)];
-//		global.refreshTimer.register("${_id}_$_name", TimerJob(getDataFunc(_id), addData, {
-//			TimerJob.PAGE_IDEN: "env"
-//		}));
-	}
-
-	Future<dynamic> Function() getDataFunc(String poiId) => () {
-//		if (global.currentDevice == null) {
-//			return Future(() => null);
-//		}
-//		return getHumiture(global.currentDevice.id, poiId, _active);
-		return Future(() => ResponseInfo([], ""));
-	};
-
-	void addData(dynamic data) {
-		setState(() {
-			_data = [];
-			for (var dat in data) {
-				_data.add(dat);
-			}
-			print(_data);
-		});
+	@override
+	void initState() {
+		super.initState();
+		global.refreshTimer.register("tempHumiChartInEnv", TimerJob(() {
+			return getTempHumi(_active.index + 1);
+		}, (dynamic data) => setState(() {
+			_humis = data["humis"].toList();
+			_temps = data["temps"].toList();
+		})));
 	}
 
 	@override
 	Widget build(BuildContext context) => Column(children: <Widget>[
 		Row(children: _genRadios()),
+		Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[Text("温度")]),
 		Expanded(child: charts.TimeSeriesChart(
 			[
 				charts.Series<TimeSeriesSales, DateTime>(
@@ -344,7 +291,21 @@ class SimpleTimeSeriesChartState extends State<SimpleTimeSeriesChart> {
 					colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
 					domainFn: (TimeSeriesSales sales, _) => sales.time,
 					measureFn: (TimeSeriesSales sales, _) => sales.sales,
-					data: _data,
+					data: _temps,
+				)
+			],
+			animate: false,
+			dateTimeFactory: const charts.LocalDateTimeFactory(),
+		)),
+		Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[Text("湿度")]),
+		Expanded(child: charts.TimeSeriesChart(
+			[
+				charts.Series<TimeSeriesSales, DateTime>(
+					id: "Sales",
+					colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+					domainFn: (TimeSeriesSales sales, _) => sales.time,
+					measureFn: (TimeSeriesSales sales, _) => sales.sales,
+					data: _humis,
 				)
 			],
 			animate: false,
@@ -495,7 +456,20 @@ class TimerJob {
 
 class RefreshTimer {
 	Timer _timer;
-	Map<String, TimerJob> _jobs = {};
+	String _idenPrefix = "";
+	Map<String, TimerJob> _jobs = {
+		"alarmLighter": TimerJob(hasAlarms, (dynamic data) {
+			if (data) {
+				global.platform.invokeMethod("lightUp", {
+					"color": "RED", "brightness": 50
+				});
+			} else {
+				global.platform.invokeMethod("lightUp", {
+					"color": "GREEN", "brightness": 50
+				});
+			}
+		})
+	};
 
 	void register(String id, TimerJob job) {
 		_jobs[id] = job;
@@ -503,7 +477,7 @@ class RefreshTimer {
 
 	void start() {
 		if (_timer == null || !_timer.isActive) {
-			_timer = Timer.periodic(const Duration(seconds: 5), _refresh);
+			_timer = Timer.periodic(const Duration(seconds: 2), _refresh);
 		}
 	}
 
@@ -518,19 +492,27 @@ class RefreshTimer {
 					return;
 				}
 			}
+			if (_idenPrefix.isNotEmpty) {
+				if (!id.startsWith(_idenPrefix)) {
+					return;
+				}
+			}
 
 			ResponseInfo ri = await job._job();
 			if (ri == null || ri.data == null) {
 				return;
 			}
+			print(ri.data);
 			if (job._callback != null) {
 				job._callback(ri.data);
 			}
 		});
+		_idenPrefix = "";
 	}
 
-	void manualRefresh() {
-		Timer.run(() => _refresh(null));
+	void refreshPointSensor() {
+		_idenPrefix = "poiValueOf";
+		Timer.run(() => _refresh);
 	}
 
 	void cancel() => _timer.cancel();
@@ -565,7 +547,7 @@ class UpsRunningModState extends State<UpsRunningMod> {
 
 	@override
 	Widget build(BuildContext context) => Center(child: CustomPaint(
-		size: Size(300, 300),
+		size: Size(400, 400),
 		painter: UpsRunningModPainter(_imgBYPASS, _imgInput, _imgACDC, _imgDCAC, _imgBatt)
 	));
 

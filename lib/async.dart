@@ -42,16 +42,18 @@ class ResponseInfo {
 }
 
 const url = "http://10.168.1.95:8080";// "http://test_api.ncpi-om.com"
-final listDevice = RequestInfo("GET", "/api/v1/devices/page", {
+final devPage = RequestInfo("GET", "/api/v1/devices/page", {
 	"type": ""
 });
 final getPoiSensor = RequestInfo("POST", "/api/v1/points/sensor", {
 	"devices": []
 });
-final humiture = RequestInfo("POST", "/api/v1/points/history", {
-	"device_id": "",
-	"points": [],
-	"time_range": ["2019-07-01", "2019-08-22"]
+final listDevices = RequestInfo("POST", "/api/v1/devices/list", {});
+final getAlarms = RequestInfo("GET", "/api/v1/alarms/active", {});
+final tempHumi = RequestInfo("POST", "/api/v1/points/history", {
+	"id": "",
+	"points": [29607741, 29607742, 29607739, 29607740],
+	"time": 1
 });
 final devTypes = RequestInfo("GET", "/api/v1/dictionary/list?type=1", {});
 final devProxies = RequestInfo("GET", "/api/v1/protocols/list", {
@@ -85,10 +87,12 @@ class Device {
 	String _protocolId;
 	double _temp = 0.0;
 	double _humi = 0.0;
+	int _status;
 
 	Device.fromJSON(Map json):
 		_id = json["id"], _name = json["name"], _type = json["type"],
-		_typeStr = json["device_type_str"], _protocolId = json["protocol_id"];
+		_typeStr = json["device_type_str"], _protocolId = json["protocol_id"],
+		_status = json["status"] != null ? json["status"].toInt() : 0;
 
 	String get name => _name;
 	String get id => _id;
@@ -103,6 +107,7 @@ class Device {
 	set temp(double value) {
 		_temp = value;
 	}
+	int get status => _status;
 }
 
 class PointVal {
@@ -129,14 +134,16 @@ class EventRecord {
 	final String _meaning;
 	final String _level;
 	final String _start;
+	final String _confirm;
+	final String _status;
 
-	EventRecord(this._name, this._warning, this._meaning, this._level, this._start);
+	EventRecord(this._name, this._warning, this._meaning, this._level, this._start, this._confirm, this._status);
 
-	String get start => _start;
-	String get level => _level;
-	String get meaning => _meaning;
-	String get warning => _warning;
-	String get name => _name;
+	EventRecord.fromJSON(Map json):
+		_name = json["device_name"], _warning = json["title"],
+		_meaning = json["content"], _level = json["level"].toString(),
+		_start = json["time"].toString(), _confirm = json["check_time"].toString(),
+		_status = json["status"].toString();
 
 	Map<String, String> toMap() => {
 		"name": _name,
@@ -144,7 +151,17 @@ class EventRecord {
 		"meaning": _meaning,
 		"level": _level,
 		"start": _start,
+		"confirm": _confirm,
+		"status": _status
 	};
+
+	String get start => _start;
+	String get level => _level;
+	String get meaning => _meaning;
+	String get warning => _warning;
+	String get name => _name;
+	String get confirm => _confirm;
+	String get status => _status;
 }
 
 class DevType {
@@ -196,7 +213,7 @@ reqTempFunc(Future<http.Response> requester, dynamic Function(dynamic data) succ
 }
 
 getDevices(int pageIndex) => reqTempFunc(
-	http.get(url + listDevice.chgBody("type", pageIndex.toString()).cmbBodyAsParamIntoPath()
+	http.get(url + devPage.chgBody("type", pageIndex.toString()).cmbBodyAsParamIntoPath()
 ), (dynamic data) => data);
 
 Future<dynamic> getPointSensor(List<String> devices) => reqTempFunc(http.post(
@@ -211,64 +228,33 @@ Future<dynamic> getPointSensor(List<String> devices) => reqTempFunc(http.post(
 	return global.pointValues;
 });
 
-getHumiture(String devId, String poiId, TimeSectionEnum tmRng) {
-	var reqBody = humiture.body;
-	reqBody["device_id"] = devId;
-	reqBody["points"] = [int.parse(poiId)];
-//	var now = DateTime.now();
-//	switch (tmRng) {
-//	case TimeSectionEnum.in1Hour:
-//		reqBody["time_range"] = [
-//			now.subtract(Duration(hours: 1)).toString(),
-//			now.toString()
-//		];
-//		break;
-//	case TimeSectionEnum.in24Hours:
-//		reqBody["time_range"] = [
-//			now.subtract(Duration(days: 1)).toString(),
-//			now.toString()
-//		];
-//		break;
-//	case TimeSectionEnum.in1Mon:
-//		reqBody["time_range"] = [
-//			now.subtract(Duration(days: 30)).toString(),
-//			now.toString()
-//		];
-//		break;
-//	case TimeSectionEnum.in1Year:
-//		reqBody["time_range"] = [
-//			now.subtract(Duration(days: 356)).toString(),
-//			now.toString()
-//		];
-//		break;
-//	}
-	return reqTempFunc(http.post(url + humiture.path,
+Future<dynamic> getDevList() => reqTempFunc(http.post(
+	url + listDevices.path,
+	headers: {"Content-Type": "application/json"},
+	body: jsonEncode(listDevices.body)
+), (dynamic data) => data.map<Device>((dev) => Device.fromJSON(dev)).toList());
+
+Future<dynamic> hasAlarms() => reqTempFunc(http.get(url + getAlarms.path), (dynamic data) => data.isNotEmpty);
+
+Future<dynamic> getTempHumi(int time) {
+	return reqTempFunc(http.post(
+		url + tempHumi.path,
 		headers: {"Content-Type": "application/json"},
-		body: jsonEncode(reqBody)
+		body: jsonEncode(tempHumi.chgBody("id", global.currentDevID).chgBody("time", time).body)
 	), (dynamic data) {
-		if (data == null || data.length == 0) {
-			return [];
-		}
-		var now = DateTime.parse(data[data.length - 1]["time"].toString());
-		DateTime startTime;
-		switch (tmRng) {
-		case TimeSectionEnum.in1Hour:
-			startTime = now.subtract(Duration(hours: 1));
-			break;
-		case TimeSectionEnum.in24Hours:
-			startTime = now.subtract(Duration(days: 1));
-			break;
-		case TimeSectionEnum.in1Mon:
-			startTime = now.subtract(Duration(days: 30));
-			break;
-		}
-		List<TimeSeriesSales> ret = [];
-		for (var i = data.length - 1; i >= 0; i--) {
-			var tsTime = DateTime.parse(data[i]["time"].toString());
-			if (tsTime.isAfter(startTime)) {
-				ret.add(TimeSeriesSales(tsTime, double.parse(data[i][poiId].toString())));
-			} else {
-				break;
+		var ret = {
+			"humis": <TimeSeriesSales>[],
+			"temps": <TimeSeriesSales>[]
+		};
+		for (var d in data) {
+			DateTime dt = DateTime.parse(d["time"]);
+			for (var key in d.keys.toList()) {
+				String pname = global.protocolMapper[key];
+				if (pname == "热通道温度" || pname == "冷通道温度") {
+					ret["temps"].add(TimeSeriesSales(dt, d[key].toDouble()));
+				} else if (pname == "热通道湿度" || pname == "冷通道湿度") {
+					ret["humis"].add(TimeSeriesSales(dt, d[key].toDouble()));
+				}
 			}
 		}
 		return ret;

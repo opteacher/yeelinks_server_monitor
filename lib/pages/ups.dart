@@ -195,7 +195,7 @@ class UpsPageState extends BasePageState<Page> {
 		for (PointVal pv in data) {
 			String poiName = global.protocolMapper[pv.id];
 			if (_values[poiName] != null) {
-				_values[poiName] = pv.value.toStringAsFixed(2);
+				_values[poiName] = pv.value.toStringAsFixed(1);
 			}
 		}
 	});

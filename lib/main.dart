@@ -40,7 +40,7 @@ class MyAppState extends State<MyApp> {
 	void dispose() {
 		super.dispose();
 		global.refreshTimer.cancel();
-//		global.platform.invokeMethod("lightDown");
+		global.platform.invokeMethod("lightDown");
 	}
 
 	@override
@@ -80,7 +80,30 @@ class MyAppBarState extends State<MyAppBar> {
 				_buildTitleButton(context, "告警", "warning", icon: Icons.warning),
 				_buildTitleButton(context, "历史", "history", icon: Icons.history)
 			])),
-			_buildTitleButton(context, "", "setting", icon: Icons.settings)
+			_buildTitleButton(context, "", "setting", icon: Icons.settings, callback: () async {
+				switch(await showDialog<global.ConfirmCancel>(context: context, builder: (BuildContext context) => SimpleDialog(
+					title: Text("管理员认证"),
+					children: <Widget>[Padding(padding: EdgeInsets.all(20), child: Form(child: Column(children: <Widget>[
+						TextFormField(decoration: InputDecoration(hintText: "输入管理员账号"), autofocus: true),
+						TextFormField(decoration: InputDecoration(hintText: "输入密码"), obscureText: true),
+						Padding(padding: EdgeInsets.only(top: 16), child: FlatButton(
+							color: Theme.of(context).primaryColor,
+							child: Text("登录", style: TextStyle(color: Colors.white)),
+							onPressed: () {
+								Navigator.pop(context, global.ConfirmCancel.CONFIRMED);
+							})
+						)
+					])))]
+				))) {
+					case global.ConfirmCancel.CONFIRMED:
+						global.currentPageID = "setting";
+						global.toIdenPage(context, "setting");
+						break;
+					case global.ConfirmCancel.CANCELED:
+					default:
+						SystemChrome.setEnabledSystemUIOverlays([]);
+				}
+			})
 		]),
 	);
 

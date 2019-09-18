@@ -17,6 +17,7 @@ import 'main.dart';
 
 String currentPageID = "home";
 String currentGroup = "AnBKy5wyBwMLNaoc";
+String currentDevID = "";
 List<Device> devices = [];
 class ComponentInfo {
 	final String _id;
@@ -40,7 +41,7 @@ final Map<String, ComponentInfo> componentInfos = {
 	"aircond":  ComponentInfo("aircond", "空调", Dashboard(aircond.Page()), 4),
 	"env":      ComponentInfo("env", "环境", Dashboard(env.Page()), 5),
 	"setting":  ComponentInfo("setting", "设置", Dashboard(setting.Page()), 8),
-	"warning":  ComponentInfo("warning", "告警", Dashboard(warning.Page()), 6),
+	"warning":  ComponentInfo("warning", "告警", Dashboard(warning.Page()), 1),
 	"history":  ComponentInfo("history", "历史", Dashboard(history.Page()), 7)
 };
 void toIdenPage(BuildContext context, String pid) {
@@ -55,10 +56,10 @@ List<PointVal> pointValues = [];
 const Map<String, String> protocolMapper = {
 	"15285839":	"温度",
 	"15039855":	"湿度",
-	"22531222":	"烟雾",
-	"29816864":	"水浸",
-	"27373773":	"前门",
-	"19959702":	"后门",
+	"29707439":	"烟雾",
+	"29707441":	"水浸",
+	"29707438":	"前门",
+	"29707440":	"后门",
 
 	"26644399":	"电压",
 	"28390360":	"电流",
@@ -131,7 +132,15 @@ const Map<String, String> protocolMapper = {
 	"21595930":	"送风低温告警",
 	"15976488":	"过热度过高报警",
 	"25894281":	"过热度过低报警",
-	"28855905":	"高压开关故障告警"
+	"28855905":	"高压开关故障告警",
+
+	"29607741": "热通道温度",
+	"29607742": "热通道湿度",
+	"29607739": "冷通道温度",
+	"29607740": "冷通道湿度"
 };
 const platform = const MethodChannel("com.yeelinks.plugins/led_ctrl");
 const lightColors = ["RED", "GREEN", "BLUE"];
+enum ConfirmCancel {
+	CONFIRMED, CANCELED
+}

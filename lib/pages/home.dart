@@ -12,11 +12,16 @@ class Page extends StatefulWidget {
 
 class HomePageState extends BasePageState<Page> {
 	List<Map<String, String>> _eventRecords = [];
-
-	double _cloudHumi = 0.0;
-	double _cloudTemp = 0.0;
-	double _hotHumi = 0.0;
-	double _hotTemp = 0.0;
+	Map<String, String> _values = {
+		"冷通道温": "0.0",
+		"热通道温": "0.0",
+		"冷通道湿": "0.0",
+		"热通道湿": "0.0",
+		"烟雾": "0",
+		"水浸": "0",
+		"前门": "0",
+		"后门": "0"
+	};
 	double _load = 0.0;
 	double _pue = 0.0;
 
@@ -65,22 +70,22 @@ class HomePageState extends BasePageState<Page> {
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
 							DescListItemTitle("冷通道温", size: 20.0),
-							DescListItemContent(_cloudTemp.toStringAsFixed(2), blocked: true),
+							DescListItemContent(_values["冷通道温"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
 							DescListItemTitle("热通道温", size: 20.0),
-							DescListItemContent(_hotTemp.toStringAsFixed(2), blocked: true),
+							DescListItemContent(_values["热通道温"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
 							DescListItemTitle("烟        感", size: 20.0),
-							DescListItemContent("正常", color: Colors.redAccent, blocked: true),
+							DescListItemContent("正常", blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
 							DescListItemTitle("前        门", size: 20.0),
-							DescListItemContent("关闭", color: Colors.redAccent, blocked: true),
+							DescListItemContent("关闭", blocked: true),
 							contentAlign: TextAlign.center
 						),
 					])),
@@ -88,12 +93,12 @@ class HomePageState extends BasePageState<Page> {
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
 							DescListItemTitle("冷通道湿", size: 20.0),
-							DescListItemContent(_cloudHumi.toStringAsFixed(2), blocked: true),
+							DescListItemContent(_values["冷通道湿"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
 							DescListItemTitle("热通道湿", size: 20.0),
-							DescListItemContent(_hotHumi.toStringAsFixed(2), blocked: true),
+							DescListItemContent(_values["热通道湿"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
@@ -103,7 +108,7 @@ class HomePageState extends BasePageState<Page> {
 						),
 						DescListItem(
 							DescListItemTitle("后        门", size: 20.0),
-							DescListItemContent("关闭", color: Colors.redAccent, blocked: true),
+							DescListItemContent("关闭", blocked: true),
 							contentAlign: TextAlign.center
 						),
 					]))
@@ -120,28 +125,32 @@ class HomePageState extends BasePageState<Page> {
 	String pageId() => "home";
 
 	@override
-	void hdlDevices(data) {
-		setState(() {
-			if (data["cloud_humi"] != 0) {
-				_cloudHumi = data["cloud_humi"].toDouble();
+	void hdlDevices(data) => setState(() {
+		if (data["alarms"] != null) {
+			_eventRecords = [];
+			for (var alarm in data["alarms"]) {
+				_eventRecords.add(EventRecord.fromJSON(alarm).toMap());
 			}
-			if (data["cloud_temp"] != 0) {
-				_cloudTemp = data["cloud_temp"].toDouble();
-			}
-			if (data["hot_humi"] != 0) {
-				_hotHumi = data["hot_humi"].toDouble();
-			}
-			if (data["hot_temp"] != 0) {
-				_hotTemp = data["hot_temp"].toDouble();
-			}
-			if (data["load"] != 0) {
-				_load = data["load"].toDouble();
-			}
-			if (data["pue"] != 0) {
-				_pue = data["pue"].toDouble();
-			}
-		});
-	}
+		}
+		if (data["cloud_humi"] != null) {
+			_values["冷通道湿"] = data["cloud_humi"].toDouble().toStringAsFixed(2);
+		}
+		if (data["cloud_temp"] != null) {
+			_values["冷通道温"] = data["cloud_temp"].toDouble().toStringAsFixed(2);
+		}
+		if (data["hot_humi"] != null) {
+			_values["热通道湿"] = data["hot_humi"].toDouble().toStringAsFixed(2);
+		}
+		if (data["hot_temp"] != null) {
+			_values["热通道温"] = data["hot_temp"].toDouble().toStringAsFixed(2);
+		}
+		if (data["load"] != null) {
+			_load = data["load"].toDouble();
+		}
+		if (data["pue"] != null) {
+			_pue = data["pue"].toDouble();
+		}
+	});
 
 	@override
 	void hdlPointVals(dynamic data) {

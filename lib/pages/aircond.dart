@@ -58,6 +58,7 @@ class AircondPageState extends BasePageState<Page> {
 					child: Text(acd.name), onPressed: () => setState(() {
 						_selAircond = acd;
 						global.idenDevs = [_selAircond.id];
+						global.refreshTimer.refreshPointSensor();
 					}))
 				)).toList())
 			)),
@@ -301,6 +302,7 @@ class AircondPageState extends BasePageState<Page> {
 		if (_selAircond == null && _airconds.isNotEmpty) {
 			_selAircond = _airconds[0];
 			global.idenDevs = [_selAircond.id];
+			global.refreshTimer.refreshPointSensor();
 		}
 	});
 
@@ -309,7 +311,7 @@ class AircondPageState extends BasePageState<Page> {
 		for (PointVal pv in data) {
 			String poiName = global.protocolMapper[pv.id];
 			if (_values[poiName] != null) {
-				_values[poiName] = pv.value.toStringAsFixed(2);
+				_values[poiName] = pv.value.toStringAsFixed(1);
 			}
 		}
 	});

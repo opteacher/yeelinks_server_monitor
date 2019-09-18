@@ -20,8 +20,13 @@ class EnvPageState extends BasePageState<Page> {
 
 	Map<String, Device> _cloudDevs = {};
 	Map<String, Device> _hotDevs = {};
-	String _selDevID = "";
 	String _switcherID = "";
+	Map<String, String> _switcher = {
+		"前门": "0",
+		"后门": "0",
+		"水浸": "0",
+		"烟雾": "0"
+	};
 
 	@override
 	Widget build(BuildContext context) => Container(padding: const EdgeInsets.all(2.5), child: Row(children: <Widget>[
@@ -31,23 +36,22 @@ class EnvPageState extends BasePageState<Page> {
 			))
 		])),
 		Expanded(flex: 2, child: Column(children: <Widget>[
-			DataCard(title: "温度曲线", child: SimpleTimeSeriesChart("温度", "20479254")),
-			DataCard(title: "湿度曲线", child: SimpleTimeSeriesChart("湿度", "20361980")),
+			DataCard(title: "历史曲线", child: SimpleTimeSeriesChart()),
 			DataCard(title: "机柜状态", height: 200, child: Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Row(children: <Widget>[
 				Expanded(child: Column(children: <Widget>[
-					Text("前门"), RaisedButton(elevation: 0, onPressed: () {}, child: Text("开启"))
+					Text("前门"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["前门"]))
 				])),
 				VerticalDivider(),
 				Expanded(child: Column(children: <Widget>[
-					Text("后门"), RaisedButton(elevation: 0, onPressed: () {}, child: Text("开启"))
+					Text("后门"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["后门"]))
 				])),
 				VerticalDivider(),
 				Expanded(child: Column(children: <Widget>[
-					Text("水浸"), RaisedButton(elevation: 0, onPressed: () {}, child: Text("正常"))
+					Text("水浸"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["水浸"]))
 				])),
 				VerticalDivider(),
 				Expanded(child: Column(children: <Widget>[
-					Text("烟感"), RaisedButton(elevation: 0, onPressed: () {}, child: Text("异常", style: TextStyle(color: Colors.orangeAccent)))
+					Text("烟感"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["烟雾"]))
 				])),
 				VerticalDivider()
 			])))
@@ -61,7 +65,7 @@ class EnvPageState extends BasePageState<Page> {
 
 	List<Widget> _genHumiTempCard(List<Device> devices) => devices.map<Widget>((dev) {
 		Widget titleBar;
-		if (_selDevID.isNotEmpty && _selDevID == dev.id) {
+		if (global.currentDevID.isNotEmpty && global.currentDevID == dev.id) {
 			titleBar = FlatButton(padding: EdgeInsets.all(0), child: ListTile(
 				title: Text(dev.name, style: _dividerTxtStyle),
 				trailing: Icon(Icons.check_circle, color: Theme.of(context).primaryColor)
@@ -70,7 +74,7 @@ class EnvPageState extends BasePageState<Page> {
 			titleBar = FlatButton(padding: EdgeInsets.all(0), child: ListTile(
 				title: Text(dev.name, style: _dividerTxtStyle)
 			), color: Colors.grey[100], onPressed: () => setState(() {
-				_selDevID = dev.id;
+				global.currentDevID = dev.id;
 			}));
 		}
 		return Container(margin: EdgeInsets.only(bottom: 50), child: Column(children: <Widget>[
@@ -78,13 +82,13 @@ class EnvPageState extends BasePageState<Page> {
 			Container(margin: EdgeInsets.only(top: 10), child: Row(children: <Widget>[
 				DescListItem(
 					DescListItemTitle("温度", size: 20.0),
-					DescListItemContent(dev.temp.toStringAsFixed(2), blocked: true),
+					DescListItemContent(dev.temp.toStringAsFixed(1), blocked: true),
 					contentAlign: TextAlign.center
 				),
-				VerticalDivider(width: 10),
+				VerticalDivider(width: 5),
 				DescListItem(
 					DescListItemTitle("湿度", size: 20.0),
-					DescListItemContent(dev.humi.toStringAsFixed(2), blocked: true),
+					DescListItemContent(dev.humi.toStringAsFixed(1), blocked: true),
 					contentAlign: TextAlign.center
 				)
 			])),
@@ -114,14 +118,14 @@ class EnvPageState extends BasePageState<Page> {
 			if (data["switcher"] != null && data["switcher"].isNotEmpty) {
 				_switcherID = Device.fromJSON(data["switcher"][0]).id;
 			}
-		});
-		if (_selDevID.isEmpty) {
-			if (_cloudDevs.isNotEmpty) {
-				_selDevID = _cloudDevs.keys.first;
-			} else if (_hotDevs.isNotEmpty) {
-				_selDevID = _hotDevs.keys.first;
+			if (global.currentDevID.isEmpty) {
+				if (_cloudDevs.isNotEmpty) {
+					global.currentDevID = _cloudDevs.keys.first;
+				} else if (_hotDevs.isNotEmpty) {
+					global.currentDevID = _hotDevs.keys.first;
+				}
 			}
-		}
+		});
 		global.idenDevs = [];
 		global.idenDevs.addAll(_cloudDevs.keys);
 		global.idenDevs.addAll(_hotDevs.keys);
@@ -134,21 +138,24 @@ class EnvPageState extends BasePageState<Page> {
 	void hdlPointVals(dynamic data) => setState(() {
 		for (PointVal pv in data) {
 			if (_cloudDevs[pv.deviceId] != null) {
-				if (pv.id == "15285839") {
+				if (global.protocolMapper[pv.id] == "冷通道温度") {
 					_cloudDevs[pv.deviceId].temp = pv.value;
-				} else if (pv.id == "15039855") {
+				} else if (global.protocolMapper[pv.id] == "冷通道湿度") {
 					_cloudDevs[pv.deviceId].humi = pv.value;
 				}
 			}
 			if (_hotDevs[pv.deviceId] != null) {
-				if (pv.id == "15285839") {
+				if (global.protocolMapper[pv.id] == "热通道温度") {
 					_hotDevs[pv.deviceId].temp = pv.value;
-				} else {
+				} else if (global.protocolMapper[pv.id] == "热通道湿度") {
 					_hotDevs[pv.deviceId].humi = pv.value;
 				}
 			}
 			if (_switcherID == pv.deviceId) {
-				// TODO:
+				String poiName = global.protocolMapper[pv.id];
+				if (_switcher[poiName] != null) {
+					_switcher[poiName] = pv.value.toStringAsFixed(0);
+				}
 			}
 		}
 	});

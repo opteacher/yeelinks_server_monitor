@@ -12,7 +12,10 @@ class ElectronPageState extends BasePageState<Page> {
 	List<Device> _pdus = [];
 	Device _selPDU;
 	Device _mainEle;
+
 	Map<String, String> _eleVals = {
+		"电压": "0.0",
+		"电流": "0.0",
 		"有功功率": "0.0",
 		"有功电能": "0.0",
 		"功率因素": "0.0",
@@ -49,16 +52,23 @@ class ElectronPageState extends BasePageState<Page> {
 					borderSide: BorderSide(color: primaryColor),
 					child: Text(pdu.name), onPressed: () => setState(() {
 						_selPDU = pdu;
-						global.idenDevs = [_selPDU.id];
-						global.refreshTimer.manualRefresh();
+						if (_mainEle != null) {
+							global.idenDevs = [_mainEle.id];
+						}
+						global.idenDevs.add(_selPDU.id);
+						global.refreshTimer.refreshPointSensor();
 					}))
 				)).toList())
 			)),
 			Expanded(flex: 4, child: Column(children: <Widget>[
 				DataCard(title: "主路输入", child: Padding(padding: EdgeInsets.all(20), child: Row(children: <Widget>[
-					Expanded(child: Padding(padding: EdgeInsets.only(top: 10), child: Instrument(radius: 120.0, numScales: 10, max: 260.0, maxScale: 208.0))),
+					Expanded(child: Padding(padding: EdgeInsets.only(top: 10),
+						child: Instrument(radius: 120.0, numScales: 10, max: 260.0, maxScale: 208.0, value: double.parse(_eleVals["电压"]))
+					)),
 					VerticalDivider(width: 50),
-					Expanded(child: Padding(padding: EdgeInsets.only(top: 10), child: Instrument(radius: 120.0, numScales: 8, max: 32.0, maxScale: 26.0))),
+					Expanded(child: Padding(padding: EdgeInsets.only(top: 10),
+						child: Instrument(radius: 120.0, numScales: 8, max: 32.0, maxScale: 26.0, value: double.parse(_eleVals["电流"]))
+					)),
 					VerticalDivider(width: 50),
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
@@ -131,28 +141,33 @@ class ElectronPageState extends BasePageState<Page> {
 	String pageId() => "electron";
 
 	@override
-	void hdlDevices(data) {
+	void hdlDevices(data) => setState(() {
+		bool manualRefresh = false;
 		global.idenDevs = [];
 		if (data["ele"] != null) {
 			_mainEle = Device.fromJSON(data["ele"]);
 			global.idenDevs.add(_mainEle.id);
+			manualRefresh = true;
 		} else {
 			_mainEle = null;
 		}
 		if (data["pdu"] == null) {
 			return;
 		}
-		setState(() {
-			_pdus = [];
-			for (var pdu in data["pdu"]) {
-				_pdus.add(Device.fromJSON(pdu));
-			}
-			if (_selPDU == null && _pdus.isNotEmpty) {
-				_selPDU = _pdus[0];
-				global.idenDevs.add(_selPDU.id);
-			}
-		});
-	}
+
+		_pdus = [];
+		for (var pdu in data["pdu"]) {
+			_pdus.add(Device.fromJSON(pdu));
+		}
+		if (_selPDU == null && _pdus.isNotEmpty) {
+			_selPDU = _pdus[0];
+			global.idenDevs.add(_selPDU.id);
+			manualRefresh = true;
+		}
+		if (manualRefresh) {
+			global.refreshTimer.refreshPointSensor();
+		}
+	});
 
 	@override
 	void hdlPointVals(dynamic data) => setState(() {
