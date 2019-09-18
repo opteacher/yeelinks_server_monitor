@@ -81,16 +81,41 @@ class MyAppBarState extends State<MyAppBar> {
 				_buildTitleButton(context, "历史", "history", icon: Icons.history)
 			])),
 			_buildTitleButton(context, "", "setting", icon: Icons.settings, callback: () async {
+				final _formKey = GlobalKey<FormState>();
+				String _account = "";
+				String _password = "";
 				switch(await showDialog<global.ConfirmCancel>(context: context, builder: (BuildContext context) => SimpleDialog(
 					title: Text("管理员认证"),
-					children: <Widget>[Padding(padding: EdgeInsets.all(20), child: Form(child: Column(children: <Widget>[
-						TextFormField(decoration: InputDecoration(hintText: "输入管理员账号"), autofocus: true),
-						TextFormField(decoration: InputDecoration(hintText: "输入密码"), obscureText: true),
+					children: <Widget>[Padding(padding: EdgeInsets.all(20), child: Form(key: _formKey, child: Column(children: <Widget>[
+						TextFormField(
+							decoration: InputDecoration(hintText: "输入管理员账号"),
+							autofocus: true,
+							onSaved: (content) {
+								_account = content;
+							},
+						),
+						TextFormField(
+							decoration: InputDecoration(hintText: "输入密码"),
+							obscureText: true,
+							onSaved: (content) {
+								_password = content;
+							},
+						),
 						Padding(padding: EdgeInsets.only(top: 16), child: FlatButton(
 							color: Theme.of(context).primaryColor,
 							child: Text("登录", style: TextStyle(color: Colors.white)),
 							onPressed: () {
-								Navigator.pop(context, global.ConfirmCancel.CONFIRMED);
+								var _form = _formKey.currentState;
+								if (!_form.validate()) {
+									return;
+								}
+								_form.save();
+								if (_account != "admin" || _password != "admin") {
+									Navigator.pop(context, global.ConfirmCancel.CANCELED);
+									Toast.show("管理员账户或密码错误！", context);
+								} else {
+									Navigator.pop(context, global.ConfirmCancel.CONFIRMED);
+								}
 							})
 						)
 					])))]
