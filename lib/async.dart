@@ -55,6 +55,10 @@ final tempHumi = RequestInfo("POST", "/api/v1/points/history", {
 	"points": [29607741, 29607742, 29607739, 29607740],
 	"time": 1
 });
+final devEventHistory = RequestInfo("POST", "/api/v1/alarms/history", {
+	"device_id": "",
+	"time_range": []
+});
 final devTypes = RequestInfo("GET", "/api/v1/dictionary/list?type=1", {});
 final devProxies = RequestInfo("GET", "/api/v1/protocols/list", {
 	"device_type": ""
@@ -236,30 +240,36 @@ Future<dynamic> getDevList() => reqTempFunc(http.post(
 
 Future<dynamic> hasAlarms() => reqTempFunc(http.get(url + getAlarms.path), (dynamic data) => data.isNotEmpty);
 
-Future<dynamic> getTempHumi(int time) {
-	return reqTempFunc(http.post(
-		url + tempHumi.path,
-		headers: {"Content-Type": "application/json"},
-		body: jsonEncode(tempHumi.chgBody("id", global.currentDevID).chgBody("time", time).body)
-	), (dynamic data) {
-		var ret = {
-			"humis": <TimeSeriesSales>[],
-			"temps": <TimeSeriesSales>[]
-		};
-		for (var d in data) {
-			DateTime dt = DateTime.parse(d["time"]);
-			for (var key in d.keys.toList()) {
-				String pname = global.protocolMapper[key];
-				if (pname == "热通道温度" || pname == "冷通道温度") {
-					ret["temps"].add(TimeSeriesSales(dt, d[key].toDouble()));
-				} else if (pname == "热通道湿度" || pname == "冷通道湿度") {
-					ret["humis"].add(TimeSeriesSales(dt, d[key].toDouble()));
-				}
+Future<dynamic> getTempHumi(int time) => reqTempFunc(http.post(
+	url + tempHumi.path,
+	headers: {"Content-Type": "application/json"},
+	body: jsonEncode(tempHumi.chgBody("id", global.currentDevID).chgBody("time", time).body)
+), (dynamic data) {
+	var ret = {
+		"humis": <TimeSeriesSales>[],
+		"temps": <TimeSeriesSales>[]
+	};
+	for (var d in data) {
+		DateTime dt = DateTime.parse(d["time"]);
+		for (var key in d.keys.toList()) {
+			String pname = global.protocolMapper[key];
+			if (pname == "热通道温度" || pname == "冷通道温度") {
+				ret["temps"].add(TimeSeriesSales(dt, d[key].toDouble()));
+			} else if (pname == "热通道湿度" || pname == "冷通道湿度") {
+				ret["humis"].add(TimeSeriesSales(dt, d[key].toDouble()));
 			}
 		}
-		return ret;
-	});
-}
+	}
+	return ret;
+});
+
+Future<dynamic> getEventHistory(DateTime begin, DateTime end) => reqTempFunc(http.post(
+	url + devEventHistory.path,
+	headers: {"Content-Type": "application/json"},
+	body: jsonEncode(devEventHistory.chgBody("device_id", global.currentDevID).chgBody("time_range", [
+		begin.toString(), end.toString()
+	]).body)
+), (dynamic data) => data.map<EventRecord>((rcd) => EventRecord.fromJSON(rcd)).toList());
 
 getDevProxyList(String devTyp) => reqTempFunc(http.get(
 	url + devProxies.chgBody("device_type", devTyp).cmbBodyAsParamIntoPath()

@@ -398,6 +398,17 @@ class MyDataTable extends StatelessWidget {
 			}
 			columnWidths[index] = FractionColumnWidth(_header[key]._width);
 		});
+//		return Scrollbar(child: ListView(children: <Widget>[
+//			SingleChildScrollView(
+//				scrollDirection: Axis.horizontal,
+//				child: Table(
+//					columnWidths: columnWidths,
+//					border: hasBorder ? TableBorder.symmetric(inside: _border) : null,
+//					defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+//					children: rows
+//				)
+//			)
+//		]));
 		return Table(
 			columnWidths: columnWidths,
 			border: hasBorder ? TableBorder.symmetric(inside: _border) : null,

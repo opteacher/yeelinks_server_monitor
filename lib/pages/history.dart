@@ -12,18 +12,12 @@ class Page extends StatefulWidget {
 class HistoryPageState extends BasePageState<Page> {
 	final ShapeBorder _noBorderRadius = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0)));
 
-	List<Map<String, String>> _historyRecords = [{
-		"level": "一级",
-		"name": "UPS",
-		"warning": "设备通训故障",
-		"meaning": "设备通训故障，链接失败",
-		"start": "2019-08-30 15:39:28",
-		"confirm": "",
-		"confirmer": "",
-		"status": "未确认"
-	}];
-	Map<String, List<Device>> _devices;
+	List<Map<String, String>> _historyRecords = [];
+	Map<String, List<Device>> _devices = {};
 	String _selType = "选择设备类型";
+	int _curPage = 1;
+	int _maxItmPerPage = 20;
+	int _numPage = 1;
 
 	@override
 	void initState() {
@@ -31,11 +25,45 @@ class HistoryPageState extends BasePageState<Page> {
 		global.refreshTimer.register("listDevicesOfHistory", TimerJob(getDevList, hdlDevices, {
 			TimerJob.PAGE_IDEN: pageId()
 		}));
+		global.refreshTimer.register("getDeviceEventHistory", TimerJob(() => getEventHistory(
+			DateTime.now().subtract(Duration(hours: 10)),
+			DateTime.now()
+		), hdlPointVals, {
+			TimerJob.PAGE_IDEN: pageId()
+		}));
 	}
 
 	@override
 	Widget build(BuildContext context) {
 		final primaryColor = Theme.of(context).primaryColor;
+		_numPage = (_historyRecords.length ~/ _maxItmPerPage).toInt() + 1;
+		List<Widget> pages = [
+			Padding(
+				padding: EdgeInsets.symmetric(horizontal: 5),
+				child: SizedBox(width: 50, child: IconButton(icon: Icon(Icons.chevron_left), onPressed: () {}))
+			)
+		];
+		for (int i = 1; i <= _numPage; i++) {
+			if (_curPage == i) {
+				pages.add(Padding(
+					padding: EdgeInsets.symmetric(horizontal: 5),
+					child: SizedBox(width: 50, child: FlatButton(child: Text(i.toString()), onPressed: null))
+				));
+			} else {
+				pages.add(Padding(
+					padding: EdgeInsets.symmetric(horizontal: 5),
+					child: SizedBox(width: 50, child: OutlineButton(child: Text(i.toString()), onPressed: () => setState(() {
+						_curPage = i;
+					})))
+				));
+			}
+		}
+		pages.add(Padding(
+			padding: EdgeInsets.symmetric(horizontal: 5),
+			child: SizedBox(width: 50, child: IconButton(icon: Icon(Icons.chevron_right), onPressed: () {}))
+		));
+		var sttIdx = (_curPage - 1) * _maxItmPerPage;
+		var endIdx = _historyRecords.length - sttIdx > _maxItmPerPage ? sttIdx + _maxItmPerPage : _historyRecords.length;
 		return Container(
 			padding: const EdgeInsets.all(2.5),
 			child: Column(children: <Widget>[
@@ -61,52 +89,62 @@ class HistoryPageState extends BasePageState<Page> {
 								shape: _noBorderRadius,
 								child: Text(_selType),
 								onPressed: () async {
-									switch (await showDialog<global.ConfirmCancel>(
+									await showDialog(
 										context: context,
-										builder: (BuildContext context) => SimpleDialog(children: <Widget>[
-											ListView(children: _devices.keys.map<Widget>((tname) => ListTile(
-												title: Text(tname),
-												onTap: () {
+										builder: (BuildContext context) {
+											List<String> types = _devices.keys.toList();
+											return SimpleDialog(children: types.map<Widget>((typ) {
+												return SimpleDialogOption(child: Text(typ), onPressed: () => setState(() {
+													_selType = typ;
 													Navigator.pop(context);
-													Toast.show(tname, context);
-												}
-											)).toList())
-										])
-									)) {
-										case global.ConfirmCancel.CONFIRMED:
-											break;
-										case global.ConfirmCancel.CANCELED:
-										default:
-									}
+												}));
+											}).toList());
+										}
+									);
 								}))
 						]),
 						Expanded(child: Container(
-							padding: EdgeInsets.all(5),
+							padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
 							decoration: BoxDecoration(
 								border: Border.all(color: Theme.of(context).primaryColor)
 							),
-							child: ListView(children: _selType != "选择设备类型" ? _devices[_selType].map<Widget>((device) => FlatButton(
-								color: Theme.of(context).primaryColor,
-								textColor: Colors.white,
-								child: Text(device.name),
-								onPressed: () {})
-							).toList() : [])
+							child: ListView(children: (_selType != "选择设备类型" && _devices.isNotEmpty ?
+								_devices[_selType].map<Widget>((device) {
+									if (global.currentDevID == device.id) {
+										return FlatButton(
+											disabledColor: primaryColor,
+											disabledTextColor: Colors.white,
+											child: Text(device.name),
+											onPressed: null);
+									} else {
+										return OutlineButton(
+											borderSide: BorderSide(color: primaryColor),
+											child: Text(device.name, style: TextStyle(color: primaryColor)),
+											onPressed: () {
+												global.currentDevID = device.id;
+											});
+									}
+								}).toList() : []
+							))
 						))
 					])),
 					Expanded(flex: 3, child: Column(children: <Widget>[
-						Padding(padding: EdgeInsets.all(10), child: MyDataTable({
-							"等级": MyDataHeader("level", 0.05),
-							"设备": MyDataHeader("name", 0.1),
-							"标题": MyDataHeader("warning", 0.15),
-							"说明": MyDataHeader("meaning", 0.25),
-							"生成时间": MyDataHeader("start"),
-							"解除时间": MyDataHeader("confirm"),
-							"解除者": MyDataHeader("confirmer", 0.1),
-							"状态": MyDataHeader("status", 0.1)
-						}, _historyRecords, vpadding: 5.0, isStriped: true, hasBorder: false,
-							headerTxtStyle: const TextStyle(fontSize: 15.0),
-							bodyTxtStyle: const TextStyle(fontSize: 15.0)
-						))
+						Padding(padding: EdgeInsets.all(10), child: Column(children: <Widget>[
+							MyDataTable({
+								"等级": MyDataHeader("level", 0.05),
+								"设备": MyDataHeader("name", 0.1),
+								"标题": MyDataHeader("warning", 0.15),
+								"说明": MyDataHeader("meaning", 0.25),
+								"生成时间": MyDataHeader("start", 0.175),
+								"解除时间": MyDataHeader("confirm", 0.175),
+								"状态": MyDataHeader("status", 0.1)
+							}, _historyRecords.isNotEmpty ? _historyRecords.sublist(sttIdx, endIdx) : [],
+								vpadding: 5.0, isStriped: true, hasBorder: false,
+								headerTxtStyle: const TextStyle(fontSize: 15.0),
+								bodyTxtStyle: const TextStyle(fontSize: 15.0)
+							),
+							Row(mainAxisAlignment: MainAxisAlignment.end, children: pages)
+						]))
 					]))
 				]))
 			])
@@ -119,13 +157,22 @@ class HistoryPageState extends BasePageState<Page> {
 	@override
 	void hdlDevices(data) => setState(() {
 		_devices.clear();
-		for (Device device in data) {
+		if (data == null || data.isEmpty) {
+			return;
+		}
+		for (var device in data) {
+			if (_devices[device.typeStr] == null) {
+				_devices[device.typeStr] = [];
+			}
 			_devices[device.typeStr].add(device);
 		}
 	});
 
 	@override
-	void hdlPointVals(dynamic data) {
-
-	}
+	void hdlPointVals(dynamic data) => setState(() {
+		_historyRecords = [];
+		for (EventRecord er in data) {
+			_historyRecords.add(er.toMap());
+		}
+	});
 }
