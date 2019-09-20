@@ -16,12 +16,11 @@ class HistoryPageState extends BasePageState<Page> {
 	Map<String, List<Device>> _devices = {};
 	String _selType = "选择设备类型";
 	int _curPage = 1;
-	int _maxItmPerPage = 20;
+	int _maxItmPerPage = 15;
 	int _numPage = 1;
 
 	@override
 	void initState() {
-		super.initState();
 		global.refreshTimer.register("listDevicesOfHistory", TimerJob(getDevList, hdlDevices, {
 			TimerJob.PAGE_IDEN: pageId()
 		}));
