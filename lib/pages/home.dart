@@ -17,10 +17,10 @@ class HomePageState extends BasePageState<Page> {
 		"热通道温": "0.0",
 		"冷通道湿": "0.0",
 		"热通道湿": "0.0",
-		"烟雾": "0",
-		"水浸": "0",
-		"前门": "0",
-		"后门": "0"
+		"烟雾": "正常",
+		"水浸": "正常",
+		"前门": "关闭",
+		"后门": "关闭"
 	};
 	double _load = 0.0;
 	double _pue = 0.0;
@@ -80,12 +80,12 @@ class HomePageState extends BasePageState<Page> {
 						),
 						DescListItem(
 							DescListItemTitle("烟        感", size: 20.0),
-							DescListItemContent("正常", blocked: true),
+							DescListItemContent(_values["烟雾"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
 							DescListItemTitle("前        门", size: 20.0),
-							DescListItemContent("关闭", blocked: true),
+							DescListItemContent(_values["前门"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 					])),
@@ -103,12 +103,12 @@ class HomePageState extends BasePageState<Page> {
 						),
 						DescListItem(
 							DescListItemTitle("水        浸", size: 20.0),
-							DescListItemContent("正常", blocked: true),
+							DescListItemContent(_values["水浸"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
 							DescListItemTitle("后        门", size: 20.0),
-							DescListItemContent("关闭", blocked: true),
+							DescListItemContent(_values["后门"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 					]))
@@ -127,9 +127,24 @@ class HomePageState extends BasePageState<Page> {
 	@override
 	void hdlDevices(data) => setState(() {
 		if (data["alarms"] != null) {
-			_eventRecords = [];
-			for (var alarm in data["alarms"]) {
-				_eventRecords.add(EventRecord.fromJSON(alarm).toMap());
+			List alarms = data["alarms"].map<EventRecord>((alarm) {
+				return EventRecord.fromJSON(alarm);
+			}).toList();
+			bool needUpdate = true;
+			if (_eventRecords.length == alarms.length) {
+				needUpdate = false;
+				for (int i = 0; i < alarms.length; i++) {
+					if (alarms[i].id.toString() != _eventRecords[i]["id"]) {
+						needUpdate = true;
+						break;
+					}
+				}
+			}
+			if (needUpdate) {
+				_eventRecords = [];
+				for (var alarm in alarms) {
+					_eventRecords.add(alarm.toMap());
+				}
 			}
 		}
 		if (data["cloud_humi"] != null) {
@@ -149,6 +164,21 @@ class HomePageState extends BasePageState<Page> {
 		}
 		if (data["pue"] != null) {
 			_pue = data["pue"].toDouble();
+		}
+		if (data["switcher"] != null) {
+			Map switcher = data["switcher"];
+			for (var pid in switcher.keys.toList()) {
+				String pname = global.protocolMapper[pid];
+				if (_values[pname] == null) {
+					continue;
+				}
+				bool sw = switcher[pid];
+				if (pname == "前门" || pname == "后门") {
+					_values[pname] = sw ? "开启" : "关闭";
+				} else {
+					_values[pname] = sw ? "正常" : "异常";
+				}
+			}
 		}
 	});
 

@@ -16,8 +16,12 @@ class HistoryPageState extends BasePageState<Page> {
 	Map<String, List<Device>> _devices = {};
 	String _selType = "选择设备类型";
 	int _curPage = 1;
-	int _maxItmPerPage = 15;
+	int _maxItmPerPage = 10;
 	int _numPage = 1;
+	int _hlfMaxPages = 5;
+	DateTime _begTime = DateTime.now().subtract(Duration(hours: 10));
+	DateTime _endTime = DateTime.now();
+	bool _showHistory = true;
 
 	@override
 	void initState() {
@@ -25,44 +29,67 @@ class HistoryPageState extends BasePageState<Page> {
 			TimerJob.PAGE_IDEN: pageId()
 		}));
 		global.refreshTimer.register("getDeviceEventHistory", TimerJob(() => getEventHistory(
-			DateTime.now().subtract(Duration(hours: 10)),
-			DateTime.now()
+			_begTime, _endTime
 		), hdlPointVals, {
 			TimerJob.PAGE_IDEN: pageId()
 		}));
+	}
+
+	List<Widget> _genPages() {
+		const pgPdg = const EdgeInsets.symmetric(horizontal: 5);
+		const btnWid = 55.0;
+		List<Widget> pages = [
+			Padding(padding: pgPdg, child: SizedBox(width: btnWid, child: OutlineButton(
+				child: Icon(Icons.chevron_left),
+				onPressed: () => setState(() {
+					if (_curPage > 1) {
+						_curPage--;
+					}
+				}))
+			))
+		];
+		int sttPage = _curPage >= _hlfMaxPages ? _curPage - _hlfMaxPages : 1;
+		if (sttPage > 1) {
+			pages.add(Padding(padding: pgPdg, child: Text("...")));
+		}
+		int endPage = _curPage < _numPage - _hlfMaxPages ? _curPage + _hlfMaxPages : _numPage;
+		for (int i = sttPage; i <= endPage; i++) {
+			if (_curPage == i) {
+				pages.add(Padding(padding: pgPdg, child: SizedBox(width: btnWid, child: FlatButton(
+					child: Text(i.toString()), onPressed: null
+				))));
+			} else {
+				pages.add(Padding(padding: pgPdg, child: SizedBox(width: btnWid, child: OutlineButton(
+					child: Text(i.toString()),
+					onPressed: () => setState(() {
+						_curPage = i;
+					})
+				))));
+			}
+		}
+		if (endPage < _numPage) {
+			pages.add(Padding(padding: pgPdg, child: Text("...")));
+		}
+		pages.add(Padding(
+			padding: pgPdg,
+			child: SizedBox(width: btnWid, child: OutlineButton(
+				child: Icon(Icons.chevron_right),
+				onPressed: () => setState(() {
+					if (_curPage < _numPage) {
+						_curPage++;
+					}
+				}))
+			)));
+		return pages;
 	}
 
 	@override
 	Widget build(BuildContext context) {
 		final primaryColor = Theme.of(context).primaryColor;
 		_numPage = (_historyRecords.length ~/ _maxItmPerPage).toInt() + 1;
-		List<Widget> pages = [
-			Padding(
-				padding: EdgeInsets.symmetric(horizontal: 5),
-				child: SizedBox(width: 50, child: IconButton(icon: Icon(Icons.chevron_left), onPressed: () {}))
-			)
-		];
-		for (int i = 1; i <= _numPage; i++) {
-			if (_curPage == i) {
-				pages.add(Padding(
-					padding: EdgeInsets.symmetric(horizontal: 5),
-					child: SizedBox(width: 50, child: FlatButton(child: Text(i.toString()), onPressed: null))
-				));
-			} else {
-				pages.add(Padding(
-					padding: EdgeInsets.symmetric(horizontal: 5),
-					child: SizedBox(width: 50, child: OutlineButton(child: Text(i.toString()), onPressed: () => setState(() {
-						_curPage = i;
-					})))
-				));
-			}
-		}
-		pages.add(Padding(
-			padding: EdgeInsets.symmetric(horizontal: 5),
-			child: SizedBox(width: 50, child: IconButton(icon: Icon(Icons.chevron_right), onPressed: () {}))
-		));
 		var sttIdx = (_curPage - 1) * _maxItmPerPage;
 		var endIdx = _historyRecords.length - sttIdx > _maxItmPerPage ? sttIdx + _maxItmPerPage : _historyRecords.length;
+		var dispRecords = _historyRecords.isNotEmpty ? _historyRecords.sublist(sttIdx, endIdx) : <Map<String, String>>[];
 		return Container(
 			padding: const EdgeInsets.all(2.5),
 			child: Column(children: <Widget>[
@@ -119,15 +146,30 @@ class HistoryPageState extends BasePageState<Page> {
 										return OutlineButton(
 											borderSide: BorderSide(color: primaryColor),
 											child: Text(device.name, style: TextStyle(color: primaryColor)),
-											onPressed: () {
+											onPressed: () => setState(() {
 												global.currentDevID = device.id;
-											});
+												_curPage = 1;
+											}));
 									}
 								}).toList() : []
 							))
 						))
 					])),
 					Expanded(flex: 3, child: Column(children: <Widget>[
+						Row(children: <Widget>[
+							FlatButton(child: Text(_begTime.toString()), onPressed: () {
+
+							}),
+							FlatButton(child: Text(_endTime.toString()), onPressed: () {
+
+							}),
+							ListTile(
+								title: Text(_showHistory ? "历史数据" : "实时数据"),
+								trailing: Switch(onChanged: (bool value) => setState(() {
+									_showHistory = !_showHistory;
+								}), value: _showHistory),
+							)
+						]),
 						Padding(padding: EdgeInsets.all(10), child: Column(children: <Widget>[
 							MyDataTable({
 								"等级": MyDataHeader("level", 0.05),
@@ -137,12 +179,12 @@ class HistoryPageState extends BasePageState<Page> {
 								"生成时间": MyDataHeader("start", 0.175),
 								"解除时间": MyDataHeader("confirm", 0.175),
 								"状态": MyDataHeader("status", 0.1)
-							}, _historyRecords.isNotEmpty ? _historyRecords.sublist(sttIdx, endIdx) : [],
+							}, dispRecords,
 								vpadding: 5.0, isStriped: true, hasBorder: false,
 								headerTxtStyle: const TextStyle(fontSize: 15.0),
 								bodyTxtStyle: const TextStyle(fontSize: 15.0)
 							),
-							Row(mainAxisAlignment: MainAxisAlignment.end, children: pages)
+							Row(mainAxisAlignment: MainAxisAlignment.end, children: _genPages())
 						]))
 					]))
 				]))

@@ -10,9 +10,7 @@ class Page extends StatefulWidget {
 
 class ElectronPageState extends BasePageState<Page> {
 	List<Device> _pdus = [];
-	Device _selPDU;
-	Device _mainEle;
-
+	String _mainEleID = "";
 	Map<String, String> _eleVals = {
 		"电压": "0.0",
 		"电流": "0.0",
@@ -22,12 +20,12 @@ class ElectronPageState extends BasePageState<Page> {
 		"输入频率": "0.0"
 	};
 	Map<String, String> _pduVals = {
-		"输出电压": "0.0",
-		"输出电流": "0.0",
-		"有功功率": "0.0",
-		"功率因素": "0.0",
-		"输出频率": "0.0",
-		"有功电能": "0.0"
+		"PDU-输出电压": "0.0",
+		"PDU-输出电流": "0.0",
+		"PDU-有功功率": "0.0",
+		"PDU-功率因素": "0.0",
+		"PDU-输出频率": "0.0",
+		"PDU-有功电能": "0.0"
 	};
 
 	@override
@@ -40,7 +38,7 @@ class ElectronPageState extends BasePageState<Page> {
 				decoration: BoxDecoration(
 					border: Border.all(color: Theme.of(context).primaryColor),
 				),
-				child: ListView(children: _pdus.map<Widget>((pdu) => (_selPDU != null && _selPDU.id == pdu.id ? FlatButton(
+				child: ListView(children: _pdus.map<Widget>((pdu) => (global.currentDevID == pdu.id ? FlatButton(
 					shape: RoundedRectangleBorder(
 						side: BorderSide(color: primaryColor),
 						borderRadius: BorderRadius.all(Radius.circular(3))
@@ -51,11 +49,11 @@ class ElectronPageState extends BasePageState<Page> {
 					textColor: primaryColor,
 					borderSide: BorderSide(color: primaryColor),
 					child: Text(pdu.name), onPressed: () => setState(() {
-						_selPDU = pdu;
-						if (_mainEle != null) {
-							global.idenDevs = [_mainEle.id];
+						global.currentDevID = pdu.id;
+						if (_mainEleID.isNotEmpty) {
+							global.idenDevs = [_mainEleID];
 						}
-						global.idenDevs.add(_selPDU.id);
+						global.idenDevs.add(global.currentDevID);
 						global.refreshTimer.refreshPointSensor();
 					}))
 				)).toList())
@@ -89,26 +87,23 @@ class ElectronPageState extends BasePageState<Page> {
 						),
 					]))
 				]))),
-				DataCard(title: "PDU", tailing: _selPDU != null ? OutlineButton(
-					child: Text(_selPDU.name, style: TextStyle(color: Colors.grey[600])),
-					onPressed: null
-				) : Text(""), child: Row(children: <Widget>[
+				DataCard(title: "PDU", child: Row(children: <Widget>[
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
 							DescListItemTitle("输出电压"),
-							DescListItemContent(_pduVals["输出电压"], horizontal: 50.0),
+							DescListItemContent(_pduVals["PDU-输出电压"], horizontal: 50.0),
 							suffix: DescListItemSuffix(text: "V"),
 							horizontal: 50.0
 						),
 						DescListItem(
 							DescListItemTitle("输出电流"),
-							DescListItemContent(_pduVals["输出电流"], horizontal: 50.0),
+							DescListItemContent(_pduVals["PDU-输出电流"], horizontal: 50.0),
 							suffix: DescListItemSuffix(text: "A"),
 							horizontal: 50.0
 						),
 						DescListItem(
 							DescListItemTitle("有功功率"),
-							DescListItemContent(_pduVals["有功功率"], horizontal: 50.0),
+							DescListItemContent(_pduVals["PDU-有功功率"], horizontal: 50.0),
 							suffix: DescListItemSuffix(text: "W"),
 							horizontal: 50.0
 						),
@@ -116,18 +111,18 @@ class ElectronPageState extends BasePageState<Page> {
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
 							DescListItemTitle("功率因素"),
-							DescListItemContent(_pduVals["功率因素"], horizontal: 50.0),
+							DescListItemContent(_pduVals["PDU-功率因素"], horizontal: 50.0),
 							horizontal: 50.0
 						),
 						DescListItem(
 							DescListItemTitle("输出频率"),
-							DescListItemContent(_pduVals["输出频率"], horizontal: 50.0),
+							DescListItemContent(_pduVals["PDU-输出频率"], horizontal: 50.0),
 							suffix: DescListItemSuffix(text: "Hz"),
 							horizontal: 50.0
 						),
 						DescListItem(
 							DescListItemTitle("有功电能"),
-							DescListItemContent(_pduVals["有功电能"], horizontal: 50.0),
+							DescListItemContent(_pduVals["PDU-有功电能"], horizontal: 50.0),
 							suffix: DescListItemSuffix(text: "kWh"),
 							horizontal: 50.0
 						),
@@ -145,25 +140,25 @@ class ElectronPageState extends BasePageState<Page> {
 		bool manualRefresh = false;
 		global.idenDevs = [];
 		if (data["ele"] != null) {
-			_mainEle = Device.fromJSON(data["ele"]);
-			global.idenDevs.add(_mainEle.id);
+			_mainEleID = Device.fromJSON(data["ele"]).id;
+			global.idenDevs.add(_mainEleID);
 			manualRefresh = true;
 		} else {
-			_mainEle = null;
+			_mainEleID = "";
 		}
+
 		if (data["pdu"] == null) {
 			return;
 		}
-
 		_pdus = [];
 		for (var pdu in data["pdu"]) {
 			_pdus.add(Device.fromJSON(pdu));
 		}
-		if (_selPDU == null && _pdus.isNotEmpty) {
-			_selPDU = _pdus[0];
-			global.idenDevs.add(_selPDU.id);
+		if (global.currentDevID.isEmpty && _pdus.isNotEmpty) {
+			global.currentDevID = _pdus[0].id;
 			manualRefresh = true;
 		}
+		global.idenDevs.add(global.currentDevID);
 		if (manualRefresh) {
 			global.refreshTimer.refreshPointSensor();
 		}
@@ -171,16 +166,16 @@ class ElectronPageState extends BasePageState<Page> {
 
 	@override
 	void hdlPointVals(dynamic data) => setState(() {
-		if (_mainEle == null || _selPDU == null) {
+		if (_mainEleID.isEmpty || global.currentDevID.isEmpty) {
 			return;
 		}
 		for (PointVal pv in data) {
-			if (pv.deviceId == _mainEle.id) {
+			if (pv.deviceId == _mainEleID) {
 				String poiName = global.protocolMapper[pv.id];
 				if (_eleVals[poiName] != null) {
 					_eleVals[poiName] = pv.value.toStringAsFixed(2);
 				}
-			} else if (pv.deviceId == _selPDU.id) {
+			} else if (pv.deviceId == global.currentDevID) {
 				String poiName = global.protocolMapper[pv.id];
 				if (_pduVals[poiName] != null) {
 					_pduVals[poiName] = pv.value.toStringAsFixed(2);

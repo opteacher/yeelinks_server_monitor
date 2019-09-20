@@ -13,6 +13,7 @@ class UpsPageState extends BasePageState<Page> {
 
 	bool _showDetail = false;
 	Map<String, String> _values = {
+		"UPS负载率": "0.0",
 		"输入电压": "0.0",
 		"输入频率": "0.0",
 		"输出电压": "0.0",
@@ -76,7 +77,14 @@ class UpsPageState extends BasePageState<Page> {
 				Expanded(child: Row(children: <Widget>[
 					DataCard(title: "UPS负载率", child: Padding(
 						padding: EdgeInsets.only(top: 20),
-						child: Instrument(radius: 120.0, numScales: 10, max: 120.0, maxScale: 96, suffix: "%")
+						child: Instrument(
+							radius: 120.0,
+							numScales: 10,
+							max: 120.0,
+							maxScale: 96,
+							suffix: "%",
+							value: double.parse(_values["UPS负载率"])
+						)
 					)),
 					DataCard(title: "UPS状态", tailing: IconButton(icon: Icon(Icons.info_outline, color: Theme.of(context).primaryColor), onPressed: () {
 						setState(() {

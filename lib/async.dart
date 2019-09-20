@@ -133,6 +133,7 @@ class PointVal {
 }
 
 class EventRecord {
+	final int _id;
 	final String _name;
 	final String _warning;
 	final String _meaning;
@@ -141,15 +142,16 @@ class EventRecord {
 	final String _confirm;
 	final String _status;
 
-	EventRecord(this._name, this._warning, this._meaning, this._level, this._start, this._confirm, this._status);
+	EventRecord(this._id, this._name, this._warning, this._meaning, this._level, this._start, this._confirm, this._status);
 
-	EventRecord.fromJSON(Map json):
+	EventRecord.fromJSON(Map json): _id = json["id"],
 		_name = json["device_name"], _warning = json["title"],
 		_meaning = json["content"], _level = json["level"].toString(),
 		_start = json["time"].toString(), _confirm = json["check_time"].toString(),
 		_status = json["status"].toString();
 
 	Map<String, String> toMap() => {
+		"id": _id.toString(),
 		"name": _name,
 		"warning": _warning,
 		"meaning": _meaning,
@@ -159,6 +161,7 @@ class EventRecord {
 		"status": _status
 	};
 
+	int get id => _id;
 	String get start => _start;
 	String get level => _level;
 	String get meaning => _meaning;
