@@ -200,6 +200,7 @@ class HistoryPageState extends BasePageState<Page> {
 								_showHistory = !_showHistory;
 								global.refreshTimer.getJob("getDeviceEventHistory").doActive(_showHistory);
 								global.refreshTimer.getJob("getDeviceEventActive").doActive(!_showHistory);
+								_curPage = 1;
 							}), value: _showHistory)
 						]),
 						Padding(padding: EdgeInsets.all(10), child: Column(children: <Widget>[
