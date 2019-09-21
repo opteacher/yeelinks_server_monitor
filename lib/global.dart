@@ -45,6 +45,7 @@ final Map<String, ComponentInfo> componentInfos = {
 	"history":  ComponentInfo("history", "历史", Dashboard(history.Page()), 7)
 };
 void toIdenPage(BuildContext context, String pid) {
+	currentDevID = "";
 	Navigator.push(context, PageSwitchRoute(componentInfos[pid].page));
 }
 final RefreshTimer refreshTimer = RefreshTimer();

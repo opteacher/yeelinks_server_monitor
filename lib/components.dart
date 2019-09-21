@@ -461,8 +461,15 @@ class TimerJob {
 	final void Function(dynamic) _callback;
 	final Map<String, String> _conditions;
 	static const String PAGE_IDEN = "page_iden";
+	static const String ACTV_IDEN = "active_iden";
 
 	TimerJob(this._job, this._callback, [this._conditions = const <String, String>{}]);
+
+	doActive(bool active) {
+		if (_conditions[ACTV_IDEN] != null) {
+			_conditions[ACTV_IDEN] = active ? "1" : "";
+		}
+	}
 }
 
 class RefreshTimer {
@@ -503,6 +510,11 @@ class RefreshTimer {
 					return;
 				}
 			}
+			if (job._conditions[TimerJob.ACTV_IDEN] != null) {
+				if (job._conditions[TimerJob.ACTV_IDEN].isEmpty) {
+					return;
+				}
+			}
 			if (_idenPrefix.isNotEmpty) {
 				if (!id.startsWith(_idenPrefix)) {
 					return;
@@ -527,6 +539,8 @@ class RefreshTimer {
 	}
 
 	void cancel() => _timer.cancel();
+
+	TimerJob getJob(String iden) => _jobs[iden];
 }
 
 class PageSwitchRoute extends PageRouteBuilder {

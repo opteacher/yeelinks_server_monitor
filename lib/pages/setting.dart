@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:yeelinks/async.dart';
 import '../components.dart';
 import '../global.dart' as global;
@@ -38,10 +39,13 @@ class SettingPageState extends BasePageState<Page> {
 	List<Widget> _genDevCards() {
 		final textColor = Colors.grey[600];
 		final primaryColor = Theme.of(context).primaryColor;
+		final loadBtnCtt = (color) => Padding(padding: EdgeInsets.symmetric(vertical: 10),
+			child: SizedBox(width: 80, child: SpinKitWave(size: 25, color: color))
+		);
 		return _devices.map<Widget>((device) => Container(
 			padding: EdgeInsets.symmetric(vertical: 50),
 			decoration: BoxDecoration(
-				border: Border.all(color: Theme.of(context).primaryColor)
+				border: Border.all(color: primaryColor)
 			),
 			child: Column(children: <Widget>[
 				Text(device.name, style: TextStyle(fontSize: 30, color: textColor)),
@@ -49,15 +53,25 @@ class SettingPageState extends BasePageState<Page> {
 				Divider(color:Colors.white, height: 10),
 				device.status == 1 ? OutlineButton(
 					borderSide: BorderSide(color: primaryColor),
-					child: Text("关闭", style: TextStyle(fontSize: 10, color: primaryColor)),
-					onPressed: () {
-
-					}) : FlatButton(
+					child: device.loading ? loadBtnCtt(primaryColor) : Text("关闭", style: TextStyle(fontSize: 10, color: primaryColor)),
+					onPressed: !device.loading ? () async {
+						setState(() {
+							device.loading = true;
+						});
+						await turnOnOffDev(device.id, DEV_OFF);
+						device.loading = false;
+					} : () {}
+				) : FlatButton(
 					color: primaryColor,
-					child: Text("开启", style: TextStyle(fontSize: 10, color: Colors.white)),
-					onPressed: () {
-
-					})
+					child: device.loading ? loadBtnCtt(Colors.white) : Text("开启", style: TextStyle(fontSize: 10, color: Colors.white)),
+					onPressed: !device.loading ? () async {
+						setState(() {
+							device.loading = true;
+						});
+						await turnOnOffDev(device.id, DEV_ON);
+						device.loading = false;
+					} : () {}
+				),
 			])
 		)).toList();
 	}

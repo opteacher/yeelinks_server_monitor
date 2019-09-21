@@ -59,6 +59,15 @@ final devEventHistory = RequestInfo("POST", "/api/v1/alarms/history", {
 	"device_id": "",
 	"time_range": []
 });
+final devEventActive = RequestInfo("GET", "/api/v1/alarms/active", {
+	"device_id": ""
+});
+final _turnOnOffDev = RequestInfo("PUT", "/api/v1/devices/update", {
+	"id": "",
+	"status": -1
+});
+const DEV_ON = 1;
+const DEV_OFF = 2;
 final devTypes = RequestInfo("GET", "/api/v1/dictionary/list?type=1", {});
 final devProxies = RequestInfo("GET", "/api/v1/protocols/list", {
 	"device_type": ""
@@ -92,6 +101,7 @@ class Device {
 	double _temp = 0.0;
 	double _humi = 0.0;
 	int _status;
+	bool _loading = false;
 
 	Device.fromJSON(Map json):
 		_id = json["id"], _name = json["name"], _type = json["type"],
@@ -112,6 +122,10 @@ class Device {
 		_temp = value;
 	}
 	int get status => _status;
+	bool get loading => _loading;
+	set loading(bool value) {
+		_loading = value;
+	}
 }
 
 class PointVal {
@@ -273,6 +287,16 @@ Future<dynamic> getEventHistory(DateTime begin, DateTime end) => reqTempFunc(htt
 		begin.toString(), end.toString()
 	]).body)
 ), (dynamic data) => data.map<EventRecord>((rcd) => EventRecord.fromJSON(rcd)).toList());
+
+Future<dynamic> getEventActive() => reqTempFunc(http.get(
+	url + devEventActive.chgBody("device_id", global.currentDevID).cmbBodyAsParamIntoPath()
+), (dynamic data) => data.map<EventRecord>((rcd) => EventRecord.fromJSON(rcd)).toList());
+
+turnOnOffDev(String devID, int status) => reqTempFunc(http.put(
+	url + _turnOnOffDev.path,
+	headers: {"Content-Type": "application/json"},
+	body: jsonEncode(_turnOnOffDev.chgBody("id", devID).chgBody("status", status).body)
+), (dynamic data) => data);
 
 getDevProxyList(String devTyp) => reqTempFunc(http.get(
 	url + devProxies.chgBody("device_type", devTyp).cmbBodyAsParamIntoPath()

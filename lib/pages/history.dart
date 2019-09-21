@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:toast/toast.dart';
 import 'package:yeelinks/async.dart';
 import 'package:yeelinks/components.dart';
@@ -10,7 +11,8 @@ class Page extends StatefulWidget {
 }
 
 class HistoryPageState extends BasePageState<Page> {
-	final ShapeBorder _noBorderRadius = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0)));
+	final _noBorderRadius = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0)));
+	final dtFmter = DateFormat("yyyy-MM-dd");
 
 	List<Map<String, String>> _historyRecords = [];
 	Map<String, List<Device>> _devices = {};
@@ -18,8 +20,8 @@ class HistoryPageState extends BasePageState<Page> {
 	int _curPage = 1;
 	int _maxItmPerPage = 10;
 	int _numPage = 1;
-	int _hlfMaxPages = 5;
-	DateTime _begTime = DateTime.now().subtract(Duration(hours: 10));
+	int _hlfMaxPages = 3;
+	DateTime _begTime = DateTime.now().subtract(Duration(days: 5));
 	DateTime _endTime = DateTime.now();
 	bool _showHistory = true;
 
@@ -28,10 +30,15 @@ class HistoryPageState extends BasePageState<Page> {
 		global.refreshTimer.register("listDevicesOfHistory", TimerJob(getDevList, hdlDevices, {
 			TimerJob.PAGE_IDEN: pageId()
 		}));
-		global.refreshTimer.register("getDeviceEventHistory", TimerJob(() => getEventHistory(
-			_begTime, _endTime
-		), hdlPointVals, {
-			TimerJob.PAGE_IDEN: pageId()
+		global.refreshTimer.register("getDeviceEventHistory", TimerJob(() {
+			return getEventHistory(_begTime, _endTime);
+		}, hdlPointVals, {
+			TimerJob.PAGE_IDEN: pageId(),
+			TimerJob.ACTV_IDEN: "1"
+		}));
+		global.refreshTimer.register("getDeviceEventActive", TimerJob(getEventActive, hdlPointVals, {
+			TimerJob.PAGE_IDEN: pageId(),
+			TimerJob.ACTV_IDEN: ""
 		}));
 	}
 
@@ -41,18 +48,16 @@ class HistoryPageState extends BasePageState<Page> {
 		List<Widget> pages = [
 			Padding(padding: pgPdg, child: SizedBox(width: btnWid, child: OutlineButton(
 				child: Icon(Icons.chevron_left),
-				onPressed: () => setState(() {
-					if (_curPage > 1) {
-						_curPage--;
-					}
-				}))
+				onPressed: _curPage > 1 ? () => setState(() {
+					_curPage--;
+				}) : null)
 			))
 		];
-		int sttPage = _curPage >= _hlfMaxPages ? _curPage - _hlfMaxPages : 1;
+		int sttPage = _curPage > _hlfMaxPages ? _curPage - _hlfMaxPages : 1;
 		if (sttPage > 1) {
 			pages.add(Padding(padding: pgPdg, child: Text("...")));
 		}
-		int endPage = _curPage < _numPage - _hlfMaxPages ? _curPage + _hlfMaxPages : _numPage;
+		int endPage = _curPage < _numPage - _hlfMaxPages - 1 ? _curPage + _hlfMaxPages : _numPage;
 		for (int i = sttPage; i <= endPage; i++) {
 			if (_curPage == i) {
 				pages.add(Padding(padding: pgPdg, child: SizedBox(width: btnWid, child: FlatButton(
@@ -74,11 +79,9 @@ class HistoryPageState extends BasePageState<Page> {
 			padding: pgPdg,
 			child: SizedBox(width: btnWid, child: OutlineButton(
 				child: Icon(Icons.chevron_right),
-				onPressed: () => setState(() {
-					if (_curPage < _numPage) {
-						_curPage++;
-					}
-				}))
+				onPressed: _curPage < _numPage ? () => setState(() {
+					_curPage++;
+				}) : null)
 			)));
 		return pages;
 	}
@@ -155,20 +158,49 @@ class HistoryPageState extends BasePageState<Page> {
 							))
 						))
 					])),
-					Expanded(flex: 3, child: Column(children: <Widget>[
+					Expanded(flex: 3, child: Padding(padding: EdgeInsets.only(left: 5), child: Column(children: <Widget>[
 						Row(children: <Widget>[
-							FlatButton(child: Text(_begTime.toString()), onPressed: () {
-
-							}),
-							FlatButton(child: Text(_endTime.toString()), onPressed: () {
-
-							}),
-							ListTile(
-								title: Text(_showHistory ? "历史数据" : "实时数据"),
-								trailing: Switch(onChanged: (bool value) => setState(() {
-									_showHistory = !_showHistory;
-								}), value: _showHistory),
-							)
+							OutlineButton(
+								borderSide: BorderSide(color: primaryColor),
+								child: Text(dtFmter.format(_begTime), style: TextStyle(color: primaryColor)),
+								onPressed: () async {
+									DateTime pkTime = await showDatePicker(
+										context: context,
+										initialDate: _begTime,
+										firstDate: DateTime(2000),
+										lastDate: DateTime(2050)
+									);
+									if (pkTime != null) {
+										setState(() {
+											_begTime = pkTime;
+										});
+									}
+								}
+							),
+							Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text("-")),
+							OutlineButton(
+								borderSide: BorderSide(color: primaryColor),
+								child: Text(dtFmter.format(_endTime), style: TextStyle(color: primaryColor)),
+								onPressed: () async {
+									DateTime pkTime = await showDatePicker(
+										context: context,
+										initialDate: _endTime,
+										firstDate: DateTime(2000),
+										lastDate: DateTime(2050)
+									);
+									if (pkTime != null) {
+										setState(() {
+											_endTime = pkTime;
+										});
+									}
+								}
+							),
+							Padding(padding: EdgeInsets.only(left: 10), child: Text(_showHistory ? "历史数据" : "实时数据")),
+							Switch(activeColor: primaryColor, onChanged: (bool value) => setState(() {
+								_showHistory = !_showHistory;
+								global.refreshTimer.getJob("getDeviceEventHistory").doActive(_showHistory);
+								global.refreshTimer.getJob("getDeviceEventActive").doActive(!_showHistory);
+							}), value: _showHistory)
 						]),
 						Padding(padding: EdgeInsets.all(10), child: Column(children: <Widget>[
 							MyDataTable({
@@ -186,7 +218,7 @@ class HistoryPageState extends BasePageState<Page> {
 							),
 							Row(mainAxisAlignment: MainAxisAlignment.end, children: _genPages())
 						]))
-					]))
+					])))
 				]))
 			])
 		);
