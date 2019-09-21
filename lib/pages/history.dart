@@ -4,6 +4,7 @@ import 'package:toast/toast.dart';
 import 'package:yeelinks/async.dart';
 import 'package:yeelinks/components.dart';
 import '../global.dart' as global;
+import 'package:charts_flutter/flutter.dart' as charts;
 
 class Page extends StatefulWidget {
 	@override
@@ -12,9 +13,9 @@ class Page extends StatefulWidget {
 
 class HistoryPageState extends BasePageState<Page> {
 	final _noBorderRadius = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0)));
-	final dtFmter = DateFormat("yyyy-MM-dd");
 
-	List<Map<String, String>> _historyRecords = [];
+	bool _historyPanel = true;
+	List<Map<String, String>> _events = [];
 	Map<String, List<Device>> _devices = {};
 	String _selType = "选择设备类型";
 	int _curPage = 1;
@@ -24,6 +25,9 @@ class HistoryPageState extends BasePageState<Page> {
 	DateTime _begTime = DateTime.now().subtract(Duration(days: 5));
 	DateTime _endTime = DateTime.now();
 	bool _showHistory = true;
+	List<DevPoint> _devPoints = [];
+	List<TimeSeriesSales> _poiVals = [TimeSeriesSales(DateTime.now(), 0)];
+	int _selPoi = 0;
 
 	@override
 	void initState() {
@@ -32,11 +36,17 @@ class HistoryPageState extends BasePageState<Page> {
 		}));
 		global.refreshTimer.register("getDeviceEventHistory", TimerJob(() {
 			return getEventHistory(_begTime, _endTime);
-		}, hdlPointVals, {
+		}, hdlEvents, {
 			TimerJob.PAGE_IDEN: pageId(),
 			TimerJob.ACTV_IDEN: "1"
 		}));
-		global.refreshTimer.register("getDeviceEventActive", TimerJob(getEventActive, hdlPointVals, {
+		global.refreshTimer.register("getDeviceEventActive", TimerJob(getEventActive, hdlEvents, {
+			TimerJob.PAGE_IDEN: pageId(),
+			TimerJob.ACTV_IDEN: ""
+		}));
+		global.refreshTimer.register("getDevicePointHistory", TimerJob(() {
+			return getDevPoiHistory([_selPoi], _begTime, _endTime);
+		}, hdlPointVals, {
 			TimerJob.PAGE_IDEN: pageId(),
 			TimerJob.ACTV_IDEN: ""
 		}));
@@ -86,28 +96,162 @@ class HistoryPageState extends BasePageState<Page> {
 		return pages;
 	}
 
+	List<Widget> _genCompRdoGrp() {
+		return _devPoints.map<Widget>((poi) => RadioListTile(
+			activeColor: Theme.of(context).primaryColor,
+			title: Text(poi.name, style: TextStyle(color: Colors.grey[600])),
+			value: poi.poiID,
+			groupValue: _selPoi,
+			onChanged: (int value) {
+				setState(() { _selPoi = value; });
+				
+			}
+		)).toList();
+	}
+
+	Widget _genToolbar() {
+		final primaryColor = Theme.of(context).primaryColor;
+		return Row(children: <Widget>[
+			OutlineButton(
+				borderSide: BorderSide(color: primaryColor),
+				child: Text(global.dtFmter.format(_begTime), style: TextStyle(color: primaryColor)),
+				onPressed: () async {
+					DateTime pkTime = await showDatePicker(
+						context: context,
+						initialDate: _begTime,
+						firstDate: DateTime(2000),
+						lastDate: DateTime(2050)
+					);
+					if (pkTime != null) {
+						setState(() {
+							_begTime = pkTime;
+						});
+					}
+				}
+			),
+			Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text("-")),
+			OutlineButton(
+				borderSide: BorderSide(color: primaryColor),
+				child: Text(global.dtFmter.format(_endTime), style: TextStyle(color: primaryColor)),
+				onPressed: () async {
+					DateTime pkTime = await showDatePicker(
+						context: context,
+						initialDate: _endTime,
+						firstDate: DateTime(2000),
+						lastDate: DateTime(2050)
+					);
+					if (pkTime != null) {
+						setState(() {
+							_endTime = pkTime;
+						});
+					}
+				}
+			),
+			_historyPanel ? Row(children: <Widget>[
+				Padding(padding: EdgeInsets.only(left: 10), child: Text(_showHistory ? "历史数据" : "实时数据")),
+				Switch(activeColor: primaryColor, onChanged: (bool value) => setState(() {
+					_showHistory = !_showHistory;
+					global.refreshTimer.getJob("getDeviceEventHistory").doActive(_showHistory);
+					global.refreshTimer.getJob("getDeviceEventActive").doActive(!_showHistory);
+					_curPage = 1;
+				}), value: _showHistory)
+			]) : Expanded(child: Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
+				Text("*点位栏可滚动", style: TextStyle(color: primaryColor))
+			]))
+		]);
+	}
+
 	@override
 	Widget build(BuildContext context) {
 		final primaryColor = Theme.of(context).primaryColor;
-		_numPage = (_historyRecords.length ~/ _maxItmPerPage).toInt() + 1;
+		_numPage = (_events.length ~/ _maxItmPerPage).toInt() + 1;
 		var sttIdx = (_curPage - 1) * _maxItmPerPage;
-		var endIdx = _historyRecords.length - sttIdx > _maxItmPerPage ? sttIdx + _maxItmPerPage : _historyRecords.length;
-		var dispRecords = _historyRecords.isNotEmpty ? _historyRecords.sublist(sttIdx, endIdx) : <Map<String, String>>[];
+		var endIdx = _events.length - sttIdx > _maxItmPerPage ? sttIdx + _maxItmPerPage : _events.length;
+		var dispRecords = _events.isNotEmpty ? _events.sublist(sttIdx, endIdx) : <Map<String, String>>[];
+		List<Widget> subPanel = [_genToolbar()];
+		if (_historyPanel) {
+			subPanel.addAll([
+				MyDataTable({
+					"等级": MyDataHeader("level", 0.05),
+					"设备": MyDataHeader("name", 0.1),
+					"标题": MyDataHeader("warning", 0.15),
+					"说明": MyDataHeader("meaning", 0.25),
+					"生成时间": MyDataHeader("start", 0.175),
+					"解除时间": MyDataHeader("confirm", 0.175),
+					"状态": MyDataHeader("status", 0.1)
+				}, dispRecords,
+					vpadding: 5.0, isStriped: true, hasBorder: false,
+					headerTxtStyle: const TextStyle(fontSize: 15.0),
+					bodyTxtStyle: const TextStyle(fontSize: 15.0)
+				),
+				Row(mainAxisAlignment: MainAxisAlignment.end, children: _genPages())
+			]);
+		} else {
+			subPanel.addAll([
+				Container(height: 150, decoration: BoxDecoration(
+					border: Border.all(color: primaryColor),
+				), child: GridView.count(
+					crossAxisCount: 4,
+					childAspectRatio: 5,
+					children: _genCompRdoGrp(),
+				)),
+				Flexible(child: Padding(padding: EdgeInsets.all(10), child: charts.TimeSeriesChart(
+					[
+						charts.Series<TimeSeriesSales, DateTime>(
+							id: "Sales",
+							colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+							domainFn: (TimeSeriesSales sales, _) => sales.time,
+							measureFn: (TimeSeriesSales sales, _) => sales.sales,
+							data: _poiVals,
+						)
+					],
+					animate: false,
+					dateTimeFactory: const charts.LocalDateTimeFactory(),
+				)))
+			]);
+		}
 		return Container(
 			padding: const EdgeInsets.all(2.5),
 			child: Column(children: <Widget>[
 				Row(children: <Widget>[
-					Expanded(child: Container(
+					_historyPanel ? Expanded(child: Container(
 						padding: EdgeInsets.symmetric(vertical: 8),
 						color: primaryColor,
 						child: Center(child: Text("历史警告", style: TextStyle(color: Colors.white))),
-					)),
-					Expanded(child: OutlineButton(
+					)) : Expanded(child: OutlineButton(
+						borderSide: BorderSide(color: primaryColor),
+						textColor: primaryColor,
+						shape: _noBorderRadius,
+						child: Text("历史警告"),
+						onPressed: () => setState(() {
+							_historyPanel = true;
+							global.refreshTimer.getJob("getDevicePointHistory").doActive(false);
+						}))
+					),
+					_historyPanel ? Expanded(child: OutlineButton(
 						borderSide: BorderSide(color: primaryColor),
 						textColor: primaryColor,
 						shape: _noBorderRadius,
 						child: Text("历史数据"),
-						onPressed: () {}))
+						onPressed: () async {
+							List<DevPoint> points = [];
+							if (global.currentDevID.isNotEmpty) {
+								ResponseInfo ri = await getDevPoints();
+								if (ri.data != null) {
+									points = ri.data;
+								}
+							}
+							setState(() {
+								_devPoints = points;
+								_historyPanel = false;
+								global.refreshTimer.getJob("getDevicePointHistory").doActive(true);
+							});
+						})
+					) : Expanded(child: Container(
+						padding: EdgeInsets.symmetric(vertical: 8),
+						color: primaryColor,
+						child: Center(child: Text("历史数据", style: TextStyle(color: Colors.white))),
+					))
 				]),
 				Expanded(child: Row(children: <Widget>[
 					Expanded(child: Column(children: <Widget>[
@@ -144,82 +288,28 @@ class HistoryPageState extends BasePageState<Page> {
 											disabledColor: primaryColor,
 											disabledTextColor: Colors.white,
 											child: Text(device.name),
-											onPressed: null);
+											onPressed: null
+										);
 									} else {
 										return OutlineButton(
 											borderSide: BorderSide(color: primaryColor),
 											child: Text(device.name, style: TextStyle(color: primaryColor)),
-											onPressed: () => setState(() {
+											onPressed: () async {
 												global.currentDevID = device.id;
-												_curPage = 1;
-											}));
+												ResponseInfo ri = await getDevPoints();
+												setState(() {
+													_curPage = 1;
+													_devPoints = ri.data != null ? ri.data : [];
+													_poiVals = [];
+												});
+											}
+										);
 									}
 								}).toList() : []
 							))
 						))
 					])),
-					Expanded(flex: 3, child: Padding(padding: EdgeInsets.only(left: 5), child: Column(children: <Widget>[
-						Row(children: <Widget>[
-							OutlineButton(
-								borderSide: BorderSide(color: primaryColor),
-								child: Text(dtFmter.format(_begTime), style: TextStyle(color: primaryColor)),
-								onPressed: () async {
-									DateTime pkTime = await showDatePicker(
-										context: context,
-										initialDate: _begTime,
-										firstDate: DateTime(2000),
-										lastDate: DateTime(2050)
-									);
-									if (pkTime != null) {
-										setState(() {
-											_begTime = pkTime;
-										});
-									}
-								}
-							),
-							Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text("-")),
-							OutlineButton(
-								borderSide: BorderSide(color: primaryColor),
-								child: Text(dtFmter.format(_endTime), style: TextStyle(color: primaryColor)),
-								onPressed: () async {
-									DateTime pkTime = await showDatePicker(
-										context: context,
-										initialDate: _endTime,
-										firstDate: DateTime(2000),
-										lastDate: DateTime(2050)
-									);
-									if (pkTime != null) {
-										setState(() {
-											_endTime = pkTime;
-										});
-									}
-								}
-							),
-							Padding(padding: EdgeInsets.only(left: 10), child: Text(_showHistory ? "历史数据" : "实时数据")),
-							Switch(activeColor: primaryColor, onChanged: (bool value) => setState(() {
-								_showHistory = !_showHistory;
-								global.refreshTimer.getJob("getDeviceEventHistory").doActive(_showHistory);
-								global.refreshTimer.getJob("getDeviceEventActive").doActive(!_showHistory);
-								_curPage = 1;
-							}), value: _showHistory)
-						]),
-						Padding(padding: EdgeInsets.all(10), child: Column(children: <Widget>[
-							MyDataTable({
-								"等级": MyDataHeader("level", 0.05),
-								"设备": MyDataHeader("name", 0.1),
-								"标题": MyDataHeader("warning", 0.15),
-								"说明": MyDataHeader("meaning", 0.25),
-								"生成时间": MyDataHeader("start", 0.175),
-								"解除时间": MyDataHeader("confirm", 0.175),
-								"状态": MyDataHeader("status", 0.1)
-							}, dispRecords,
-								vpadding: 5.0, isStriped: true, hasBorder: false,
-								headerTxtStyle: const TextStyle(fontSize: 15.0),
-								bodyTxtStyle: const TextStyle(fontSize: 15.0)
-							),
-							Row(mainAxisAlignment: MainAxisAlignment.end, children: _genPages())
-						]))
-					])))
+					Expanded(flex: 3, child: Padding(padding: EdgeInsets.only(left: 5), child: Column(children: subPanel)))
 				]))
 			])
 		);
@@ -242,11 +332,19 @@ class HistoryPageState extends BasePageState<Page> {
 		}
 	});
 
-	@override
-	void hdlPointVals(dynamic data) => setState(() {
-		_historyRecords = [];
+	void hdlEvents(dynamic data) => setState(() {
+		_events = [];
 		for (EventRecord er in data) {
-			_historyRecords.add(er.toMap());
+			_events.add(er.toMap());
 		}
 	});
+
+	@override
+	void hdlPointVals(dynamic data) {
+		if (data[_selPoi.toString()] != null) {
+			setState(() {
+				_poiVals = data[_selPoi.toString()];
+			});
+		}
+	}
 }

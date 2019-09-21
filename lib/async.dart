@@ -20,6 +20,11 @@ class RequestInfo {
 		return this;
 	}
 
+	RequestInfo rmvBody(String key) {
+		_body.remove(key);
+		return this;
+	}
+
 	String cmbBodyAsParamIntoPath() {
 		String ret = _path;
 		var keys = _body.keys.toList();
@@ -50,10 +55,11 @@ final getPoiSensor = RequestInfo("POST", "/api/v1/points/sensor", {
 });
 final listDevices = RequestInfo("POST", "/api/v1/devices/list", {});
 final getAlarms = RequestInfo("GET", "/api/v1/alarms/active", {});
-final tempHumi = RequestInfo("POST", "/api/v1/points/history", {
+final _poiHistory = RequestInfo("POST", "/api/v1/points/history", {
 	"id": "",
-	"points": [29607741, 29607742, 29607739, 29607740],
-	"time": 1
+	"points": [],
+	"time": 1,
+	"time_range": []
 });
 final devEventHistory = RequestInfo("POST", "/api/v1/alarms/history", {
 	"device_id": "",
@@ -68,6 +74,9 @@ final _turnOnOffDev = RequestInfo("PUT", "/api/v1/devices/update", {
 });
 const DEV_ON = 1;
 const DEV_OFF = 2;
+final _getDevPoints = RequestInfo("GET", "/api/v1/devices/points", {
+	"id": ""
+});
 final devTypes = RequestInfo("GET", "/api/v1/dictionary/list?type=1", {});
 final devProxies = RequestInfo("GET", "/api/v1/protocols/list", {
 	"device_type": ""
@@ -185,6 +194,19 @@ class EventRecord {
 	String get status => _status;
 }
 
+class DevPoint {
+	final String _name;
+	final int _poiID;
+
+	DevPoint(this._name, this._poiID);
+
+	DevPoint.fromJSON(Map json): _name = json["name"],
+		_poiID = json["point_id"];
+
+	int get poiID => _poiID;
+	String get name => _name;
+}
+
 class DevType {
 	final int _id;
 	final String _name;
@@ -258,9 +280,13 @@ Future<dynamic> getDevList() => reqTempFunc(http.post(
 Future<dynamic> hasAlarms() => reqTempFunc(http.get(url + getAlarms.path), (dynamic data) => data.isNotEmpty);
 
 Future<dynamic> getTempHumi(int time) => reqTempFunc(http.post(
-	url + tempHumi.path,
+	url + _poiHistory.path,
 	headers: {"Content-Type": "application/json"},
-	body: jsonEncode(tempHumi.chgBody("id", global.currentDevID).chgBody("time", time).body)
+	body: jsonEncode(_poiHistory
+		.chgBody("id", global.currentDevID)
+		.chgBody("points", [29607741, 29607742, 29607739, 29607740])
+		.rmvBody("time_range")
+		.chgBody("time", time).body)
 ), (dynamic data) {
 	var ret = {
 		"humis": <TimeSeriesSales>[],
@@ -297,6 +323,40 @@ turnOnOffDev(String devID, int status) => reqTempFunc(http.put(
 	headers: {"Content-Type": "application/json"},
 	body: jsonEncode(_turnOnOffDev.chgBody("id", devID).chgBody("status", status).body)
 ), (dynamic data) => data);
+
+getDevPoints() => reqTempFunc(http.get(
+	url + _getDevPoints.chgBody("id", global.currentDevID).cmbBodyAsParamIntoPath()
+), (dynamic data) => data.map<DevPoint>((json) {
+	return DevPoint.fromJSON(json);
+}).toList());
+
+Future<dynamic> getDevPoiHistory(List<int> poiIds, DateTime begin, DateTime end) => reqTempFunc(http.post(
+	url + _poiHistory.path,
+	headers: {"Content-Type": "application/json"},
+	body: jsonEncode(_poiHistory
+		.chgBody("id", global.currentDevID)
+		.chgBody("points", poiIds.length != 0 && poiIds[0] == 0 ? [] : poiIds)
+		.chgBody("time_range", [
+		global.dtFmter.format(begin),
+		global.dtFmter.format(end)
+	])
+		.rmvBody("time").body)
+), (dynamic data) {
+	Map<String, List<TimeSeriesSales>> ret = {};
+	for (var d in data) {
+		DateTime dt = DateTime.parse(d["time"]);
+		for (var key in d.keys.toList()) {
+			if (key == "time") {
+				continue;
+			}
+			if (ret[key] == null) {
+				ret[key] = [];
+			}
+			ret[key].add(TimeSeriesSales(dt, d[key].toDouble()));
+		}
+	}
+	return ret;
+});
 
 getDevProxyList(String devTyp) => reqTempFunc(http.get(
 	url + devProxies.chgBody("device_type", devTyp).cmbBodyAsParamIntoPath()

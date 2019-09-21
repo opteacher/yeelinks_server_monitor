@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'pages/home.dart' as home;
 import 'pages/initialize.dart' as initialize;
 import 'pages/electron.dart' as electron;
@@ -152,3 +153,4 @@ const lightColors = ["RED", "GREEN", "BLUE"];
 enum ConfirmCancel {
 	CONFIRMED, CANCELED
 }
+final dtFmter = DateFormat("yyyy-MM-dd");
