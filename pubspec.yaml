@@ -33,6 +33,7 @@ dependencies:
   toast: ^0.1.5
   intl: ^0.15.1
   flutter_spinkit: ^2.1.0
+  package_info: ^0.3.2+1
 
 dev_dependencies:
   flutter_test:

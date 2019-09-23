@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'global.dart' as global;
 import 'components.dart';
+import 'package:package_info/package_info.dart';
 
 class RequestInfo {
 	final String _method;
@@ -89,6 +90,7 @@ final addDevice = RequestInfo("POST", "/api/v1/devices/add", {
 	"slave_id": -1,
 	"protocol_id": ""
 });
+const updateURL = "http://py9z68s8h.bkt.clouddn.com/apk-release-v{version}.apk";
 
 class DeviceComponent {
 	String _id;
@@ -381,3 +383,19 @@ postAddDev(
 		.chgBody("protocol_id", proxyId)
 		.body)
 ), (dynamic data) => data);
+
+checkVersionForUpdate() async {
+	PackageInfo pi = await PackageInfo.fromPlatform();
+	List<String> subVers = pi.version.split(".");
+	int v1 = int.parse(subVers[0]);
+	int v2 = int.parse(subVers[1]);
+	int v3 = int.parse(subVers[2]);
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 10; j++) {
+			for (int t = 0; t < 15; t++) {
+				String ver = "${v1 + i}.${v2 + j}.${v3 + t}";
+				print(ver);
+			}
+		}
+	}
+}

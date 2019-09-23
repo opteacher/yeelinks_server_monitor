@@ -14,6 +14,7 @@ void main() {
 		DeviceOrientation.landscapeLeft
 	]);
 	SystemChrome.setEnabledSystemUIOverlays([]);
+	checkVersionForUpdate();
 	return runApp(MyApp());
 }
 

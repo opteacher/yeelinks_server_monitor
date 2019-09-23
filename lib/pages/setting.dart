@@ -11,7 +11,14 @@ class Page extends StatefulWidget {
 }
 
 class SettingPageState extends BasePageState<Page> {
+	static const SYSTEM_SETTING = 1;
+	static const DEVICE_SETTING = 2;
 	List<Device> _devices = [];
+	List<NamedWithID> _settingBtns = [
+		NamedWithID(SYSTEM_SETTING, "系统设置"),
+		NamedWithID(DEVICE_SETTING, "设备设置")
+	];
+	int _selSetting = DEVICE_SETTING;
 
 	@override
 	void initState() {
@@ -21,20 +28,70 @@ class SettingPageState extends BasePageState<Page> {
 		}));
 	}
 
+	List<Widget> _genSettingBtns() {
+		List<Widget> ret = [];
+		final primaryColor = Theme.of(context).primaryColor;
+		for (int i = 0; i < _settingBtns.length; i++) {
+			var btn = _settingBtns[i];
+			ShapeBorder btnBorder = RoundedRectangleBorder();
+			if (i == 0) {
+				btnBorder = RoundedRectangleBorder(
+					borderRadius: BorderRadius.horizontal(left: Radius.circular(4)),
+				);
+			} else if (i == _settingBtns.length - 1) {
+				btnBorder = RoundedRectangleBorder(
+					borderRadius: BorderRadius.horizontal(right: Radius.circular(4)),
+				);
+			}
+			if (btn.id == _selSetting) {
+				ret.add(FlatButton(
+					child: Text(btn.name, style: TextStyle(color: Colors.white)),
+					disabledColor: primaryColor,
+					shape: btnBorder,
+					onPressed: null));
+			} else {
+				ret.add(OutlineButton(
+					child: Text(btn.name, style: TextStyle(color: primaryColor)),
+					borderSide: BorderSide(color: primaryColor),
+					shape: btnBorder,
+					onPressed: () => setState(() {
+						_selSetting = btn.id;
+					})
+				));
+			}
+		}
+		return ret;
+	}
+
 	@override
-	Widget build(BuildContext context) => Container(padding: const EdgeInsets.all(2.5), child: Column(children: <Widget>[
-		Center(child: Container(width: 200.0, child: Row(children: <Widget>[
-			OutlineButton(child: Text("系统设置"), shape: RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(left: Radius.circular(4))), onPressed: null),
-			OutlineButton(child: Text("设备设置"), shape: RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(right: Radius.circular(4))), onPressed: null)
-		]))),
-		Divider(),
-		Expanded(child: GridView.count(
-			crossAxisCount: 5,
-			mainAxisSpacing: 10.0,
-			crossAxisSpacing: 10.0,
-			children: _genDevCards()
-		))
-	]));
+	Widget build(BuildContext context) {
+		final primaryColor = Theme.of(context).primaryColor;
+		Widget content = null;
+		switch (_selSetting) {
+			case DEVICE_SETTING:
+				content = GridView.count(
+					crossAxisCount: 5,
+					mainAxisSpacing: 10.0,
+					crossAxisSpacing: 10.0,
+					children: _genDevCards()
+				);
+				break;
+			case SYSTEM_SETTING:
+			default:
+				content = Center(child: FlatButton(
+					color: primaryColor,
+					child: Text("检查更新", style: TextStyle(color: Colors.white)),
+					onPressed: () {
+
+					})
+				);
+		}
+		return Container(padding: const EdgeInsets.all(2.5), child: Column(children: <Widget>[
+			Center(child: Container(width: 200.0, child: Row(children: _genSettingBtns()))),
+			Divider(),
+			Expanded(child: content)
+		]));
+	}
 
 	List<Widget> _genDevCards() {
 		final textColor = Colors.grey[600];
