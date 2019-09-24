@@ -421,12 +421,12 @@ class MyDataTable extends StatelessWidget {
 		if (txtStyle == null) {
 			txtStyle = bodyTxtStyle;
 		}
-		List<Widget> children = [];
-		data.asMap().forEach((index, item) {
-			final Widget cell = _genCell(item, txtStyle);
-			children.add(striped ? Container(color: Colors.grey[300], child: cell) : cell);
-		});
-		return TableRow(children: children);
+		List<Widget> children = data.map<Widget>((ele) => _genCell(ele, txtStyle)).toList();
+		if (striped) {
+			return TableRow(decoration: BoxDecoration(color: Colors.grey[300]), children: children);
+		} else {
+			return TableRow(children: children);
+		}
 	}
 
 	Widget _genCell(String content, TextStyle txtStyle) {
@@ -478,11 +478,11 @@ class RefreshTimer {
 	Map<String, TimerJob> _jobs = {
 		"alarmLighter": TimerJob(hasAlarms, (dynamic data) {
 			if (data) {
-				global.platform.invokeMethod("lightUp", {
+				global.ledCtrl.invokeMethod("lightUp", {
 					"color": "RED", "brightness": 50
 				});
 			} else {
-				global.platform.invokeMethod("lightUp", {
+				global.ledCtrl.invokeMethod("lightUp", {
 					"color": "GREEN", "brightness": 50
 				});
 			}

@@ -390,9 +390,9 @@ checkVersionForUpdate() async {
 	int v1 = int.parse(subVers[0]);
 	int v2 = int.parse(subVers[1]);
 	int v3 = int.parse(subVers[2]);
-	for (int i = 0; i < 5; i++) {
-		for (int j = 0; j < 10; j++) {
-			for (int t = 0; t < 15; t++) {
+	for (int i = 0; i <= 5; i++) {
+		for (int j = 0; j <= 10; j++) {
+			for (int t = 0; t <= 15; t++) {
 				String ver = "${v1 + i}.${v2 + j}.${v3 + t}";
 				print(ver);
 			}

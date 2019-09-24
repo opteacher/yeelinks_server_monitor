@@ -14,7 +14,7 @@ void main() {
 		DeviceOrientation.landscapeLeft
 	]);
 	SystemChrome.setEnabledSystemUIOverlays([]);
-	checkVersionForUpdate();
+//	global.brightnessCtrl.invokeMethod("turnOff");
 	return runApp(MyApp());
 }
 
@@ -41,7 +41,7 @@ class MyAppState extends State<MyApp> {
 	void dispose() {
 		super.dispose();
 		global.refreshTimer.cancel();
-		global.platform.invokeMethod("lightDown");
+		global.ledCtrl.invokeMethod("lightDown");
 	}
 
 	@override

@@ -148,7 +148,8 @@ const Map<String, String> protocolMapper = {
 	"29607739": "冷通道温度",
 	"29607740": "冷通道湿度"
 };
-const platform = const MethodChannel("com.yeelinks.plugins/led_ctrl");
+const ledCtrl = const MethodChannel("com.yeelinks.plugins/led_ctrl");
+//const brightnessCtrl = const MethodChannel("com.yeelinks.plugins/bright_ctrl");
 const lightColors = ["RED", "GREEN", "BLUE"];
 enum ConfirmCancel {
 	CONFIRMED, CANCELED

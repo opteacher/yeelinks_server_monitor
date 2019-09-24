@@ -217,12 +217,12 @@ class HistoryPageState extends BasePageState<Page> {
 					_historyPanel ? Expanded(child: Container(
 						padding: EdgeInsets.symmetric(vertical: 8),
 						color: primaryColor,
-						child: Center(child: Text("历史警告", style: TextStyle(color: Colors.white))),
+						child: Center(child: Text("历史告警", style: TextStyle(color: Colors.white))),
 					)) : Expanded(child: OutlineButton(
 						borderSide: BorderSide(color: primaryColor),
 						textColor: primaryColor,
 						shape: _noBorderRadius,
-						child: Text("历史警告"),
+						child: Text("历史告警"),
 						onPressed: () => setState(() {
 							_historyPanel = true;
 							global.refreshTimer.getJob("getDevicePointHistory").doActive(false);
