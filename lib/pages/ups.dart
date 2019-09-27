@@ -196,15 +196,19 @@ class UpsPageState extends BasePageState<Page> {
 		global.idenDevs = [
 			Device.fromJSON(data["ups"]).id
 		];
+		global.turnOffLoadingNext = true;
+		global.refreshTimer.refreshPointSensor();
 	}
 
 	@override
 	void hdlPointVals(dynamic data) => setState(() {
+		print(data.length);
 		for (PointVal pv in data) {
 			String poiName = global.protocolMapper[pv.id];
 			if (_values[poiName] != null) {
 				_values[poiName] = pv.value.toStringAsFixed(1);
 			}
 		}
+		global.turnOffLoadingPoint(context);
 	});
 }

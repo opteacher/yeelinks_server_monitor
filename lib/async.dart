@@ -163,17 +163,18 @@ class EventRecord {
 	final String _warning;
 	final String _meaning;
 	final String _level;
+	final String _confirmer;
 	final String _start;
 	final String _confirm;
 	final String _status;
 
-	EventRecord(this._id, this._name, this._warning, this._meaning, this._level, this._start, this._confirm, this._status);
+	EventRecord(this._id, this._name, this._warning, this._meaning, this._level, this._start, this._confirm, this._status, this._confirmer);
 
 	EventRecord.fromJSON(Map json): _id = json["id"],
 		_name = json["device_name"], _warning = json["title"],
 		_meaning = json["content"], _level = json["level"].toString(),
 		_start = json["time"].toString(), _confirm = json["check_time"].toString(),
-		_status = json["status"].toString();
+		_status = json["status"].toString(), _confirmer = json["checker"];
 
 	Map<String, String> toMap() => {
 		"id": _id.toString(),
@@ -183,6 +184,7 @@ class EventRecord {
 		"level": _level,
 		"start": _start,
 		"confirm": _confirm,
+		"confirmer": _confirmer,
 		"status": _status
 	};
 
@@ -193,6 +195,7 @@ class EventRecord {
 	String get warning => _warning;
 	String get name => _name;
 	String get confirm => _confirm;
+	String get confirmer => _confirmer;
 	String get status => _status;
 }
 

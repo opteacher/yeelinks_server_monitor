@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yeelinks/components.dart';
-
+import '../global.dart' as global;
 import '../async.dart';
 
 class Page extends StatefulWidget {
@@ -45,6 +45,7 @@ class WarningPageState extends BasePageState<Page> {
 				_warningRecords.add(EventRecord.fromJSON(alarm).toMap());
 			}
 		}
+		global.turnOffLoadingPoint(context);
 	});
 
 	@override

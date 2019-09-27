@@ -13,6 +13,14 @@ class Page extends StatefulWidget {
 
 class HistoryPageState extends BasePageState<Page> {
 	final _noBorderRadius = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0)));
+	final _WngClrLvlMap = <String, Color>{
+		"0": Colors.grey,
+		"1": Colors.yellow,
+		"2": Colors.amber,
+		"3": Colors.orange,
+		"4": Colors.red,
+		"5": Colors.purple
+	};
 
 	bool _historyPanel = true;
 	List<Map<String, String>> _events = [];
@@ -170,22 +178,49 @@ class HistoryPageState extends BasePageState<Page> {
 		var dispRecords = _events.isNotEmpty ? _events.sublist(sttIdx, endIdx) : <Map<String, String>>[];
 		List<Widget> subPanel = [_genToolbar()];
 		if (_historyPanel) {
-			subPanel.addAll([
-				MyDataTable({
-					"等级": MyDataHeader("level", 0.05),
-					"设备": MyDataHeader("name", 0.1),
-					"标题": MyDataHeader("warning", 0.15),
-					"说明": MyDataHeader("meaning", 0.25),
-					"生成时间": MyDataHeader("start", 0.175),
-					"解除时间": MyDataHeader("confirm", 0.175),
-					"状态": MyDataHeader("status", 0.1)
-				}, dispRecords,
-					vpadding: 5.0, isStriped: true, hasBorder: false,
-					headerTxtStyle: const TextStyle(fontSize: 15.0),
-					bodyTxtStyle: const TextStyle(fontSize: 15.0)
-				),
-				Row(mainAxisAlignment: MainAxisAlignment.end, children: _genPages())
-			]);
+//			subPanel.addAll([
+//				MyDataTable({
+//					"等级": MyDataHeader("level", 0.05),
+//					"设备": MyDataHeader("name", 0.1),
+//					"标题": MyDataHeader("warning", 0.15),
+//					"说明": MyDataHeader("meaning", 0.25),
+//					"生成时间": MyDataHeader("start", 0.175),
+//					"解除时间": MyDataHeader("confirm", 0.175),
+//					"状态": MyDataHeader("status", 0.1)
+//				}, dispRecords,
+//					vpadding: 5.0, isStriped: true, hasBorder: false,
+//					headerTxtStyle: const TextStyle(fontSize: 15.0),
+//					bodyTxtStyle: const TextStyle(fontSize: 15.0)
+//				),
+//				Row(mainAxisAlignment: MainAxisAlignment.end, children: _genPages())
+//			]);
+			final Color txtClr = Colors.grey[600];
+			subPanel.add(Expanded(child: ListView(children: _events.map<Widget>((rcd) => Card(
+				elevation: 0,
+				color: Colors.grey[100],
+				child: Padding(padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20), child: Row(children: <Widget>[
+					Padding(padding: EdgeInsets.only(right: 20), child: Center(
+						child: Icon(Icons.info, size: 40, color: _WngClrLvlMap[rcd["level"]])
+					)),
+					Expanded(child: Column(children: <Widget>[
+						Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+							Text(rcd["name"], style: TextStyle(color: txtClr))
+						]),
+						Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+							Text("${rcd["warning"]} : ", style: TextStyle(fontSize: 25, color: txtClr)),
+							Flexible(child: Text(rcd["meaning"], style: TextStyle(fontSize: 20, color: txtClr)))
+						]),
+						Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+							Text(rcd["confirmer"].isEmpty ? "未确认" : rcd["confirmer"], style: TextStyle(color: txtClr))
+						]),
+					])),
+					Column(children: <Widget>[
+						Text(rcd["start"], style: TextStyle(color: txtClr)),
+						Text("", style: TextStyle(fontSize: 25, color: txtClr)),
+						Text(rcd["confirm"] == "null" ? "未确认" : rcd["confirm"], style: TextStyle(color: txtClr)),
+					])
+				]))
+			)).toList())));
 		} else {
 			subPanel.addAll([
 				Container(height: 150, decoration: BoxDecoration(
@@ -330,6 +365,8 @@ class HistoryPageState extends BasePageState<Page> {
 			}
 			_devices[device.typeStr].add(device);
 		}
+		global.turnOffLoadingNext = true;
+		global.refreshTimer.refreshPointSensor();
 	});
 
 	void hdlEvents(dynamic data) => setState(() {
@@ -337,6 +374,7 @@ class HistoryPageState extends BasePageState<Page> {
 		for (EventRecord er in data) {
 			_events.add(er.toMap());
 		}
+		global.turnOffLoadingPoint(context);
 	});
 
 	@override
@@ -346,5 +384,6 @@ class HistoryPageState extends BasePageState<Page> {
 				_poiVals = data[_selPoi.toString()];
 			});
 		}
+		global.turnOffLoadingPoint(context);
 	}
 }

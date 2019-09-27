@@ -160,6 +160,7 @@ class ElectronPageState extends BasePageState<Page> {
 		}
 		global.idenDevs.add(global.currentDevID);
 		if (manualRefresh) {
+			global.turnOffLoadingNext = true;
 			global.refreshTimer.refreshPointSensor();
 		}
 	});
@@ -182,5 +183,6 @@ class ElectronPageState extends BasePageState<Page> {
 				}
 			}
 		}
+		global.turnOffLoadingPoint(context);
 	});
 }

@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../async.dart';
 import '../global.dart' as global;
 import '../components.dart';
@@ -180,6 +181,7 @@ class HomePageState extends BasePageState<Page> {
 				}
 			}
 		}
+		global.turnOffLoadingPoint(context);
 	});
 
 	@override

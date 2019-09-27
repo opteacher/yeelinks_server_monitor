@@ -139,6 +139,7 @@ class SettingPageState extends BasePageState<Page> {
 	@override
 	void hdlDevices(data) => setState(() {
 		_devices = data.toList();
+		global.turnOffLoadingPoint(context);
 	});
 
 	@override

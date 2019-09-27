@@ -132,6 +132,8 @@ class EnvPageState extends BasePageState<Page> {
 		if (_switcherID.isNotEmpty) {
 			global.idenDevs.add(_switcherID);
 		}
+		global.turnOffLoadingNext = true;
+		global.refreshTimer.refreshPointSensor();
 	}
 
 	@override
@@ -158,5 +160,6 @@ class EnvPageState extends BasePageState<Page> {
 				}
 			}
 		}
+		global.turnOffLoadingPoint(context);
 	});
 }

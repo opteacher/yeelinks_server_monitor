@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'pages/home.dart' as home;
 import 'pages/initialize.dart' as initialize;
@@ -25,29 +26,50 @@ class ComponentInfo {
 	final String _name;
 	final Widget _page;
 	final int _index;
+	final int _numJobs;
 
-	ComponentInfo(this._id, this._name, this._page, this._index);
+	ComponentInfo(this._id, this._name, this._page, this._index, this._numJobs);
 
 	Widget get page => _page;
 	String get name => _name;
 	String get id => _id;
 	int get index => _index;
-
+	int get numJobs => _numJobs;
 }
 final Map<String, ComponentInfo> componentInfos = {
-	"initlize": ComponentInfo("initlize", "添加设备", initialize.InitializePage(), 0),
-	"home":     ComponentInfo("home", "首页", Dashboard(home.Page()), 1),
-	"electron": ComponentInfo("electron", "配电", Dashboard(electron.Page()), 2),
-	"ups":      ComponentInfo("ups", "UPS", Dashboard(ups.Page()), 3),
-	"aircond":  ComponentInfo("aircond", "空调", Dashboard(aircond.Page()), 4),
-	"env":      ComponentInfo("env", "环境", Dashboard(env.Page()), 5),
-	"setting":  ComponentInfo("setting", "设置", Dashboard(setting.Page()), 8),
-	"warning":  ComponentInfo("warning", "告警", Dashboard(warning.Page()), 1),
-	"history":  ComponentInfo("history", "历史", Dashboard(history.Page()), 7)
+	"initlize": ComponentInfo("initlize", "添加设备", initialize.InitializePage(), 0, 0),
+	"home":     ComponentInfo("home", "首页", Dashboard(home.Page()), 1, 1),
+	"electron": ComponentInfo("electron", "配电", Dashboard(electron.Page()), 2, 2),
+	"ups":      ComponentInfo("ups", "UPS", Dashboard(ups.Page()), 3, 2),
+	"aircond":  ComponentInfo("aircond", "空调", Dashboard(aircond.Page()), 4, 2),
+	"env":      ComponentInfo("env", "环境", Dashboard(env.Page()), 5, 2),
+	"setting":  ComponentInfo("setting", "设置", Dashboard(setting.Page()), 8, 1),
+	"warning":  ComponentInfo("warning", "告警", Dashboard(warning.Page()), 1, 1),
+	"history":  ComponentInfo("history", "历史", Dashboard(history.Page()), 7, 3)
 };
+bool pageLoading = false;
+bool turnOffLoadingNext = false;
 void toIdenPage(BuildContext context, String pid) {
 	currentDevID = "";
 	Navigator.push(context, PageSwitchRoute(componentInfos[pid].page));
+	showLoadingPage(context);
+}
+void showLoadingPage(BuildContext context) {
+	pageLoading = true;
+	showDialog(context: context, builder: (BuildContext context) => SimpleDialog(
+		elevation: 0,
+		backgroundColor: Colors.transparent,
+		children: <Widget>[
+			SpinKitFadingCircle(color: Colors.white, size: 100)
+		]
+	));
+}
+void turnOffLoadingPoint(BuildContext context) {
+	if (pageLoading && turnOffLoadingNext) {
+		pageLoading = false;
+		turnOffLoadingNext = false;
+		Navigator.pop(context);
+	}
 }
 final RefreshTimer refreshTimer = RefreshTimer();
 bool manualLight = false;

@@ -302,6 +302,7 @@ class AircondPageState extends BasePageState<Page> {
 		if (_selAircond == null && _airconds.isNotEmpty) {
 			_selAircond = _airconds[0];
 			global.idenDevs = [_selAircond.id];
+			global.turnOffLoadingNext = true;
 			global.refreshTimer.refreshPointSensor();
 		}
 	});
@@ -314,5 +315,6 @@ class AircondPageState extends BasePageState<Page> {
 				_values[poiName] = pv.value.toStringAsFixed(1);
 			}
 		}
+		global.turnOffLoadingPoint(context);
 	});
 }
