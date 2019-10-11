@@ -4,6 +4,7 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:toast/toast.dart';
 import 'async.dart';
 import 'global.dart' as global;
@@ -129,6 +130,7 @@ class DescListItem extends StatelessWidget {
 class Instrument extends StatelessWidget {
 	double _radius;
 	double _max;
+	double _min;
 	int _numScales;
 	double _maxScale;
 	double _step;
@@ -139,17 +141,18 @@ class Instrument extends StatelessWidget {
 		double radius,
 		int numScales,
 		double max,
+		double min = 0.0,
 		double maxScale = -1,
 		String suffix = "",
 		double value = 0.0
-	}): _radius = radius, _max = max, _numScales = numScales,
+	}): _radius = radius, _max = max, _min = min, _numScales = numScales,
 		_maxScale = maxScale, _value = value, _suffix = suffix;
 
 	@override
 	Widget build(BuildContext context) => Center(child: Column(children: <Widget>[
 		CustomPaint(
 			size: Size(2 * _radius, 1.5 * _radius),
-			painter: InstrumentGraph(_radius, _numScales, _max, _maxScale)
+			painter: InstrumentGraph(_radius, _numScales, _max, _min, _maxScale)
 				..updateValue(_value),
 		),
 		Text(
@@ -164,17 +167,18 @@ class InstrumentGraph extends CustomPainter {
 	final double radius;
 	final int numScales;
 	final double max;
+	final double min;
 	final double maxScale;
 	double poiLen;
 	final double poiWid = 5.0;
 	double _angle = -210.0;
 
-	InstrumentGraph(this.radius, this.numScales, this.max, this.maxScale) {
+	InstrumentGraph(this.radius, this.numScales, this.max, this.min, this.maxScale) {
 		this.poiLen = radius * 0.6;
 	}
 
 	void updateValue(double value) {
-		double tmp = (value / max * 240) - 210;
+		double tmp = ((value - min) / (max - min) * 240) - 210;
 		if (tmp < -210) {
 			_angle = -210;
 		} else if (tmp > 30) {
@@ -202,7 +206,7 @@ class InstrumentGraph extends CustomPainter {
 			radius: radius
 		), -210.0 * rate, 240 * rate, false, _paint);
 		// 绘制警告段
-		double maxSclAgl = maxScale != -1 ? (max - maxScale) / max * 240 : 30;
+		double maxSclAgl = maxScale != -1 ? (max - maxScale) / (max - min) * 240 : 30;
 		double begAgl = 30 - maxSclAgl;
 		_paint
 			..color = Colors.red[300];
@@ -224,8 +228,8 @@ class InstrumentGraph extends CustomPainter {
 		)
 			..layout();
 		final wdsLen = radius * 0.75;
-		final dt = max / numScales;
-		for (double a = -211, t = 0; a <= 30 && t <= max; a += scale, t += dt) {
+		final dt = (max - min) / numScales;
+		for (double a = -211, t = min; a <= 30 && t <= max; a += scale, t += dt) {
 			canvas.drawArc(Rect.fromCircle(
 				center: center,
 				radius: radius - 5
@@ -489,56 +493,62 @@ class RefreshTimer {
 		})
 	};
 
-	void register(String id, TimerJob job) {
+	register(String id, TimerJob job) {
 		_jobs[id] = job;
 	}
 
-	void start() {
+	start() async {
+		await _refresh(null);
 		if (_timer == null || !_timer.isActive) {
-			_timer = Timer.periodic(const Duration(seconds: 2), _refresh);
+			_timer = Timer.periodic(const Duration(seconds: 30), _refresh);
 		}
 	}
 
-	void stop() {
+	bool isStarted() {
+		return _timer != null && _timer.isActive;
+	}
+
+	stop() {
 		_timer.cancel();
 	}
 
-	void _refresh(Timer t) {
-		_jobs.forEach((id, job) async {
+	_refresh(Timer t) async {
+		for (var id in _jobs.keys.toList()) {
+			if (_idenPrefix.isNotEmpty) {
+				if (!id.startsWith(_idenPrefix)) {
+					continue;
+				}
+			}
+			var job = _jobs[id];
 			if (job._conditions[TimerJob.PAGE_IDEN] != null) {
 				if (job._conditions[TimerJob.PAGE_IDEN] != global.currentPageID) {
-					return;
+					continue;
 				}
 			}
 			if (job._conditions[TimerJob.ACTV_IDEN] != null) {
 				if (job._conditions[TimerJob.ACTV_IDEN].isEmpty) {
-					return;
-				}
-			}
-			if (_idenPrefix.isNotEmpty) {
-				if (!id.startsWith(_idenPrefix)) {
-					return;
+					continue;
 				}
 			}
 
 			ResponseInfo ri = await job._job();
 			if (ri == null || ri.data == null) {
-				return;
+				continue;
 			}
 			print(ri.data);
 			if (job._callback != null) {
 				job._callback(ri.data);
 			}
-		});
+		}
 		_idenPrefix = "";
 	}
 
-	void refreshPointSensor() {
-		_idenPrefix = "poiValueOf";
-		Timer.run(() => _refresh);
+	refreshIdenPrefix(String prefix) async {
+		_idenPrefix = prefix;
+		await _refresh(null);
 	}
 
-	void cancel() => _timer.cancel();
+	cancel() => _timer.cancel();
 
 	TimerJob getJob(String iden) => _jobs[iden];
 }

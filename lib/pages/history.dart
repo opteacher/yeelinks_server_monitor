@@ -30,9 +30,9 @@ class HistoryPageState extends BasePageState<Page> {
 	int _maxItmPerPage = 10;
 	int _numPage = 1;
 	int _hlfMaxPages = 3;
-	DateTime _begTime = DateTime.now().subtract(Duration(days: 5));
+	DateTime _begTime = DateTime.now().subtract(Duration(days: 1));
 	DateTime _endTime = DateTime.now();
-	bool _showHistory = true;
+	bool _showHistory = false;
 	List<DevPoint> _devPoints = [];
 	List<TimeSeriesSales> _poiVals = [TimeSeriesSales(DateTime.now(), 0)];
 	int _selPoi = 0;
@@ -46,11 +46,11 @@ class HistoryPageState extends BasePageState<Page> {
 			return getEventHistory(_begTime, _endTime);
 		}, hdlEvents, {
 			TimerJob.PAGE_IDEN: pageId(),
-			TimerJob.ACTV_IDEN: "1"
+			TimerJob.ACTV_IDEN: ""
 		}));
 		global.refreshTimer.register("getDeviceEventActive", TimerJob(getEventActive, hdlEvents, {
 			TimerJob.PAGE_IDEN: pageId(),
-			TimerJob.ACTV_IDEN: ""
+			TimerJob.ACTV_IDEN: "1"
 		}));
 		global.refreshTimer.register("getDevicePointHistory", TimerJob(() {
 			return getDevPoiHistory([_selPoi], _begTime, _endTime);
@@ -211,13 +211,13 @@ class HistoryPageState extends BasePageState<Page> {
 							Flexible(child: Text(rcd["meaning"], style: TextStyle(fontSize: 20, color: txtClr)))
 						]),
 						Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-							Text(rcd["confirmer"].isEmpty ? "未确认" : rcd["confirmer"], style: TextStyle(color: txtClr))
+							Text(rcd["confirmer"].isEmpty ? "-" : rcd["confirmer"], style: TextStyle(color: txtClr))
 						]),
 					])),
 					Column(children: <Widget>[
 						Text(rcd["start"], style: TextStyle(color: txtClr)),
 						Text("", style: TextStyle(fontSize: 25, color: txtClr)),
-						Text(rcd["confirm"] == "null" ? "未确认" : rcd["confirm"], style: TextStyle(color: txtClr)),
+						Text(rcd["confirm"] == "null" ? "-" : rcd["confirm"], style: TextStyle(color: txtClr)),
 					])
 				]))
 			)).toList())));
@@ -359,14 +359,15 @@ class HistoryPageState extends BasePageState<Page> {
 		if (data == null || data.isEmpty) {
 			return;
 		}
-		for (var device in data) {
+		for (Device device in data) {
 			if (_devices[device.typeStr] == null) {
 				_devices[device.typeStr] = [];
 			}
+			if (device.status != 1) {
+				continue;
+			}
 			_devices[device.typeStr].add(device);
 		}
-		global.turnOffLoadingNext = true;
-		global.refreshTimer.refreshPointSensor();
 	});
 
 	void hdlEvents(dynamic data) => setState(() {
@@ -374,7 +375,6 @@ class HistoryPageState extends BasePageState<Page> {
 		for (EventRecord er in data) {
 			_events.add(er.toMap());
 		}
-		global.turnOffLoadingPoint(context);
 	});
 
 	@override
@@ -384,6 +384,5 @@ class HistoryPageState extends BasePageState<Page> {
 				_poiVals = data[_selPoi.toString()];
 			});
 		}
-		global.turnOffLoadingPoint(context);
 	}
 }

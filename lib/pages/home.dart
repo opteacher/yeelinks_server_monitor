@@ -18,13 +18,22 @@ class HomePageState extends BasePageState<Page> {
 		"热通道温": "0.0",
 		"冷通道湿": "0.0",
 		"热通道湿": "0.0",
-		"烟雾": "正常",
-		"水浸": "正常",
-		"前门": "关闭",
-		"后门": "关闭"
+		"烟感": "正常",
+		"门禁": "关",
+		"漏水": "正常",
+		"防雷": "正常"
 	};
 	double _load = 0.0;
 	double _pue = 0.0;
+
+
+	@override
+	void initState() {
+		super.initState();
+		if (!global.refreshTimer.isStarted()) {
+			global.refreshTimer.start();
+		}
+	}
 
 	@override
 	Widget build(BuildContext context) {
@@ -47,8 +56,9 @@ class HomePageState extends BasePageState<Page> {
 					padding: EdgeInsets.only(top: 20),
 					child: Instrument(
 						radius: 110.0,
-						numScales: 4,
+						numScales: 3,
 						max: 4.0,
+						min: 1.0,
 						maxScale: 3.0,
 						value: _pue,
 					)
@@ -67,49 +77,49 @@ class HomePageState extends BasePageState<Page> {
 				))
 			])),
 			Expanded(child: Row(children: <Widget>[
-				DataCard(title: "环境信息", child: Padding(padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0), child: Row(children: <Widget>[
+				DataCard(title: "环境信息", child: Padding(padding: EdgeInsets.all(10.0), child: Row(children: <Widget>[
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
-							DescListItemTitle("冷通道温", size: 20.0),
+							DescListItemTitle("冷通道温度", size: 18.0),
 							DescListItemContent(_values["冷通道温"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
-							DescListItemTitle("热通道温", size: 20.0),
+							DescListItemTitle("热通道温度", size: 18.0),
 							DescListItemContent(_values["热通道温"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
-							DescListItemTitle("烟        感", size: 20.0),
-							DescListItemContent(_values["烟雾"], blocked: true),
+							DescListItemTitle("烟            感", size: 18.0),
+							DescListItemContent(_values["烟感"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
-							DescListItemTitle("前        门", size: 20.0),
-							DescListItemContent(_values["前门"], blocked: true),
+							DescListItemTitle("漏            水", size: 18.0),
+							DescListItemContent(_values["漏水"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 					])),
-					VerticalDivider(width: 30),
+					VerticalDivider(width: 15),
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
-							DescListItemTitle("冷通道湿", size: 20.0),
+							DescListItemTitle("冷通道湿度", size: 18.0),
 							DescListItemContent(_values["冷通道湿"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
-							DescListItemTitle("热通道湿", size: 20.0),
+							DescListItemTitle("热通道湿度", size: 18.0),
 							DescListItemContent(_values["热通道湿"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
-							DescListItemTitle("水        浸", size: 20.0),
-							DescListItemContent(_values["水浸"], blocked: true),
+							DescListItemTitle("门            禁", size: 18.0),
+							DescListItemContent(_values["门禁"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 						DescListItem(
-							DescListItemTitle("后        门", size: 20.0),
-							DescListItemContent(_values["后门"], blocked: true),
+							DescListItemTitle("防            雷", size: 18.0),
+							DescListItemContent(_values["防雷"], blocked: true),
 							contentAlign: TextAlign.center
 						),
 					]))
@@ -167,21 +177,10 @@ class HomePageState extends BasePageState<Page> {
 			_pue = data["pue"].toDouble();
 		}
 		if (data["switcher"] != null) {
-			Map switcher = data["switcher"];
-			for (var pid in switcher.keys.toList()) {
-				String pname = global.protocolMapper[pid];
-				if (_values[pname] == null) {
-					continue;
-				}
-				bool sw = switcher[pid];
-				if (pname == "前门" || pname == "后门") {
-					_values[pname] = sw ? "开启" : "关闭";
-				} else {
-					_values[pname] = sw ? "正常" : "异常";
-				}
+			for (var swh in data["switcher"].toList()) {
+				_values[swh["name"]] = swh["value"];
 			}
 		}
-		global.turnOffLoadingPoint(context);
 	});
 
 	@override

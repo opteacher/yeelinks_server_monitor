@@ -45,7 +45,6 @@ class WarningPageState extends BasePageState<Page> {
 				_warningRecords.add(EventRecord.fromJSON(alarm).toMap());
 			}
 		}
-		global.turnOffLoadingPoint(context);
 	});
 
 	@override

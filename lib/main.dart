@@ -43,12 +43,6 @@ class MyAppState extends State<MyApp> {
 		global.refreshTimer.cancel();
 		global.ledCtrl.invokeMethod("lightDown");
 	}
-
-	@override
-	void initState() {
-		super.initState();
-		global.refreshTimer.start();
-	}
 }
 
 class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -121,7 +115,6 @@ class MyAppBarState extends State<MyAppBar> {
 					])))]
 				))) {
 					case global.ConfirmCancel.CONFIRMED:
-						global.currentPageID = "setting";
 						global.toIdenPage(context, "setting");
 						break;
 					case global.ConfirmCancel.CANCELED:
@@ -141,7 +134,6 @@ class MyAppBarState extends State<MyAppBar> {
 		}
 		if (callback == null) {
 			callback = () {
-				global.currentPageID = pid;
 				global.toIdenPage(context, pid);
 			};
 		}

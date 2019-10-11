@@ -54,18 +54,18 @@ class ElectronPageState extends BasePageState<Page> {
 							global.idenDevs = [_mainEleID];
 						}
 						global.idenDevs.add(global.currentDevID);
-						global.refreshTimer.refreshPointSensor();
+						global.refreshTimer.refreshIdenPrefix("poiValueOf");
 					}))
 				)).toList())
 			)),
 			Expanded(flex: 4, child: Column(children: <Widget>[
 				DataCard(title: "主路输入", child: Padding(padding: EdgeInsets.all(20), child: Row(children: <Widget>[
 					Expanded(child: Padding(padding: EdgeInsets.only(top: 10),
-						child: Instrument(radius: 120.0, numScales: 10, max: 260.0, maxScale: 208.0, value: double.parse(_eleVals["电压"]))
+						child: Instrument(radius: 120.0, numScales: 10, max: 260.0, maxScale: 208.0, value: double.parse(_eleVals["电压"]), suffix: "V")
 					)),
 					VerticalDivider(width: 50),
 					Expanded(child: Padding(padding: EdgeInsets.only(top: 10),
-						child: Instrument(radius: 120.0, numScales: 8, max: 32.0, maxScale: 26.0, value: double.parse(_eleVals["电流"]))
+						child: Instrument(radius: 120.0, numScales: 8, max: 32.0, maxScale: 26.0, value: double.parse(_eleVals["电流"]), suffix: "A",)
 					)),
 					VerticalDivider(width: 50),
 					Expanded(child: Column(children: <Widget>[
@@ -137,12 +137,10 @@ class ElectronPageState extends BasePageState<Page> {
 
 	@override
 	void hdlDevices(data) => setState(() {
-		bool manualRefresh = false;
 		global.idenDevs = [];
 		if (data["ele"] != null) {
 			_mainEleID = Device.fromJSON(data["ele"]).id;
 			global.idenDevs.add(_mainEleID);
-			manualRefresh = true;
 		} else {
 			_mainEleID = "";
 		}
@@ -156,13 +154,8 @@ class ElectronPageState extends BasePageState<Page> {
 		}
 		if (global.currentDevID.isEmpty && _pdus.isNotEmpty) {
 			global.currentDevID = _pdus[0].id;
-			manualRefresh = true;
 		}
 		global.idenDevs.add(global.currentDevID);
-		if (manualRefresh) {
-			global.turnOffLoadingNext = true;
-			global.refreshTimer.refreshPointSensor();
-		}
 	});
 
 	@override
@@ -183,6 +176,5 @@ class ElectronPageState extends BasePageState<Page> {
 				}
 			}
 		}
-		global.turnOffLoadingPoint(context);
 	});
 }

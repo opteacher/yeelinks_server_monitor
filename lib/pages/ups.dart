@@ -10,6 +10,18 @@ class Page extends StatefulWidget {
 
 class UpsPageState extends BasePageState<Page> {
 	final _infoPdg = const EdgeInsets.symmetric(vertical: 10, horizontal: 15);
+	final Map<double, String> _modMap = {
+		20480: "开机模式",
+		21248: "待机模式",
+		22784: "旁路模式",
+		19456: "在线模式",
+		16896: "电池模式",
+		21504: "电池测试模式",
+		17920: "故障模式",
+		17664: "HE/ECO",
+		17152: "转换器模式",
+		17408: "关机"
+	};
 
 	bool _showDetail = false;
 	Map<String, String> _values = {
@@ -19,7 +31,7 @@ class UpsPageState extends BasePageState<Page> {
 		"输出电压": "0.0",
 		"输出电流": "0.0",
 		"输出频率": "0.0",
-		"运行模式": "0",
+		"运行模式": "未知模式",
 		"电池容量": "0.0",
 		"电池剩余时间": "0",
 		"电池电压": "0.0",
@@ -196,8 +208,6 @@ class UpsPageState extends BasePageState<Page> {
 		global.idenDevs = [
 			Device.fromJSON(data["ups"]).id
 		];
-		global.turnOffLoadingNext = true;
-		global.refreshTimer.refreshPointSensor();
 	}
 
 	@override
@@ -206,9 +216,12 @@ class UpsPageState extends BasePageState<Page> {
 		for (PointVal pv in data) {
 			String poiName = global.protocolMapper[pv.id];
 			if (_values[poiName] != null) {
-				_values[poiName] = pv.value.toStringAsFixed(1);
+				if (poiName == "运行模式") {
+					_values[poiName] = _modMap[pv.value] != null ? _modMap[pv.value] : "未知模式";
+				} else {
+					_values[poiName] = pv.value.toStringAsFixed(1);
+				}
 			}
 		}
-		global.turnOffLoadingPoint(context);
 	});
 }

@@ -22,10 +22,10 @@ class EnvPageState extends BasePageState<Page> {
 	Map<String, Device> _hotDevs = {};
 	String _switcherID = "";
 	Map<String, String> _switcher = {
-		"前门": "0",
-		"后门": "0",
-		"水浸": "0",
-		"烟雾": "0"
+		"前门": "未知",
+		"后门": "未知",
+		"水浸": "未知",
+		"烟雾": "未知"
 	};
 
 	@override
@@ -99,42 +99,38 @@ class EnvPageState extends BasePageState<Page> {
 	String pageId() => "env";
 
 	@override
-	void hdlDevices(data) {
-		setState(() {
-			if (data["cloud_ch"] != null) {
-				_cloudDevs = {};
-				for (var devData in data["cloud_ch"]) {
-					var device = Device.fromJSON(devData);
-					_cloudDevs[device.id] = device;
-				}
+	void hdlDevices(data) => setState(() {
+		if (data["cloud_ch"] != null) {
+			_cloudDevs = {};
+			for (var devData in data["cloud_ch"]) {
+				var device = Device.fromJSON(devData);
+				_cloudDevs[device.id] = device;
 			}
-			if (data["hot_ch"] != null) {
-				_hotDevs = {};
-				for (var devData in data["hot_ch"]) {
-					var device = Device.fromJSON(devData);
-					_hotDevs[device.id] = device;
-				}
+		}
+		if (data["hot_ch"] != null) {
+			_hotDevs = {};
+			for (var devData in data["hot_ch"]) {
+				var device = Device.fromJSON(devData);
+				_hotDevs[device.id] = device;
 			}
-			if (data["switcher"] != null && data["switcher"].isNotEmpty) {
-				_switcherID = Device.fromJSON(data["switcher"][0]).id;
+		}
+		if (data["switcher"] != null && data["switcher"].isNotEmpty) {
+			_switcherID = Device.fromJSON(data["switcher"][0]).id;
+		}
+		if (global.currentDevID.isEmpty) {
+			if (_cloudDevs.isNotEmpty) {
+				global.currentDevID = _cloudDevs.keys.first;
+			} else if (_hotDevs.isNotEmpty) {
+				global.currentDevID = _hotDevs.keys.first;
 			}
-			if (global.currentDevID.isEmpty) {
-				if (_cloudDevs.isNotEmpty) {
-					global.currentDevID = _cloudDevs.keys.first;
-				} else if (_hotDevs.isNotEmpty) {
-					global.currentDevID = _hotDevs.keys.first;
-				}
-			}
-		});
+		}
 		global.idenDevs = [];
 		global.idenDevs.addAll(_cloudDevs.keys);
 		global.idenDevs.addAll(_hotDevs.keys);
 		if (_switcherID.isNotEmpty) {
 			global.idenDevs.add(_switcherID);
 		}
-		global.turnOffLoadingNext = true;
-		global.refreshTimer.refreshPointSensor();
-	}
+	});
 
 	@override
 	void hdlPointVals(dynamic data) => setState(() {
@@ -156,10 +152,9 @@ class EnvPageState extends BasePageState<Page> {
 			if (_switcherID == pv.deviceId) {
 				String poiName = global.protocolMapper[pv.id];
 				if (_switcher[poiName] != null) {
-					_switcher[poiName] = pv.value.toStringAsFixed(0);
+					_switcher[poiName] = pv.value != 0 ? "开" : "关";
 				}
 			}
 		}
-		global.turnOffLoadingPoint(context);
 	});
 }

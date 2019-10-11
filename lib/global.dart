@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -47,29 +49,29 @@ final Map<String, ComponentInfo> componentInfos = {
 	"warning":  ComponentInfo("warning", "告警", Dashboard(warning.Page()), 1, 1),
 	"history":  ComponentInfo("history", "历史", Dashboard(history.Page()), 7, 3)
 };
-bool pageLoading = false;
-bool turnOffLoadingNext = false;
-void toIdenPage(BuildContext context, String pid) {
-	currentDevID = "";
+toIdenPage(BuildContext context, String pid) {
+	currentPageID = pid;
 	Navigator.push(context, PageSwitchRoute(componentInfos[pid].page));
-	showLoadingPage(context);
-}
-void showLoadingPage(BuildContext context) {
-	pageLoading = true;
-	showDialog(context: context, builder: (BuildContext context) => SimpleDialog(
+
+	showDialog(context: context, barrierDismissible: false, builder: (BuildContext context) => SimpleDialog(
 		elevation: 0,
 		backgroundColor: Colors.transparent,
 		children: <Widget>[
 			SpinKitFadingCircle(color: Colors.white, size: 100)
 		]
 	));
-}
-void turnOffLoadingPoint(BuildContext context) {
-	if (pageLoading && turnOffLoadingNext) {
-		pageLoading = false;
-		turnOffLoadingNext = false;
+
+	Timer(Duration(milliseconds: 200), () async {
+		currentDevID = "";
+		// 暂停所有定时任务
+		refreshTimer.stop();
+		// 手动启动页面请求
+		await refreshTimer.refreshIdenPrefix("devPageOf");
+		// 根据收到的数据调整当前设备，并再次启动定时任务
+		await refreshTimer.start();
+
 		Navigator.pop(context);
-	}
+	});
 }
 final RefreshTimer refreshTimer = RefreshTimer();
 bool manualLight = false;
@@ -109,7 +111,7 @@ const Map<String, String> protocolMapper = {
 	"28539519":	"电池模式",
 	"29399240":	"在线模式",
 	"12453288":	"输出电压不良",
-	"13574393":	"运行模式",
+	"11811578":	"运行模式",
 	"20334398":	"电池容量",
 	"20986224":	"电池剩余时间",
 	"27014081":	"输入电压",
