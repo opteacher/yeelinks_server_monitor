@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:english_words/english_words.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/services.dart';
@@ -132,8 +133,7 @@ class Instrument extends StatelessWidget {
 	double _max;
 	double _min;
 	int _numScales;
-	double _maxScale;
-	double _step;
+	Map<Offset, Color> _scalesColor;
 	double _value = 0.0;
 	String _suffix;
 
@@ -142,17 +142,17 @@ class Instrument extends StatelessWidget {
 		int numScales,
 		double max,
 		double min = 0.0,
-		double maxScale = -1,
+		Map<Offset, Color> scalesColor = const {},
 		String suffix = "",
 		double value = 0.0
 	}): _radius = radius, _max = max, _min = min, _numScales = numScales,
-		_maxScale = maxScale, _value = value, _suffix = suffix;
+			_scalesColor = scalesColor, _value = value, _suffix = suffix;
 
 	@override
 	Widget build(BuildContext context) => Center(child: Column(children: <Widget>[
 		CustomPaint(
 			size: Size(2 * _radius, 1.5 * _radius),
-			painter: InstrumentGraph(_radius, _numScales, _max, _min, _maxScale)
+			painter: InstrumentGraph(_radius, _numScales, _max, _min, _scalesColor)
 				..updateValue(_value),
 		),
 		Text(
@@ -168,12 +168,12 @@ class InstrumentGraph extends CustomPainter {
 	final int numScales;
 	final double max;
 	final double min;
-	final double maxScale;
+	final Map<Offset, Color> scalesColor;
 	double poiLen;
 	final double poiWid = 5.0;
 	double _angle = -210.0;
 
-	InstrumentGraph(this.radius, this.numScales, this.max, this.min, this.maxScale) {
+	InstrumentGraph(this.radius, this.numScales, this.max, this.min, this.scalesColor) {
 		this.poiLen = radius * 0.6;
 	}
 
@@ -205,15 +205,17 @@ class InstrumentGraph extends CustomPainter {
 			center: center,
 			radius: radius
 		), -210.0 * rate, 240 * rate, false, _paint);
-		// 绘制警告段
-		double maxSclAgl = maxScale != -1 ? (max - maxScale) / (max - min) * 240 : 30;
-		double begAgl = 30 - maxSclAgl;
-		_paint
-			..color = Colors.red[300];
-		canvas.drawArc(Rect.fromCircle(
-			center: center,
-			radius: radius - 10
-		), begAgl * rate, maxSclAgl * rate, false, _paint);
+		// 绘制颜色段
+		final rangeRate = 1 / (max - min);
+		for (Offset range in scalesColor.keys.toList()) {
+			double aglRng = (range.dy - range.dx) * rangeRate * 240;
+			double aglBeg = rangeRate * (range.dx - min) * 240 - 210;
+			_paint.color = scalesColor[range];
+			canvas.drawArc(Rect.fromCircle(
+				center: center,
+				radius: radius - 10
+			), aglBeg * rate, aglRng * rate, false, _paint);
+		}
 		// 绘制刻度
 		final scale = 240.0 / numScales;
 		_paint
@@ -228,7 +230,12 @@ class InstrumentGraph extends CustomPainter {
 		)
 			..layout();
 		final wdsLen = radius * 0.75;
-		final dt = (max - min) / numScales;
+		final dt = (max - min) / numScales.toDouble();
+		int fixed = 0;
+		if (dt - dt.toInt() != 0) {
+			final dtStr = dt.toStringAsFixed(1);
+			fixed = dt == double.parse(dtStr) ? 1 : 2;
+		}
 		for (double a = -211, t = min; a <= 30 && t <= max; a += scale, t += dt) {
 			canvas.drawArc(Rect.fromCircle(
 				center: center,
@@ -236,7 +243,7 @@ class InstrumentGraph extends CustomPainter {
 			), a * rate, 2 * rate, false, _paint);
 			_tpaint
 				..text = TextSpan(
-					text: t.toStringAsFixed(0),
+					text: t.toStringAsFixed(fixed),
 					style: TextStyle(color: Colors.green[400])
 				)
 				..layout();
@@ -326,6 +333,7 @@ class SimpleTimeSeriesChartState extends State<SimpleTimeSeriesChart> {
 				groupValue: _active,
 				onChanged: (TimeSectionEnum value) {
 					setState(() { _active = value; });
+					global.refreshTimer.refresh(context, global.currentDevID, null);
 				})
 			));
 		}
@@ -500,7 +508,7 @@ class RefreshTimer {
 	start() async {
 		await _refresh(null);
 		if (_timer == null || !_timer.isActive) {
-			_timer = Timer.periodic(const Duration(seconds: 30), _refresh);
+			_timer = Timer.periodic(const Duration(seconds: 2), _refresh);
 		}
 	}
 
@@ -551,6 +559,28 @@ class RefreshTimer {
 	cancel() => _timer.cancel();
 
 	TimerJob getJob(String iden) => _jobs[iden];
+
+	refresh(BuildContext context, String selDevID, Future<dynamic> Function() callback) async {
+		showDialog(context: context, barrierDismissible: false, builder: (BuildContext context) => SimpleDialog(
+			elevation: 0,
+			backgroundColor: Colors.transparent,
+			children: <Widget>[
+				SpinKitFadingCircle(color: Colors.white, size: 100)
+			]
+		));
+
+		global.currentDevID = selDevID;
+		// 暂停所有定时任务
+		stop();
+		// 有回调则执行
+		if (callback != null) {
+			await callback();
+		}
+		// 根据收到的数据调整当前设备，并再次启动定时任务
+		await start();
+
+		Navigator.pop(context);
+	}
 }
 
 class PageSwitchRoute extends PageRouteBuilder {

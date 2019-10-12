@@ -56,10 +56,13 @@ class HomePageState extends BasePageState<Page> {
 					padding: EdgeInsets.only(top: 20),
 					child: Instrument(
 						radius: 110.0,
-						numScales: 3,
+						numScales: 4,
 						max: 4.0,
 						min: 1.0,
-						maxScale: 3.0,
+						scalesColor: {
+							Offset(2.5, 3.25): Colors.orange,
+							Offset(3.25, 4): Colors.red
+						},
 						value: _pue,
 					)
 				)),
@@ -70,7 +73,10 @@ class HomePageState extends BasePageState<Page> {
 						radius: 110.0,
 						numScales: 10,
 						max: 120.0,
-						maxScale: 96,
+						scalesColor: {
+							Offset(60, 78): Colors.orange,
+							Offset(78, 120): Colors.red
+						},
 						suffix: "%",
 						value: _load,
 					)

@@ -16,7 +16,6 @@ class AircondPageState extends BasePageState<Page> {
 
 	bool _showDetail = false;
 	List<Device> _airconds = [];
-	Device _selAircond;
 	Map<String, String> _values = {
 		"送风温度": "0.0",
 		"回风温度": "0.0",
@@ -45,7 +44,7 @@ class AircondPageState extends BasePageState<Page> {
 				),
 				margin: EdgeInsets.all(3.5),
 				padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-				child: ListView(children: _airconds.map<Widget>((acd) => (_selAircond != null && _selAircond.id == acd.id ? FlatButton(
+				child: ListView(children: _airconds.map<Widget>((acd) => (global.currentDevID == acd.id ? FlatButton(
 					shape: RoundedRectangleBorder(
 						side: BorderSide(color: primaryColor),
 						borderRadius: BorderRadius.all(Radius.circular(3))
@@ -56,9 +55,9 @@ class AircondPageState extends BasePageState<Page> {
 					textColor: primaryColor,
 					borderSide: BorderSide(color: primaryColor),
 					child: Text(acd.name), onPressed: () => setState(() {
-						_selAircond = acd;
-						global.idenDevs = [_selAircond.id];
-						global.refreshTimer.refreshIdenPrefix("poiValueOf");
+						global.refreshTimer.refresh(context, acd.id, () async {
+							global.idenDevs = [acd.id];
+						});
 					}))
 				)).toList())
 			)),
@@ -299,9 +298,9 @@ class AircondPageState extends BasePageState<Page> {
 		for (var acd in data["devices"]) {
 			_airconds.add(Device.fromJSON(acd));
 		}
-		if (_selAircond == null && _airconds.isNotEmpty) {
-			_selAircond = _airconds[0];
-			global.idenDevs = [_selAircond.id];
+		if (global.currentDevID.isEmpty) {
+			global.currentDevID = _airconds[0].id;
+			global.idenDevs = [global.currentDevID];
 		}
 	});
 

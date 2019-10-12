@@ -49,23 +49,42 @@ class ElectronPageState extends BasePageState<Page> {
 					textColor: primaryColor,
 					borderSide: BorderSide(color: primaryColor),
 					child: Text(pdu.name), onPressed: () => setState(() {
-						global.currentDevID = pdu.id;
+						global.idenDevs = [pdu.id];
 						if (_mainEleID.isNotEmpty) {
-							global.idenDevs = [_mainEleID];
+							global.idenDevs.add(_mainEleID);
 						}
-						global.idenDevs.add(global.currentDevID);
-						global.refreshTimer.refreshIdenPrefix("poiValueOf");
+						global.refreshTimer.refresh(context, pdu.id, null);
 					}))
 				)).toList())
 			)),
 			Expanded(flex: 4, child: Column(children: <Widget>[
 				DataCard(title: "主路输入", child: Padding(padding: EdgeInsets.all(20), child: Row(children: <Widget>[
 					Expanded(child: Padding(padding: EdgeInsets.only(top: 10),
-						child: Instrument(radius: 120.0, numScales: 10, max: 260.0, maxScale: 208.0, value: double.parse(_eleVals["电压"]), suffix: "V")
+						child: Instrument(
+							radius: 120.0,
+							numScales: 10,
+							max: 300.0,
+							scalesColor: {
+								Offset(0, 180): Colors.grey,
+//								Offset(180, 240): Colors.green,
+								Offset(240, 300): Colors.red
+							},
+							value: double.parse(_eleVals["电压"]),
+							suffix: "V"
+						)
 					)),
 					VerticalDivider(width: 50),
 					Expanded(child: Padding(padding: EdgeInsets.only(top: 10),
-						child: Instrument(radius: 120.0, numScales: 8, max: 32.0, maxScale: 26.0, value: double.parse(_eleVals["电流"]), suffix: "A",)
+						child: Instrument(
+							radius: 120.0,
+							numScales: 8,
+							max: 20.0,
+							scalesColor: {
+								Offset(16, 20): Colors.red
+							},
+							value: double.parse(_eleVals["电流"]),
+							suffix: "A"
+						)
 					)),
 					VerticalDivider(width: 50),
 					Expanded(child: Column(children: <Widget>[

@@ -52,25 +52,11 @@ final Map<String, ComponentInfo> componentInfos = {
 toIdenPage(BuildContext context, String pid) {
 	currentPageID = pid;
 	Navigator.push(context, PageSwitchRoute(componentInfos[pid].page));
-
-	showDialog(context: context, barrierDismissible: false, builder: (BuildContext context) => SimpleDialog(
-		elevation: 0,
-		backgroundColor: Colors.transparent,
-		children: <Widget>[
-			SpinKitFadingCircle(color: Colors.white, size: 100)
-		]
-	));
-
-	Timer(Duration(milliseconds: 200), () async {
-		currentDevID = "";
-		// 暂停所有定时任务
-		refreshTimer.stop();
-		// 手动启动页面请求
-		await refreshTimer.refreshIdenPrefix("devPageOf");
-		// 根据收到的数据调整当前设备，并再次启动定时任务
-		await refreshTimer.start();
-
-		Navigator.pop(context);
+	Timer(Duration(milliseconds: 200), () {
+		refreshTimer.refresh(context, "", () async {
+			// 手动启动页面请求
+			await refreshTimer.refreshIdenPrefix("devPageOf");
+		});
 	});
 }
 final RefreshTimer refreshTimer = RefreshTimer();

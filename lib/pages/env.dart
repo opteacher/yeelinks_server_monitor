@@ -22,10 +22,10 @@ class EnvPageState extends BasePageState<Page> {
 	Map<String, Device> _hotDevs = {};
 	String _switcherID = "";
 	Map<String, String> _switcher = {
-		"前门": "未知",
-		"后门": "未知",
-		"水浸": "未知",
-		"烟雾": "未知"
+		"前门": "关",
+		"后门": "关",
+		"水浸": "正常",
+		"烟雾": "正常"
 	};
 
 	@override
@@ -74,7 +74,7 @@ class EnvPageState extends BasePageState<Page> {
 			titleBar = FlatButton(padding: EdgeInsets.all(0), child: ListTile(
 				title: Text(dev.name, style: _dividerTxtStyle)
 			), color: Colors.grey[100], onPressed: () => setState(() {
-				global.currentDevID = dev.id;
+				global.refreshTimer.refresh(context, dev.id, null);
 			}));
 		}
 		return Container(margin: EdgeInsets.only(bottom: 50), child: Column(children: <Widget>[

@@ -32,7 +32,7 @@ class HistoryPageState extends BasePageState<Page> {
 	int _hlfMaxPages = 3;
 	DateTime _begTime = DateTime.now().subtract(Duration(days: 1));
 	DateTime _endTime = DateTime.now();
-	bool _showHistory = false;
+	bool _showActive = true;
 	List<DevPoint> _devPoints = [];
 	List<TimeSeriesSales> _poiVals = [TimeSeriesSales(DateTime.now(), 0)];
 	int _selPoi = 0;
@@ -112,7 +112,7 @@ class HistoryPageState extends BasePageState<Page> {
 			groupValue: _selPoi,
 			onChanged: (int value) {
 				setState(() { _selPoi = value; });
-				
+				global.refreshTimer.refresh(context, global.currentDevID, null);
 			}
 		)).toList();
 	}
@@ -134,6 +134,7 @@ class HistoryPageState extends BasePageState<Page> {
 						setState(() {
 							_begTime = pkTime;
 						});
+						global.refreshTimer.refresh(context, global.currentDevID, null);
 					}
 				}
 			),
@@ -152,17 +153,19 @@ class HistoryPageState extends BasePageState<Page> {
 						setState(() {
 							_endTime = pkTime;
 						});
+						global.refreshTimer.refresh(context, global.currentDevID, null);
 					}
 				}
 			),
 			_historyPanel ? Row(children: <Widget>[
-				Padding(padding: EdgeInsets.only(left: 10), child: Text(_showHistory ? "历史数据" : "实时数据")),
+				Padding(padding: EdgeInsets.only(left: 10), child: Text(!_showActive ? "历史数据" : "实时数据")),
 				Switch(activeColor: primaryColor, onChanged: (bool value) => setState(() {
-					_showHistory = !_showHistory;
-					global.refreshTimer.getJob("getDeviceEventHistory").doActive(_showHistory);
-					global.refreshTimer.getJob("getDeviceEventActive").doActive(!_showHistory);
+					_showActive = !_showActive;
+					global.refreshTimer.getJob("getDeviceEventHistory").doActive(!_showActive);
+					global.refreshTimer.getJob("getDeviceEventActive").doActive(_showActive);
 					_curPage = 1;
-				}), value: _showHistory)
+					global.refreshTimer.refresh(context, global.currentDevID, null);
+				}), value: _showActive)
 			]) : Expanded(child: Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
 				Text("*点位栏可滚动", style: TextStyle(color: primaryColor))
 			]))
@@ -329,13 +332,14 @@ class HistoryPageState extends BasePageState<Page> {
 										return OutlineButton(
 											borderSide: BorderSide(color: primaryColor),
 											child: Text(device.name, style: TextStyle(color: primaryColor)),
-											onPressed: () async {
-												global.currentDevID = device.id;
-												ResponseInfo ri = await getDevPoints();
-												setState(() {
-													_curPage = 1;
-													_devPoints = ri.data != null ? ri.data : [];
-													_poiVals = [];
+											onPressed: () {
+												global.refreshTimer.refresh(context, device.id, () async {
+													ResponseInfo ri = await getDevPoints();
+													setState(() {
+														_curPage = 1;
+														_devPoints = ri.data != null ? ri.data : [];
+														_poiVals = [];
+													});
 												});
 											}
 										);

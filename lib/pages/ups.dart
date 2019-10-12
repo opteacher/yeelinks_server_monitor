@@ -93,7 +93,10 @@ class UpsPageState extends BasePageState<Page> {
 							radius: 120.0,
 							numScales: 10,
 							max: 120.0,
-							maxScale: 96,
+							scalesColor: {
+								Offset(60, 78): Colors.orange,
+								Offset(78, 120): Colors.red
+							},
 							suffix: "%",
 							value: double.parse(_values["UPS负载率"])
 						)
