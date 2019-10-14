@@ -114,7 +114,7 @@ class DescListItem extends StatelessWidget {
 		];
 		if (content.blocked) {
 			children.add(Container(
-				padding: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+				padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
 				decoration: BoxDecoration(
 					color: Colors.grey[100],
 					borderRadius: BorderRadius.all(Radius.circular(4))

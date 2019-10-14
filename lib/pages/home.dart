@@ -89,13 +89,13 @@ class HomePageState extends BasePageState<Page> {
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
 							DescListItemTitle("冷通道温度", size: 18.0),
-							DescListItemContent(_values["冷通道温"], blocked: true, horizontal: 1),
+							DescListItemContent(_values["冷通道温"], blocked: true),
 							contentAlign: TextAlign.center,
 							suffix: DescListItemSuffix(text: "℃")
 						),
 						DescListItem(
 							DescListItemTitle("热通道温度", size: 18.0),
-							DescListItemContent(_values["热通道温"], blocked: true, horizontal: 1),
+							DescListItemContent(_values["热通道温"], blocked: true),
 							contentAlign: TextAlign.center,
 							suffix: DescListItemSuffix(text: "℃")
 						),
@@ -114,13 +114,13 @@ class HomePageState extends BasePageState<Page> {
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
 							DescListItemTitle("冷通道湿度", size: 18.0),
-							DescListItemContent(_values["冷通道湿"], blocked: true, horizontal: 1),
+							DescListItemContent(_values["冷通道湿"], blocked: true),
 							contentAlign: TextAlign.center,
 							suffix: DescListItemSuffix(text: "%")
 						),
 						DescListItem(
 							DescListItemTitle("热通道湿度", size: 18.0),
-							DescListItemContent(_values["热通道湿"], blocked: true, horizontal: 1),
+							DescListItemContent(_values["热通道湿"], blocked: true),
 							contentAlign: TextAlign.center,
 							suffix: DescListItemSuffix(text: "%")
 						),
