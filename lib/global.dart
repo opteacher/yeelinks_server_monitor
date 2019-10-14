@@ -23,6 +23,7 @@ String currentPageID = "home";
 String currentGroup = "AnBKy5wyBwMLNaoc";
 String currentDevID = "";
 List<Device> devices = [];
+int upsMode = 17408;
 class ComponentInfo {
 	final String _id;
 	final String _name;

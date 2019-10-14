@@ -73,7 +73,7 @@ class DescListItemSuffix {
 	final String text;
 	Color color;
 
-	DescListItemSuffix({this.text = "", this.color = Colors.black});
+	DescListItemSuffix({this.text = "", this.color = const Color(0xFF757575)});
 }
 
 class DescListItem extends StatelessWidget {
@@ -613,7 +613,7 @@ class UpsRunningModState extends State<UpsRunningMod> {
 	@override
 	Widget build(BuildContext context) => Center(child: CustomPaint(
 		size: Size(400, 400),
-		painter: UpsRunningModPainter(_imgBYPASS, _imgInput, _imgACDC, _imgDCAC, _imgBatt)
+		painter: UpsRunningModPainter( _imgBYPASS, _imgInput, _imgACDC, _imgDCAC, _imgBatt)
 	));
 
 	@override
@@ -653,54 +653,27 @@ class UpsRunningModPainter extends CustomPainter {
 			return;
 		}
 
-		double blkWid = 100;
+		double lblkWid = 100;
+		double sblkWid = 50;
 		double blkHgt = 50;
+		double hfWid = size.width / 2;
+		double ofWid = hfWid / 2;
+		double margin = (ofWid - sblkWid) / 2;
+		double otHgt = size.height / 4;
 
 		Paint _paint = Paint()
-			..color = Colors.grey[200];
-		double hfWid = size.width / 2;
-		canvas.drawImageRect(_imgBYPASS,
-			Rect.fromLTWH(0, 0, _imgBYPASS.width.toDouble(), _imgBYPASS.height.toDouble()),
-			Rect.fromLTWH(hfWid - blkWid / 2, 0, blkWid, blkHgt),
-			_paint);
+			..color = Color(0xffc2c2c2);
 
-		blkWid = 50;
-
-		double ofWid = hfWid / 2;
-		double margin = (ofWid - blkWid) / 2;
-		double otHgt = size.height / 4;
-		canvas.drawImageRect(_imgInput,
-			Rect.fromLTWH(0, 0, _imgInput.width.toDouble(), _imgInput.height.toDouble()),
-			Rect.fromLTWH(margin, otHgt, blkWid, blkHgt),
-			_paint);
-		canvas.drawImageRect(_imgACDC,
-			Rect.fromLTWH(0, 0, _imgACDC.width.toDouble(), _imgACDC.height.toDouble()),
-			Rect.fromLTWH(margin + ofWid, otHgt, blkWid, blkHgt),
-			_paint);
-		canvas.drawImageRect(_imgDCAC,
-			Rect.fromLTWH(0, 0, _imgDCAC.width.toDouble(), _imgDCAC.height.toDouble()),
-			Rect.fromLTWH(margin + hfWid, otHgt, blkWid, blkHgt),
-			_paint);
-		canvas.drawImageRect(_imgInput,
-			Rect.fromLTWH(0, 0, _imgInput.width.toDouble(), _imgInput.height.toDouble()),
-			Rect.fromLTWH(margin + hfWid + ofWid, otHgt, blkWid, blkHgt),
-			_paint);
-
-		canvas.drawImageRect(_imgBatt,
-			Rect.fromLTWH(0, 0, _imgBatt.width.toDouble(), _imgBatt.height.toDouble()),
-			Rect.fromLTWH(hfWid - 25, otHgt * 2, blkWid, blkHgt),
-			_paint);
-
+		// 画链路
 		Path path = Path();
-		blkWid = 100;
-		double hfBlkWid = blkWid / 2;
+		_paint
+			..style = PaintingStyle.stroke
+			..strokeWidth = 10;
+		double hfBlkWid = lblkWid / 2;
 		double hfBlkHgt = blkHgt / 2;
 		path.moveTo(hfWid - hfBlkWid, hfBlkHgt);
 		path.lineTo(ofWid, hfBlkHgt);
 		path.lineTo(ofWid, otHgt + hfBlkHgt);
-		_paint
-			..style = PaintingStyle.stroke
-			..strokeWidth = 10;
 		canvas.drawPath(path, _paint);
 
 		path.reset();
@@ -710,9 +683,8 @@ class UpsRunningModPainter extends CustomPainter {
 		path.lineTo(tfWid, otHgt + hfBlkHgt);
 		canvas.drawPath(path, _paint);
 
-		blkWid = 50;
 		canvas.drawLine(
-			Offset(margin + blkWid, otHgt + hfBlkHgt),
+			Offset(margin + sblkWid, otHgt + hfBlkHgt),
 			Offset(margin + ofWid, otHgt + hfBlkHgt), _paint);
 
 		canvas.drawLine(
@@ -720,12 +692,88 @@ class UpsRunningModPainter extends CustomPainter {
 			Offset(hfWid + margin, otHgt + hfBlkHgt), _paint);
 
 		canvas.drawLine(
-			Offset(margin + hfWid + blkWid, otHgt + hfBlkHgt),
+			Offset(margin + hfWid + sblkWid, otHgt + hfBlkHgt),
 			Offset(margin + hfWid + ofWid, otHgt + hfBlkHgt), _paint);
 
 		canvas.drawLine(
 			Offset(hfWid, otHgt + hfBlkHgt),
 			Offset(hfWid, otHgt * 2), _paint);
+
+		// 画激活的链路
+		switch (global.upsMode) {
+			case 19456:// 在线模式
+				_paint.color = Color(0xff3dcd58);
+
+				canvas.drawLine(
+					Offset(margin + sblkWid, otHgt + hfBlkHgt),
+					Offset(margin + ofWid, otHgt + hfBlkHgt), _paint);
+
+				canvas.drawLine(
+					Offset(hfWid - margin, otHgt + hfBlkHgt),
+					Offset(hfWid + margin, otHgt + hfBlkHgt), _paint);
+
+				canvas.drawLine(
+					Offset(margin + hfWid + sblkWid, otHgt + hfBlkHgt),
+					Offset(margin + hfWid + ofWid, otHgt + hfBlkHgt), _paint);
+				break;
+			case 16896:// 电池模式
+				_paint.color = Color(0xff3dcd58);
+
+				canvas.drawLine(
+					Offset(hfWid, otHgt + hfBlkHgt),
+					Offset(hfWid + margin, otHgt + hfBlkHgt), _paint);
+
+				canvas.drawLine(
+					Offset(margin + hfWid + sblkWid, otHgt + hfBlkHgt),
+					Offset(margin + hfWid + ofWid, otHgt + hfBlkHgt), _paint);
+
+				canvas.drawLine(
+					Offset(hfWid, otHgt + hfBlkHgt - 5),
+					Offset(hfWid, otHgt * 2), _paint);
+				break;
+			case 22784:// 旁路模式
+				_paint.color = Color(0xff3dcd58);
+
+				path.moveTo(hfWid - hfBlkWid, hfBlkHgt);
+				path.lineTo(ofWid, hfBlkHgt);
+				path.lineTo(ofWid, otHgt + hfBlkHgt);
+				path.lineTo(margin + sblkWid, otHgt + hfBlkHgt);
+				canvas.drawPath(path, _paint);
+
+				path.reset();
+				path.moveTo(hfWid + hfBlkWid, hfBlkHgt);
+				path.lineTo(tfWid, hfBlkHgt);
+				path.lineTo(tfWid, otHgt + hfBlkHgt);
+				path.lineTo(margin + hfWid + ofWid, otHgt + hfBlkHgt);
+				canvas.drawPath(path, _paint);
+				break;
+		}
+
+		// 画各个模块
+		canvas.drawImageRect(_imgBYPASS,
+			Rect.fromLTWH(0, 0, _imgBYPASS.width.toDouble(), _imgBYPASS.height.toDouble()),
+			Rect.fromLTWH(hfWid - lblkWid / 2, 0, lblkWid, blkHgt),
+			_paint);
+		canvas.drawImageRect(_imgInput,
+			Rect.fromLTWH(0, 0, _imgInput.width.toDouble(), _imgInput.height.toDouble()),
+			Rect.fromLTWH(margin, otHgt, sblkWid, blkHgt),
+			_paint);
+		canvas.drawImageRect(_imgACDC,
+			Rect.fromLTWH(0, 0, _imgACDC.width.toDouble(), _imgACDC.height.toDouble()),
+			Rect.fromLTWH(margin + ofWid, otHgt, sblkWid, blkHgt),
+			_paint);
+		canvas.drawImageRect(_imgDCAC,
+			Rect.fromLTWH(0, 0, _imgDCAC.width.toDouble(), _imgDCAC.height.toDouble()),
+			Rect.fromLTWH(margin + hfWid, otHgt, sblkWid, blkHgt),
+			_paint);
+		canvas.drawImageRect(_imgInput,
+			Rect.fromLTWH(0, 0, _imgInput.width.toDouble(), _imgInput.height.toDouble()),
+			Rect.fromLTWH(margin + hfWid + ofWid, otHgt, sblkWid, blkHgt),
+			_paint);
+		canvas.drawImageRect(_imgBatt,
+			Rect.fromLTWH(0, 0, _imgBatt.width.toDouble(), _imgBatt.height.toDouble()),
+			Rect.fromLTWH(hfWid - 25, otHgt * 2, sblkWid, blkHgt),
+			_paint);
 	}
 
 	@override

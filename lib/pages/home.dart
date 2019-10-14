@@ -26,7 +26,6 @@ class HomePageState extends BasePageState<Page> {
 	double _load = 0.0;
 	double _pue = 0.0;
 
-
 	@override
 	void initState() {
 		super.initState();
@@ -66,7 +65,10 @@ class HomePageState extends BasePageState<Page> {
 						value: _pue,
 					)
 				)),
-				DataCard(title: "UPS运行模式", child: Padding(padding: EdgeInsets.only(top: 20), child: UpsRunningMod())),
+				DataCard(title: "UPS运行模式", child: Padding(
+					padding: EdgeInsets.only(top: 20),
+					child: UpsRunningMod()
+				)),
 				DataCard(title: "UPS负载率", child: Padding(
 					padding: EdgeInsets.only(top: 20),
 					child: Instrument(
@@ -87,13 +89,15 @@ class HomePageState extends BasePageState<Page> {
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
 							DescListItemTitle("冷通道温度", size: 18.0),
-							DescListItemContent(_values["冷通道温"], blocked: true),
-							contentAlign: TextAlign.center
+							DescListItemContent(_values["冷通道温"], blocked: true, horizontal: 1),
+							contentAlign: TextAlign.center,
+							suffix: DescListItemSuffix(text: "℃")
 						),
 						DescListItem(
 							DescListItemTitle("热通道温度", size: 18.0),
-							DescListItemContent(_values["热通道温"], blocked: true),
-							contentAlign: TextAlign.center
+							DescListItemContent(_values["热通道温"], blocked: true, horizontal: 1),
+							contentAlign: TextAlign.center,
+							suffix: DescListItemSuffix(text: "℃")
 						),
 						DescListItem(
 							DescListItemTitle("烟            感", size: 18.0),
@@ -110,13 +114,15 @@ class HomePageState extends BasePageState<Page> {
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
 							DescListItemTitle("冷通道湿度", size: 18.0),
-							DescListItemContent(_values["冷通道湿"], blocked: true),
-							contentAlign: TextAlign.center
+							DescListItemContent(_values["冷通道湿"], blocked: true, horizontal: 1),
+							contentAlign: TextAlign.center,
+							suffix: DescListItemSuffix(text: "%")
 						),
 						DescListItem(
 							DescListItemTitle("热通道湿度", size: 18.0),
-							DescListItemContent(_values["热通道湿"], blocked: true),
-							contentAlign: TextAlign.center
+							DescListItemContent(_values["热通道湿"], blocked: true, horizontal: 1),
+							contentAlign: TextAlign.center,
+							suffix: DescListItemSuffix(text: "%")
 						),
 						DescListItem(
 							DescListItemTitle("门            禁", size: 18.0),
@@ -186,6 +192,9 @@ class HomePageState extends BasePageState<Page> {
 			for (var swh in data["switcher"].toList()) {
 				_values[swh["name"]] = swh["value"];
 			}
+		}
+		if (data["ups_status"] != null) {
+			global.upsMode = data["ups_status"];
 		}
 	});
 

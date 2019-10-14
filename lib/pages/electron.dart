@@ -90,19 +90,23 @@ class ElectronPageState extends BasePageState<Page> {
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
 							DescListItemTitle("有功功率"),
-							DescListItemContent(_eleVals["有功功率"], horizontal: 50.0, blocked: true)
+							DescListItemContent(_eleVals["有功功率"], horizontal: 25.0, blocked: true),
+							suffix: DescListItemSuffix(text: "kW")
 						),
 						DescListItem(
 							DescListItemTitle("有功电能"),
-							DescListItemContent(_eleVals["有功电能"], horizontal: 50.0, blocked: true)
+							DescListItemContent(_eleVals["有功电能"], horizontal: 25.0, blocked: true),
+							suffix: DescListItemSuffix(text: "kWh")
 						),
 						DescListItem(
 							DescListItemTitle("功率因素"),
-							DescListItemContent(_eleVals["功率因素"], horizontal: 50.0, blocked: true)
+							DescListItemContent(_eleVals["功率因素"], horizontal: 25.0, blocked: true),
+							suffix: DescListItemSuffix(text: "PF")
 						),
 						DescListItem(
 							DescListItemTitle("输入频率"),
-							DescListItemContent(_eleVals["输入频率"], horizontal: 50.0, blocked: true)
+							DescListItemContent(_eleVals["输入频率"], horizontal: 25.0, blocked: true),
+							suffix: DescListItemSuffix(text: "Hz")
 						),
 					]))
 				]))),
@@ -123,7 +127,7 @@ class ElectronPageState extends BasePageState<Page> {
 						DescListItem(
 							DescListItemTitle("有功功率"),
 							DescListItemContent(_pduVals["PDU-有功功率"], horizontal: 50.0),
-							suffix: DescListItemSuffix(text: "W"),
+							suffix: DescListItemSuffix(text: "kW"),
 							horizontal: 50.0
 						),
 					])),
@@ -131,6 +135,7 @@ class ElectronPageState extends BasePageState<Page> {
 						DescListItem(
 							DescListItemTitle("功率因素"),
 							DescListItemContent(_pduVals["PDU-功率因素"], horizontal: 50.0),
+							suffix: DescListItemSuffix(text: "PF"),
 							horizontal: 50.0
 						),
 						DescListItem(

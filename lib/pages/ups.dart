@@ -59,29 +59,35 @@ class UpsPageState extends BasePageState<Page> {
 				DataCard(title: "UPS输入信息", child: Padding(padding: _infoPdg, child: Column(children: <Widget>[
 					DescListItem(
 						DescListItemTitle("输入电压", size: 20.0),
-						DescListItemContent(_values["输入电压"], blocked: true)
+						DescListItemContent(_values["输入电压"], blocked: true),
+						suffix: DescListItemSuffix(text: "V")
 					),
 					DescListItem(
 						DescListItemTitle("输入频率", size: 20.0),
-						DescListItemContent(_values["输入频率"], blocked: true)
+						DescListItemContent(_values["输入频率"], blocked: true),
+						suffix: DescListItemSuffix(text: "Hz")
 					),
 					DescListItem(
 						DescListItemTitle("旁路电压", size: 20.0),
-						DescListItemContent(_values["输入电压"], blocked: true)
+						DescListItemContent(_values["输入电压"], blocked: true),
+						suffix: DescListItemSuffix(text: "V")
 					)
 				]))),
 				DataCard(title: "UPS输出信息", child: Padding(padding: _infoPdg, child: Column(children: <Widget>[
 					DescListItem(
 						DescListItemTitle("输出电压", size: 20.0),
-						DescListItemContent(_values["输出电压"], blocked: true)
+						DescListItemContent(_values["输出电压"], blocked: true),
+						suffix: DescListItemSuffix(text: "V")
 					),
 					DescListItem(
 						DescListItemTitle("输出电流", size: 20.0),
-						DescListItemContent(_values["输出电流"], blocked: true)
+						DescListItemContent(_values["输出电流"], blocked: true),
+						suffix: DescListItemSuffix(text: "A")
 					),
 					DescListItem(
 						DescListItemTitle("输出频率", size: 20.0),
-						DescListItemContent(_values["输出频率"], blocked: true)
+						DescListItemContent(_values["输出频率"], blocked: true),
+						suffix: DescListItemSuffix(text: "Hz")
 					)
 				])))
 			])),
@@ -184,19 +190,19 @@ class UpsPageState extends BasePageState<Page> {
 		"subject": "电压",
 		"input": "{data} V",
 		"output": "{data} V",
-		"battery": "电池电压 {data} V",
+		"battery": "{data} V",
 		"others": "过载 {data}"
 	}, {
 		"subject": "电流",
 		"input": "-",
 		"output": "{data} A",
-		"battery": "电池电流 {data} A",
+		"battery": "{data} A",
 		"others": "低电池电压 {data}"
 	}, {
 		"subject": "频率",
 		"input": "{data} Hz",
 		"output": "{data} Hz",
-		"battery": "电池更换告警 {data} Hz",
+		"battery": "{data} Hz",
 		"others": "电池过充 {data}"
 	}];
 
