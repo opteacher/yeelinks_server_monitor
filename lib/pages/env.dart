@@ -22,10 +22,10 @@ class EnvPageState extends BasePageState<Page> {
 	Map<String, Device> _hotDevs = {};
 	String _switcherID = "";
 	Map<String, String> _switcher = {
-		"前门": "关",
-		"后门": "关",
-		"水浸": "正常",
-		"烟雾": "正常"
+		"防雷": "关",
+		"门禁": "关",
+		"漏水": "正常",
+		"烟感": "正常"
 	};
 
 	@override
@@ -39,19 +39,19 @@ class EnvPageState extends BasePageState<Page> {
 			DataCard(title: "历史曲线", child: SimpleTimeSeriesChart()),
 			DataCard(title: "机柜状态", height: 200, child: Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Row(children: <Widget>[
 				Expanded(child: Column(children: <Widget>[
-					Text("前门"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["前门"]))
+					Text("防雷"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["防雷"]))
 				])),
 				VerticalDivider(),
 				Expanded(child: Column(children: <Widget>[
-					Text("后门"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["后门"]))
+					Text("门禁"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["门禁"]))
 				])),
 				VerticalDivider(),
 				Expanded(child: Column(children: <Widget>[
-					Text("水浸"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["水浸"]))
+					Text("漏水"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["漏水"]))
 				])),
 				VerticalDivider(),
 				Expanded(child: Column(children: <Widget>[
-					Text("烟感"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["烟雾"]))
+					Text("烟感"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["烟感"]))
 				])),
 				VerticalDivider()
 			])))
@@ -153,8 +153,11 @@ class EnvPageState extends BasePageState<Page> {
 			}
 			if (_switcherID == pv.deviceId) {
 				String poiName = global.protocolMapper[pv.id];
-				if (_switcher[poiName] != null) {
-					_switcher[poiName] = pv.value != 0 ? "开" : "关";
+				if (_switcher[poiName] != null && (poiName == "防雷" || poiName == "门禁")) {
+					_switcher[poiName] = pv.value == 0 ? "开" : "关";
+				}
+				if (_switcher[poiName] != null && (poiName == "漏水" || poiName == "烟感")) {
+					_switcher[poiName] = pv.value == 0 ? "正常" : "异常";
 				}
 			}
 		}

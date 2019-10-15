@@ -157,7 +157,11 @@ const Map<String, String> protocolMapper = {
 	"29607741": "热通道温度",
 	"29607742": "热通道湿度",
 	"29607739": "冷通道温度",
-	"29607740": "冷通道湿度"
+	"29607740": "冷通道湿度",
+	"13615618": "防雷",
+	"14556241": "门禁",
+	"14605355": "漏水",
+	"18359908": "烟感"
 };
 const ledCtrl = const MethodChannel("com.yeelinks.plugins/led_ctrl");
 //const brightnessCtrl = const MethodChannel("com.yeelinks.plugins/bright_ctrl");
