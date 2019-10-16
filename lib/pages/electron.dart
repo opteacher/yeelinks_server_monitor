@@ -16,14 +16,14 @@ class ElectronPageState extends BasePageState<Page> {
 		"电流": "0.0",
 		"有功功率": "0.0",
 		"有功电能": "0.0",
-		"功率因素": "0.0",
+		"功率因数": "0.0",
 		"输入频率": "0.0"
 	};
 	Map<String, String> _pduVals = {
 		"PDU-输出电压": "0.0",
 		"PDU-输出电流": "0.0",
 		"PDU-有功功率": "0.0",
-		"PDU-功率因素": "0.0",
+		"PDU-功率因数": "0.0",
 		"PDU-输出频率": "0.0",
 		"PDU-有功电能": "0.0"
 	};
@@ -101,8 +101,8 @@ class ElectronPageState extends BasePageState<Page> {
 							contentWidth: 150,
 						),
 						DescListItem(
-							DescListItemTitle("功率因素"),
-							DescListItemContent(_eleVals["功率因素"], horizontal: 10.0, blocked: true),
+							DescListItemTitle("功率因数"),
+							DescListItemContent(_eleVals["功率因数"], horizontal: 10.0, blocked: true),
 							suffix: DescListItemSuffix(text: "PF"),
 							contentWidth: 150,
 						),
@@ -137,8 +137,8 @@ class ElectronPageState extends BasePageState<Page> {
 					])),
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
-							DescListItemTitle("功率因素"),
-							DescListItemContent(_pduVals["PDU-功率因素"], horizontal: 50.0),
+							DescListItemTitle("功率因数"),
+							DescListItemContent(_pduVals["PDU-功率因数"], horizontal: 50.0),
 							suffix: DescListItemSuffix(text: "PF"),
 							horizontal: 50.0
 						),
