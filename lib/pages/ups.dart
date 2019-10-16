@@ -36,7 +36,18 @@ class UpsPageState extends BasePageState<Page> {
 		"电池剩余时间": "0",
 		"电池电压": "0.0",
 		"电池电流": "0.0",
-		"电池电量不足": "0"
+		"电池电量不足": "0",
+
+		"电池开启": "0",
+		"旁路功率不稳定": "0",
+		"EEPROM错误": "0",
+		"输出过载": "0",
+		"根据用户指令，UPS准备好供电": "0",
+		"已准备供电": "0",
+		"电池电量不足": "0",
+		"电池模式": "0",
+		"在线模式": "0",
+		"输出电压不良": "0"
 	};
 
 	@override
@@ -141,43 +152,43 @@ class UpsPageState extends BasePageState<Page> {
 					]) : ListView(padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0), children: <Widget>[
 						ListTile(
 							title: Text("电池开启"),
-							trailing: Text("0")
+							trailing: Text(_values["电池开启"])
 						), Divider(),
 						ListTile(
 							title: Text("旁路功率不稳定"),
-							trailing: Text("0")
+							trailing: Text(_values["旁路功率不稳定"])
 						), Divider(),
 						ListTile(
 							title: Text("EEPROM错误"),
-							trailing: Text("0")
+							trailing: Text(_values["EEPROM错误"])
 						), Divider(),
 						ListTile(
 							title: Text("输出过载"),
-							trailing: Text("0")
+							trailing: Text(_values["输出过载"])
 						), Divider(),
 						ListTile(
 							title: Text("根据用户指令，UPS准备好供电"),
-							trailing: Text("0")
+							trailing: Text(_values["根据用户指令，UPS准备好供电"])
 						), Divider(),
 						ListTile(
 							title: Text("已准备供电"),
-							trailing: Text("0")
+							trailing: Text(_values["已准备供电"])
 						), Divider(),
 						ListTile(
 							title: Text("电池电量不足"),
-							trailing: Text("0")
+							trailing: Text(_values["电池电量不足"])
 						), Divider(),
 						ListTile(
 							title: Text("电池模式"),
-							trailing: Text("0")
+							trailing: Text(_values["电池模式"])
 						), Divider(),
 						ListTile(
 							title: Text("在线模式"),
-							trailing: Text("0")
+							trailing: Text(_values["在线模式"])
 						), Divider(),
 						ListTile(
 							title: Text("输出电压不良"),
-							trailing: Text("0")
+							trailing: Text(_values["输出电压不良"])
 						), Divider(),
 					]))
 				])),

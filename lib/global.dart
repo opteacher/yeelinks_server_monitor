@@ -10,10 +10,8 @@ import 'pages/electron.dart' as electron;
 import 'pages/ups.dart' as ups;
 import 'pages/aircond.dart' as aircond;
 import 'pages/env.dart' as env;
-import 'pages/warning.dart' as warning;
 import 'pages/history.dart' as history;
 import 'pages/setting.dart' as setting;
-import 'pages/warning.dart' as warning;
 import 'pages/history.dart' as history;
 import 'async.dart';
 import 'components.dart';
@@ -47,7 +45,6 @@ final Map<String, ComponentInfo> componentInfos = {
 	"aircond":  ComponentInfo("aircond", "空调", Dashboard(aircond.Page()), 4, 2),
 	"env":      ComponentInfo("env", "环境", Dashboard(env.Page()), 5, 2),
 	"setting":  ComponentInfo("setting", "设置", Dashboard(setting.Page()), 8, 1),
-	"warning":  ComponentInfo("warning", "告警", Dashboard(warning.Page()), 1, 1),
 	"history":  ComponentInfo("history", "历史", Dashboard(history.Page()), 7, 3)
 };
 toIdenPage(BuildContext context, String pid) {
@@ -170,3 +167,5 @@ enum ConfirmCancel {
 	CONFIRMED, CANCELED
 }
 final dtFmter = DateFormat("yyyy-MM-dd");
+final dttmParser = DateFormat("yyyy-MM-dd\THH:mm:ss");
+final dttmFmter = DateFormat("yyyy-MM-dd HH:mm:ss");

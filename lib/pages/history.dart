@@ -188,7 +188,7 @@ class HistoryPageState extends BasePageState<Page> {
 //					"标题": MyDataHeader("warning", 0.15),
 //					"说明": MyDataHeader("meaning", 0.25),
 //					"生成时间": MyDataHeader("start", 0.175),
-//					"解除时间": MyDataHeader("confirm", 0.175),
+//					"解除时间": MyDataHeader("check", 0.175),
 //					"状态": MyDataHeader("status", 0.1)
 //				}, dispRecords,
 //					vpadding: 5.0, isStriped: true, hasBorder: false,
@@ -198,6 +198,7 @@ class HistoryPageState extends BasePageState<Page> {
 //				Row(mainAxisAlignment: MainAxisAlignment.end, children: _genPages())
 //			]);
 			final Color txtClr = Colors.grey[600];
+			final String operator = _showActive ? "check" : "unchain";
 			subPanel.add(Expanded(child: ListView(children: _events.map<Widget>((rcd) => Card(
 				elevation: 0,
 				color: Colors.grey[100],
@@ -214,13 +215,15 @@ class HistoryPageState extends BasePageState<Page> {
 							Flexible(child: Text(rcd["meaning"], style: TextStyle(fontSize: 20, color: txtClr)))
 						]),
 						Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-							Text(rcd["confirmer"].isEmpty ? "-" : rcd["confirmer"], style: TextStyle(color: txtClr))
+							Text(rcd["${operator}er"].isEmpty ? "-" : rcd["${operator}er"], style: TextStyle(color: txtClr))
 						]),
 					])),
 					Column(children: <Widget>[
 						Text(rcd["start"], style: TextStyle(color: txtClr)),
 						Text("", style: TextStyle(fontSize: 25, color: txtClr)),
-						Text(rcd["confirm"] == "null" ? "-" : rcd["confirm"], style: TextStyle(color: txtClr)),
+						Text(rcd[operator] == "null" ? "-" : global.dttmFmter.format(
+							global.dttmParser.parse(rcd[operator])
+						), style: TextStyle(color: txtClr)),
 					])
 				]))
 			)).toList())));

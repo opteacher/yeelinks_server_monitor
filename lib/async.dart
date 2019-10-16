@@ -163,18 +163,33 @@ class EventRecord {
 	final String _warning;
 	final String _meaning;
 	final String _level;
-	final String _confirmer;
+	final String _checker;
 	final String _start;
-	final String _confirm;
+	final String _check;
 	final String _status;
+	final String _unchain;
+	final String _unchainer;
 
-	EventRecord(this._id, this._name, this._warning, this._meaning, this._level, this._start, this._confirm, this._status, this._confirmer);
+	EventRecord(
+		this._id,
+		this._name,
+		this._warning,
+		this._meaning,
+		this._level,
+		this._start,
+		this._check,
+		this._status,
+		this._checker,
+		this._unchain,
+		this._unchainer
+	);
 
 	EventRecord.fromJSON(Map json): _id = json["id"],
 		_name = json["device_name"], _warning = json["title"],
 		_meaning = json["content"], _level = json["level"].toString(),
-		_start = json["time"].toString(), _confirm = json["check_time"].toString(),
-		_status = json["status"].toString(), _confirmer = json["checker"];
+		_start = json["time"].toString(), _check = json["check_time"].toString(),
+		_status = json["status"].toString(), _checker = json["checker"],
+		_unchain = json["unchain_time"].toString(), _unchainer = json["unchainer"];
 
 	Map<String, String> toMap() => {
 		"id": _id.toString(),
@@ -183,9 +198,11 @@ class EventRecord {
 		"meaning": _meaning,
 		"level": _level,
 		"start": _start,
-		"confirm": _confirm,
-		"confirmer": _confirmer,
-		"status": _status
+		"check": _check,
+		"checker": _checker,
+		"status": _status,
+		"unchain": _unchain,
+		"unchainer": _unchainer
 	};
 
 	int get id => _id;
@@ -194,9 +211,11 @@ class EventRecord {
 	String get meaning => _meaning;
 	String get warning => _warning;
 	String get name => _name;
-	String get confirm => _confirm;
-	String get confirmer => _confirmer;
+	String get check => _check;
+	String get checker => _checker;
 	String get status => _status;
+	String get unchainer => _unchainer;
+	String get unchain => _unchain;
 }
 
 class DevPoint {
