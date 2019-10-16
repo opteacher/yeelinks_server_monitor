@@ -60,34 +60,40 @@ class UpsPageState extends BasePageState<Page> {
 					DescListItem(
 						DescListItemTitle("输入电压", size: 20.0),
 						DescListItemContent(_values["输入电压"], blocked: true),
-						suffix: DescListItemSuffix(text: "V")
+						suffix: DescListItemSuffix(text: "V"),
+						contentWidth: 100,
 					),
 					DescListItem(
 						DescListItemTitle("输入频率", size: 20.0),
 						DescListItemContent(_values["输入频率"], blocked: true),
-						suffix: DescListItemSuffix(text: "Hz")
+						suffix: DescListItemSuffix(text: "Hz"),
+						contentWidth: 100,
 					),
 					DescListItem(
 						DescListItemTitle("旁路电压", size: 20.0),
 						DescListItemContent(_values["输入电压"], blocked: true),
-						suffix: DescListItemSuffix(text: "V")
+						suffix: DescListItemSuffix(text: "V"),
+						contentWidth: 100,
 					)
 				]))),
 				DataCard(title: "UPS输出信息", child: Padding(padding: _infoPdg, child: Column(children: <Widget>[
 					DescListItem(
 						DescListItemTitle("输出电压", size: 20.0),
 						DescListItemContent(_values["输出电压"], blocked: true),
-						suffix: DescListItemSuffix(text: "V")
+						suffix: DescListItemSuffix(text: "V"),
+						contentWidth: 100,
 					),
 					DescListItem(
 						DescListItemTitle("输出电流", size: 20.0),
 						DescListItemContent(_values["输出电流"], blocked: true),
-						suffix: DescListItemSuffix(text: "A")
+						suffix: DescListItemSuffix(text: "A"),
+						contentWidth: 100,
 					),
 					DescListItem(
 						DescListItemTitle("输出频率", size: 20.0),
 						DescListItemContent(_values["输出频率"], blocked: true),
-						suffix: DescListItemSuffix(text: "Hz")
+						suffix: DescListItemSuffix(text: "Hz"),
+						contentWidth: 100,
 					)
 				])))
 			])),
@@ -125,13 +131,13 @@ class UpsPageState extends BasePageState<Page> {
 							titleWidth: 200.0,
 							horizontal: 50.0
 						),
-						DescListItem(
+						_values["运行模式"] == "电池模式" ? DescListItem(
 							DescListItemTitle("电池剩余时间"),
 							DescListItemContent(_values["电池剩余时间"], right: 20.0),
 							suffix: DescListItemSuffix(text: "Min"),
 							titleWidth: 200.0,
 							horizontal: 50.0
-						),
+						) : Text(""),
 					]) : ListView(padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0), children: <Widget>[
 						ListTile(
 							title: Text("电池开启"),

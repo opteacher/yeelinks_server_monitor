@@ -84,6 +84,7 @@ class EnvPageState extends BasePageState<Page> {
 					DescListItemTitle("温度", size: 20.0),
 					DescListItemContent(dev.temp.toStringAsFixed(1), blocked: true),
 					contentAlign: TextAlign.center,
+					contentWidth: 80,
 					suffix: DescListItemSuffix(text: "℃")
 				),
 				VerticalDivider(width: 5),
@@ -91,6 +92,7 @@ class EnvPageState extends BasePageState<Page> {
 					DescListItemTitle("湿度", size: 20.0),
 					DescListItemContent(dev.humi.toStringAsFixed(1), blocked: true),
 					contentAlign: TextAlign.center,
+					contentWidth: 80,
 					suffix: DescListItemSuffix(text: "%")
 				)
 			])),

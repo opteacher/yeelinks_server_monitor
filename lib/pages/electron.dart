@@ -90,23 +90,27 @@ class ElectronPageState extends BasePageState<Page> {
 					Expanded(child: Column(children: <Widget>[
 						DescListItem(
 							DescListItemTitle("有功功率"),
-							DescListItemContent(_eleVals["有功功率"], horizontal: 25.0, blocked: true),
-							suffix: DescListItemSuffix(text: "kW")
+							DescListItemContent(_eleVals["有功功率"], horizontal: 10.0, blocked: true),
+							suffix: DescListItemSuffix(text: "kW"),
+							contentWidth: 150,
 						),
 						DescListItem(
 							DescListItemTitle("有功电能"),
-							DescListItemContent(_eleVals["有功电能"], horizontal: 25.0, blocked: true),
-							suffix: DescListItemSuffix(text: "kWh")
+							DescListItemContent(_eleVals["有功电能"], horizontal: 10.0, blocked: true),
+							suffix: DescListItemSuffix(text: "kWh"),
+							contentWidth: 150,
 						),
 						DescListItem(
 							DescListItemTitle("功率因素"),
-							DescListItemContent(_eleVals["功率因素"], horizontal: 25.0, blocked: true),
-							suffix: DescListItemSuffix(text: "PF")
+							DescListItemContent(_eleVals["功率因素"], horizontal: 10.0, blocked: true),
+							suffix: DescListItemSuffix(text: "PF"),
+							contentWidth: 150,
 						),
 						DescListItem(
 							DescListItemTitle("输入频率"),
-							DescListItemContent(_eleVals["输入频率"], horizontal: 25.0, blocked: true),
-							suffix: DescListItemSuffix(text: "Hz")
+							DescListItemContent(_eleVals["输入频率"], horizontal: 10.0, blocked: true),
+							suffix: DescListItemSuffix(text: "Hz"),
+							contentWidth: 150,
 						),
 					]))
 				]))),

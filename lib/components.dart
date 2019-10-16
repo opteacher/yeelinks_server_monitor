@@ -83,6 +83,7 @@ class DescListItem extends StatelessWidget {
 	EdgeInsets outPadding;
 	TextAlign contentAlign;
 	double titleWidth;
+	double contentWidth;
 
 	DescListItem(this.title, this.content, {
 		this.suffix = null,
@@ -90,7 +91,8 @@ class DescListItem extends StatelessWidget {
 		double right = 0.0, bottom = 0.0,
 		double horizontal = 0.0, double vertical = 0.0,
 		this.contentAlign = TextAlign.left,
-		this.titleWidth = -1
+		this.titleWidth = -1,
+		this.contentWidth = -1
 	}) {
 		if (suffix == null) {
 			suffix = DescListItemSuffix();
@@ -105,26 +107,34 @@ class DescListItem extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) {
 		var ttl = Text(title.text, style: TextStyle(fontSize: title.size, color: title.color));
-		List<Widget> children = [
-			titleWidth == -1 ? Expanded(child: ttl) : Container(width: titleWidth, child: ttl)
-		];
-		var ctt = [
-			Padding(padding: content.padding, child: Text(content.text, style: TextStyle(fontSize: title.size, color: content.color), textAlign: contentAlign)),
-			suffix.text.isNotEmpty ? Text(suffix.text, style: TextStyle(fontSize: title.size, color: suffix.color), textAlign: contentAlign) : Text(" ")
-		];
-		if (content.blocked) {
-			children.add(Container(
-				padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-				decoration: BoxDecoration(
+		return Expanded(child: Padding(padding: outPadding, child: Row(children: [
+			titleWidth == -1 ? Expanded(child: ttl) : Container(width: titleWidth, child: ttl),
+			Container(
+				width: contentWidth != -1 ? contentWidth : null,
+				padding: content.blocked ? EdgeInsets.symmetric(
+					vertical: 5, horizontal: 10
+				) : null,
+				decoration: content.blocked ? BoxDecoration(
 					color: Colors.grey[100],
 					borderRadius: BorderRadius.all(Radius.circular(4))
-				),
-				child: Row(children: ctt)
-			));
-		} else {
-			children.addAll(ctt);
-		}
-		return Expanded(child: Padding(padding: outPadding, child: Row(children: children)));
+				) : null,
+				child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+					Padding(
+						padding: content.padding,
+						child: Text(
+							content.text,
+							style: TextStyle(fontSize: title.size, color: content.color),
+							textAlign: contentAlign
+						)
+					),
+					suffix.text.isNotEmpty ? Text(
+						suffix.text,
+						style: TextStyle(fontSize: title.size, color: suffix.color),
+						textAlign: contentAlign
+					) : Text(" ")
+				])
+			)
+		])));
 	}
 }
 

@@ -91,23 +91,27 @@ class HomePageState extends BasePageState<Page> {
 							DescListItemTitle("冷通道温度", size: 18.0),
 							DescListItemContent(_values["冷通道温"], blocked: true),
 							contentAlign: TextAlign.center,
+							contentWidth: 90,
 							suffix: DescListItemSuffix(text: "℃")
 						),
 						DescListItem(
 							DescListItemTitle("热通道温度", size: 18.0),
 							DescListItemContent(_values["热通道温"], blocked: true),
 							contentAlign: TextAlign.center,
+							contentWidth: 90,
 							suffix: DescListItemSuffix(text: "℃")
 						),
 						DescListItem(
 							DescListItemTitle("烟            感", size: 18.0),
 							DescListItemContent(_values["烟感"], blocked: true),
-							contentAlign: TextAlign.center
+							contentAlign: TextAlign.center,
+							contentWidth: 90,
 						),
 						DescListItem(
 							DescListItemTitle("漏            水", size: 18.0),
 							DescListItemContent(_values["漏水"], blocked: true),
-							contentAlign: TextAlign.center
+							contentAlign: TextAlign.center,
+							contentWidth: 90,
 						),
 					])),
 					VerticalDivider(width: 15),
@@ -116,23 +120,27 @@ class HomePageState extends BasePageState<Page> {
 							DescListItemTitle("冷通道湿度", size: 18.0),
 							DescListItemContent(_values["冷通道湿"], blocked: true),
 							contentAlign: TextAlign.center,
+							contentWidth: 90,
 							suffix: DescListItemSuffix(text: "%")
 						),
 						DescListItem(
 							DescListItemTitle("热通道湿度", size: 18.0),
 							DescListItemContent(_values["热通道湿"], blocked: true),
 							contentAlign: TextAlign.center,
+							contentWidth: 90,
 							suffix: DescListItemSuffix(text: "%")
 						),
 						DescListItem(
 							DescListItemTitle("门            禁", size: 18.0),
 							DescListItemContent(_values["门禁"], blocked: true),
-							contentAlign: TextAlign.center
+							contentAlign: TextAlign.center,
+							contentWidth: 90,
 						),
 						DescListItem(
 							DescListItemTitle("防            雷", size: 18.0),
 							DescListItemContent(_values["防雷"], blocked: true),
-							contentAlign: TextAlign.center
+							contentAlign: TextAlign.center,
+							contentWidth: 90,
 						),
 					]))
 				]))),
