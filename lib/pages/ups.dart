@@ -37,6 +37,9 @@ class UpsPageState extends BasePageState<Page> {
 		"电池电压": "0.0",
 		"电池电流": "0.0",
 		"电池电量不足": "0",
+		"过载": "未知",
+		"低电池电压": "未知",
+		"电池过充": "未知",
 
 		"电池开启": "0",
 		"旁路功率不稳定": "0",
@@ -56,14 +59,14 @@ class UpsPageState extends BasePageState<Page> {
 		data[0]["input"] = data[0]["input"].replaceFirst("{data}", _values["输入电压"]);
 		data[0]["output"] = data[0]["output"].replaceFirst("{data}", _values["输出电压"]);
 		data[0]["battery"] = data[0]["battery"].replaceFirst("{data}", _values["电池电压"]);
-		data[0]["others"] = data[0]["others"].replaceFirst("{data}", "0");
+		data[0]["others"] = data[0]["others"].replaceFirst("{data}", _values["过载"]);
 		data[1]["output"] = data[1]["output"].replaceFirst("{data}", _values["输出电流"]);
 		data[1]["battery"] = data[1]["battery"].replaceFirst("{data}", _values["电池电流"]);
-		data[1]["others"] = data[1]["others"].replaceFirst("{data}", _values["电池电压"]);
+		data[1]["others"] = data[1]["others"].replaceFirst("{data}", _values["低电池电压"]);
 		data[2]["input"] = data[2]["input"].replaceFirst("{data}", _values["输入频率"]);
 		data[2]["output"] = data[2]["output"].replaceFirst("{data}", _values["输出频率"]);
 		data[2]["battery"] = data[2]["battery"].replaceFirst("{data}", _values["电池电量不足"]);
-		data[2]["others"] = data[2]["others"].replaceFirst("{data}", "0");
+		data[2]["others"] = data[2]["others"].replaceFirst("{data}", _values["电池过充"]);
 
 		return Container(padding: const EdgeInsets.all(2.5), child: Row(children: <Widget>[
 			Expanded(child: Column(children: <Widget>[
@@ -219,7 +222,7 @@ class UpsPageState extends BasePageState<Page> {
 		"subject": "频率",
 		"input": "{data} Hz",
 		"output": "{data} Hz",
-		"battery": "{data} Hz",
+		"battery": "电池更换告警 {data}",
 		"others": "电池过充 {data}"
 	}];
 
@@ -242,11 +245,7 @@ class UpsPageState extends BasePageState<Page> {
 		for (PointVal pv in data) {
 			String poiName = global.protocolMapper[pv.id];
 			if (_values[poiName] != null) {
-				if (poiName == "运行模式") {
-					_values[poiName] = _modMap[pv.value] != null ? _modMap[pv.value] : "未知模式";
-				} else {
-					_values[poiName] = pv.value.toStringAsFixed(1);
-				}
+				_values[poiName] = pv.desc != null ? pv.desc : pv.value.toStringAsFixed(1);
 			}
 		}
 	});

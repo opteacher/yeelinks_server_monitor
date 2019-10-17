@@ -90,6 +90,10 @@ final addDevice = RequestInfo("POST", "/api/v1/devices/add", {
 	"slave_id": -1,
 	"protocol_id": ""
 });
+final _getAcDetail = RequestInfo("GET", "/api/v1/devices/points", {
+	"id": "",
+	"point_type": 2
+});
 const updateURL = "http://py9z68s8h.bkt.clouddn.com/apk-release-v{version}.apk";
 
 class DeviceComponent {
@@ -141,20 +145,28 @@ class Device {
 
 class PointVal {
 	final String _id;
+	final String _name;
 	final String _deviceId;
 	final double _value;
 	final String _unit;
+	String _desc;
 
-	PointVal(this._id, this._deviceId, this._value, this._unit);
+	PointVal(this._id, this._name, this._deviceId, this._value, this._desc, this._unit);
 
 	PointVal.fromJSON(Map json):
-		_id = json["id"].toString(), _deviceId = json["device_id"],
-		_value = double.parse(json["value"].toString()), _unit = json["unit"];
+		_id = json["id"].toString(), _name = json["name"], _deviceId = json["device_id"],
+		_value = double.parse(json["value"].toString()), _unit = json["unit"] {
+		if (json["dictionary"] != null && json["dictionary"][json["value"].toString()] != null) {
+			_desc = json["dictionary"][json["value"].toString()].toString();
+		}
+	}
 
 	String get id => _id;
+	String get name => _name;
 	String get deviceId => _deviceId;
 	double get value => _value;
 	String get unit => _unit;
+	String get desc => _desc;
 }
 
 class EventRecord {
@@ -350,9 +362,7 @@ turnOnOffDev(String devID, int status) => reqTempFunc(http.put(
 
 getDevPoints() => reqTempFunc(http.get(
 	url + _getDevPoints.chgBody("id", global.currentDevID).cmbBodyAsParamIntoPath()
-), (dynamic data) => data.map<DevPoint>((json) {
-	return DevPoint.fromJSON(json);
-}).toList());
+), (dynamic data) => data.map<DevPoint>((json) => DevPoint.fromJSON(json)).toList());
 
 Future<dynamic> getDevPoiHistory(List<int> poiIds, DateTime begin, DateTime end) => reqTempFunc(http.post(
 	url + _poiHistory.path,
@@ -421,3 +431,7 @@ checkVersionForUpdate() async {
 		}
 	}
 }
+
+Future<dynamic> getAcDetail() => reqTempFunc(http.get(
+	url + _getAcDetail.chgBody("id", global.currentDevID).cmbBodyAsParamIntoPath()
+), (dynamic data) => data.map<PointVal>((json) => PointVal.fromJSON(json)).toList());
