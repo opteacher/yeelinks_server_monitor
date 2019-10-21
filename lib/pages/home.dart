@@ -196,7 +196,7 @@ class HomePageState extends BasePageState<Page> {
 		if (data["pue"] != null) {
 			_pue = data["pue"].toDouble();
 		}
-		if (data["switcher"] != null) {
+		if (data["switcher"] != null && data["switcher"].isNotEmpty) {
 			for (var swh in data["switcher"].toList()) {
 				_values[swh["name"]] = swh["value"];
 			}
