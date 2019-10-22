@@ -16,18 +16,24 @@ class AircondPageState extends BasePageState<Page> {
 		"送风温度": "0.0",
 		"回风温度": "0.0",
 		"回风湿度": "0.0",
-		"压缩机转速": "0.0",
-		"内风机转速": "0.0",
-		"外风机转速": "0.0",
-		"膨胀阀开度": "0.0",
+		"压缩机转速": "0",
+		"内风机转速": "0",
+		"外风机转速": "0",
+		"膨胀阀开度": "0",
 		"加热器电流": "0.0",
-		"运行状态": "0",
-		"制冷状态": "0",
-		"加热状态": "0",
-		"除湿状态": "0",
-		"内风机": "0",
-		"外风机": "0",
-		"压缩机": "0",
+		"环境温度": "0.0",
+		"回气温度": "0.0",
+		"电源电压值": "0.0",
+		"冷凝温度": "0.0",
+		"机组运行模式": "未知",
+		"机组开关机": "未知",
+		"运行状态": "未知",
+		"制冷状态": "未知",
+		"加热状态": "未知",
+		"除湿状态": "未知",
+		"内风机": "未知",
+		"外风机": "未知",
+		"压缩机": "未知",
 		"运行频率": "0.0",
 		"内风机电压": "0.0",
 		"出盘温度": "0.0",
@@ -37,8 +43,6 @@ class AircondPageState extends BasePageState<Page> {
 		"排气温度": "0.0",
 		"目标蒸发温度": "0.0"
 	};
-	String _mstatus = "未知";
-	String _rstatus = "未知";
 	List<PointVal> _details = [];
 
 	@override
@@ -135,46 +139,50 @@ class AircondPageState extends BasePageState<Page> {
 						child: !_showDetail ? Row(children: <Widget>[
 							Expanded(child: Column(children: <Widget>[
 								DescListItem(
-									DescListItemTitle("排气压力", size: _titleSize),
-									DescListItemContent(_values["排气压力"], right: _sufSpace),
-									suffix: DescListItemSuffix(text: "Bar")
+									DescListItemTitle("外风机转速", size: _titleSize),
+									DescListItemContent(_values["外风机转速"], right: _sufSpace),
+									suffix: DescListItemSuffix(text: "N")
 								),
 								DescListItem(
-									DescListItemTitle("吸气压力", size: _titleSize),
-									DescListItemContent(_values["吸气压力"], right: _sufSpace),
-									suffix: DescListItemSuffix(text: "Bar")
+									DescListItemTitle("内风机转速", size: _titleSize),
+									DescListItemContent(_values["内风机转速"], right: _sufSpace),
+									suffix: DescListItemSuffix(text: "N")
 								),
 								DescListItem(
-									DescListItemTitle("运行频率", size: _titleSize),
-									DescListItemContent(_values["运行频率"], right: _sufSpace),
-									suffix: DescListItemSuffix(text: "Hz")
+									DescListItemTitle("压缩机转速", size: _titleSize),
+									DescListItemContent(_values["压缩机转速"], right: _sufSpace),
+									suffix: DescListItemSuffix(text: "N")
 								),
 								DescListItem(
-									DescListItemTitle("内风机电压", size: _titleSize),
-									DescListItemContent(_values["内风机电压"], right: _sufSpace),
-									suffix: DescListItemSuffix(text: "V")
+									DescListItemTitle("加热器电流", size: _titleSize),
+									DescListItemContent(_values["加热器电流"], right: _sufSpace),
+									suffix: DescListItemSuffix(text: "A")
+								),
+								DescListItem(
+									DescListItemTitle("电子膨胀阀开度", size: _titleSize),
+									DescListItemContent(_values["膨胀阀开度"], right: _sufSpace)
 								)
 							])),
 							VerticalDivider(width: 60),
 							Expanded(child: Column(children: <Widget>[
 								DescListItem(
-									DescListItemTitle("排气温度", size: _titleSize),
-									DescListItemContent(_values["排气温度"], right: _sufSpace),
+									DescListItemTitle("环境温度", size: _titleSize),
+									DescListItemContent(_values["环境温度"], right: _sufSpace),
 									suffix: DescListItemSuffix(text: "℃")
 								),
 								DescListItem(
-									DescListItemTitle("蒸发温度", size: _titleSize),
-									DescListItemContent(_values["目标蒸发温度"], right: _sufSpace),
+									DescListItemTitle("回气温度", size: _titleSize),
+									DescListItemContent(_values["回气温度"], right: _sufSpace),
 									suffix: DescListItemSuffix(text: "℃")
 								),
 								DescListItem(
-									DescListItemTitle("进盘温度", size: _titleSize),
-									DescListItemContent(_values["进盘温度"], right: _sufSpace),
-									suffix: DescListItemSuffix(text: "℃")
+									DescListItemTitle("电源电压值", size: _titleSize),
+									DescListItemContent(_values["电源电压值"], right: _sufSpace),
+									suffix: DescListItemSuffix(text: "V")
 								),
 								DescListItem(
-									DescListItemTitle("出盘温度", size: _titleSize),
-									DescListItemContent(_values["出盘温度"], right: _sufSpace),
+									DescListItemTitle("冷凝温度", size: _titleSize),
+									DescListItemContent(_values["冷凝温度"], right: _sufSpace),
 									suffix: DescListItemSuffix(text: "℃")
 								)
 							]))
@@ -187,12 +195,32 @@ class AircondPageState extends BasePageState<Page> {
 						padding: EdgeInsets.symmetric(horizontal: _htlPadding),
 						child: Column(children: <Widget>[
 							DescListItem(
-								DescListItemTitle("机组状态", size: _titleSize),
-								DescListItemContent(_mstatus, right: _sufSpace)
+								DescListItemTitle("运行状态", size: _titleSize),
+								DescListItemContent(_values["运行状态"], right: _sufSpace)
 							),
 							DescListItem(
-								DescListItemTitle("运行模式", size: _titleSize),
-								DescListItemContent(_rstatus, right: _sufSpace)
+								DescListItemTitle("制冷状态", size: _titleSize),
+								DescListItemContent(_values["制冷状态"], right: _sufSpace)
+							),
+							DescListItem(
+								DescListItemTitle("加热状态", size: _titleSize),
+								DescListItemContent(_values["加热状态"], right: _sufSpace)
+							),
+							DescListItem(
+								DescListItemTitle("除湿状态", size: _titleSize),
+								DescListItemContent(_values["除湿状态"], right: _sufSpace)
+							),
+							DescListItem(
+								DescListItemTitle("内风机", size: _titleSize),
+								DescListItemContent(_values["内风机"], right: _sufSpace)
+							),
+							DescListItem(
+								DescListItemTitle("外风机", size: _titleSize),
+								DescListItemContent(_values["外风机"], right: _sufSpace)
+							),
+							DescListItem(
+								DescListItemTitle("压缩机", size: _titleSize),
+								DescListItemContent(_values["压缩机"], right: _sufSpace)
 							)
 						])
 					))
@@ -221,13 +249,24 @@ class AircondPageState extends BasePageState<Page> {
 		for (PointVal pv in data) {
 			String poiName = global.protocolMapper[pv.id];
 			if (_values[poiName] != null) {
-				_values[poiName] = pv.value.toStringAsFixed(1);
-			}
-			if (poiName == "机组开关机") {
-				_mstatus = pv.desc;
-			}
-			if (poiName == "机组运行模式") {
-				_rstatus = pv.desc;
+				if (pv.desc != null && pv.desc.isNotEmpty) {
+					_values[poiName] = pv.desc;
+				} else if (poiName == "送风温度"
+					|| poiName == "回风温度"
+					|| poiName == "回风湿度"
+					|| poiName == "送风温度"
+				) {
+					_values[poiName] = pv.value.toStringAsFixed(2);
+				} else if (poiName == "加热器电流"
+					|| poiName == "环境温度"
+					|| poiName == "回气温度"
+					|| poiName == "电源电压值"
+					|| poiName == "冷凝温度"
+				) {
+					_values[poiName] = pv.value.toStringAsFixed(1);
+				} else {
+					_values[poiName] = pv.value.toStringAsFixed(0);
+				}
 			}
 		}
 	});
