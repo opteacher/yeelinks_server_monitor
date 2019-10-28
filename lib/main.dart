@@ -72,7 +72,8 @@ class MyAppBarState extends State<MyAppBar> {
 				_buildTitleButton(context, "UPS", "ups", icon: Icons.battery_std),
 				_buildTitleButton(context, "空调", "aircond", icon: Icons.ac_unit),
 				_buildTitleButton(context, "环境", "env", icon: Icons.settings_system_daydream),
-				_buildTitleButton(context, "日志", "history", icon: Icons.content_paste)
+				_buildTitleButton(context, "日志", "history", icon: Icons.content_paste),
+				_buildTitleButton(context, "监控", "monitor", icon: Icons.videocam)
 			])),
 			_buildTitleButton(context, "", "setting", icon: Icons.settings, callback: () async {
 				final _formKey = GlobalKey<FormState>();

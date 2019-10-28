@@ -13,6 +13,7 @@ import 'pages/env.dart' as env;
 import 'pages/history.dart' as history;
 import 'pages/setting.dart' as setting;
 import 'pages/history.dart' as history;
+import 'pages/monitor.dart' as monitor;
 import 'async.dart';
 import 'components.dart';
 import 'main.dart';
@@ -45,7 +46,8 @@ final Map<String, ComponentInfo> componentInfos = {
 	"aircond":  ComponentInfo("aircond", "空调", Dashboard(aircond.Page()), 4, 2),
 	"env":      ComponentInfo("env", "环境", Dashboard(env.Page()), 5, 2),
 	"setting":  ComponentInfo("setting", "设置", Dashboard(setting.Page()), 8, 1),
-	"history":  ComponentInfo("history", "历史", Dashboard(history.Page()), 7, 3)
+	"history":  ComponentInfo("history", "历史", Dashboard(history.Page()), 7, 3),
+	"monitor":  ComponentInfo("monitor", "监控", Dashboard(monitor.Page()), 6, 0)
 };
 toIdenPage(BuildContext context, String pid) {
 	currentPageID = pid;

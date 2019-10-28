@@ -125,6 +125,15 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_ijk:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: b4d25eca184fc0df079c122689b9c093fa59fabc
+      url: "https://github.com/jadennn/flutter_ijk.git"
+    source: git
+    version: "0.0.2"
   flutter_spinkit:
     dependency: "direct main"
     description:
