@@ -23,10 +23,10 @@ class SettingPageState extends BasePageState<Page> {
 	static const UPS_SETTING = 4;
 	static const ENV_SETTING = 5;
 	List<Device> _devices = [];
-	Map<int, NamedWithID> _settings = {};
+	Map<int, NamedWithID> _settingTabs = {};
 	int _selSetting = DEV_SETTING;
 
-	Map<String, String> _aircondSettings = {
+	Map<String, String> _settings = {
 		"空调开关机": "关机",
 		"回风温度设定": "30.0",
 		"送风温度设定": "30.0",
@@ -36,7 +36,30 @@ class SettingPageState extends BasePageState<Page> {
 		"送风高温告警": "30.0",
 		"送风低温告警": "30.0",
 		"回风高湿告警": "30.0",
-		"回风低湿告警": "30.0"
+		"回风低湿告警": "30.0",
+
+		"蜂鸣器开启": "开启",
+		"旁路禁止使能": "是",
+		"关闭时使能旁路": "是",
+		"高效模式使能": "是",
+		"旁路高切换电压": "253.00",
+		"旁路低切换电压": "253.00",
+		"高效模式电压上限": "253.00",
+		"高效模式电压下限": "253.00",
+		"电池AH数设置": "100",
+		"电池并联组数": "0",
+		"电池跟换间隔": "170525",
+		"UPS状态": "在线模式",
+
+		"冷通道高温报警值": "32.0",
+		"冷通道低温报警值": "32.0",
+		"冷通道高湿报警值": "32.0",
+		"热通道高温报警值": "32.0",
+		"热通道低温报警值": "32.0",
+		"热通道高湿报警值": "32.0",
+		"风扇状态": "关闭",
+		"风扇启动温度": "0.0",
+		"风扇停止温度": "0.0",
 	};
 
 	@override
@@ -44,7 +67,7 @@ class SettingPageState extends BasePageState<Page> {
 		global.refreshTimer.register("listDevicesOfSetting", TimerJob(getDevList, hdlDevices, {
 			TimerJob.PAGE_IDEN: pageId()
 		}));
-		_settings = {
+		_settingTabs = {
 			SYS_SETTING: NamedWithID(SYS_SETTING, "系统设置", _systemSettingContent),
 			ARCD_SETTING: NamedWithID(ARCD_SETTING, "空调设置", _arcdSettingContent),
 			UPS_SETTING: NamedWithID(UPS_SETTING, "UPS设置", _upsSettingContent),
@@ -64,25 +87,46 @@ class SettingPageState extends BasePageState<Page> {
 		})
 	);
 
-	Widget _buildCtrlItem(String title, String status, {
+	Widget _buildCtrlItem(String title, {
+		String category = "",
 		double subSize = 0,
 		String subTitle = "",
+		int maxInt = 3,
+		int valFrac = 1,
 		String suffix = "    ",
 		CtrlType ctrlType = CtrlType.INPUT_SETTING,
+		Map<bool, String> swchMapper = const {
+			true: "开启", false: "关闭"
+		},
 		Widget ctrl
 	}) {
+		assert(swchMapper.isNotEmpty || ctrlType != CtrlType.SWITCH_SETTING);
 		final titleTextStyle = TextStyle(color: const Color(0xFF757575), fontSize: 25 - subSize);
 		final subTitleTextStyle = TextStyle(color: global.primaryColor, fontSize: 15 - subSize);
 		final contentTextStyle = TextStyle(color: global.primaryColor, fontSize: 25 - subSize);
 		final ctrlTextStyle = TextStyle(color: global.primaryColor, fontSize: 20 - subSize);
+		final String key = "$category$title";
+		final RegExp validator = RegExp("^\\d{0,$maxInt}(\\.\\d{0,$valFrac})?\$");
 		if (ctrl == null) {
 			switch (ctrlType) {
 				case CtrlType.INPUT_SETTING:
-					final onClickSetting = (){
-
-					};
+					final TextEditingController controller = TextEditingController();
+					final onClickSetting = () => setState(() {
+						_settings[key] = double.parse(controller.value.text).toStringAsFixed(valFrac);
+						FocusScope.of(context).requestFocus(FocusNode());
+					});
 					ctrl = Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-						SizedBox(width: 100 - subSize * 2, child: TextField()),
+						SizedBox(width: 100 - subSize * 2, child: TextField(
+							controller: controller,
+							keyboardType: TextInputType.number,
+							onEditingComplete: onClickSetting,
+							inputFormatters: <TextInputFormatter>[
+								TextInputFormatter.withFunction((
+									TextEditingValue oldValue,
+									TextEditingValue newValue
+								) => validator.hasMatch(newValue.text) ? newValue : oldValue)
+							]
+						)),
 						VerticalDivider(width: 20 - subSize * 2, color: Colors.white),
 						subSize > 5 ? OutlineButton(
 							child: Icon(Icons.settings, color: global.primaryColor),
@@ -102,8 +146,12 @@ class SettingPageState extends BasePageState<Page> {
 					break;
 				case CtrlType.SWITCH_SETTING:
 					ctrl = Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-						Switch(activeColor: global.primaryColor, value: true, onChanged: (bool value) {}),
-						Text("开启", style: ctrlTextStyle)
+						Switch(
+							activeColor: global.primaryColor,
+							value: swchMapper[true] == _settings[key],
+							onChanged: (bool value) => setState(() {
+								_settings[key] = swchMapper[value];
+							}))
 					]);
 					break;
 			}
@@ -125,14 +173,17 @@ class SettingPageState extends BasePageState<Page> {
 				mainAxisAlignment: MainAxisAlignment.center,
 				children: ttlAry
 			)),
-			Row(crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
-				Text(status,
-					textAlign: TextAlign.center,
-					style: contentTextStyle
-				),
-				VerticalDivider(color: Colors.white),
-				Text(suffix, style: titleTextStyle)
-			]),
+			SizedBox(width: 150 - subSize * 11, child: Row(
+				crossAxisAlignment: CrossAxisAlignment.center,
+				children: <Widget>[
+					Text(_settings[key],
+						textAlign: TextAlign.center,
+						style: contentTextStyle
+					),
+					VerticalDivider(color: Colors.white),
+					Text(suffix, style: titleTextStyle)
+				]
+			)),
 			Expanded(child: ctrl)
 		]));
 	}
@@ -143,16 +194,18 @@ class SettingPageState extends BasePageState<Page> {
 			child: Column(
 				mainAxisAlignment: MainAxisAlignment.center,
 				children: <Widget>[
-					_buildCtrlItem("空调开关机", _aircondSettings["空调开关机"], ctrlType: CtrlType.SWITCH_SETTING),
-					_buildCtrlItem("回风温度设定", _aircondSettings["回风温度设定"], suffix: "℃"),
-					_buildCtrlItem("送风温度设定", _aircondSettings["送风温度设定"], suffix: "℃"),
-					_buildCtrlItem("最小湿度设定", _aircondSettings["最小湿度设定"], suffix: "%"),
-					_buildCtrlItem("最大湿度设定", _aircondSettings["最大湿度设定"], suffix: "%"),
-					_buildCtrlItem("回风高温告警", _aircondSettings["回风高温告警"], suffix: "℃"),
-					_buildCtrlItem("送风高温告警", _aircondSettings["送风高温告警"], suffix: "℃"),
-					_buildCtrlItem("送风低温告警", _aircondSettings["送风低温告警"], suffix: "℃"),
-					_buildCtrlItem("回风高湿告警", _aircondSettings["回风高湿告警"], suffix: "%"),
-					_buildCtrlItem("回风低湿告警", _aircondSettings["回风低湿告警"], suffix: "%"),
+					_buildCtrlItem("空调开关机", ctrlType: CtrlType.SWITCH_SETTING, swchMapper: {
+						true: "开机", false: "关机"
+					}),
+					_buildCtrlItem("回风温度设定", suffix: "℃"),
+					_buildCtrlItem("送风温度设定", suffix: "℃"),
+					_buildCtrlItem("最小湿度设定", suffix: "%"),
+					_buildCtrlItem("最大湿度设定", suffix: "%"),
+					_buildCtrlItem("回风高温告警", suffix: "℃"),
+					_buildCtrlItem("送风高温告警", suffix: "℃"),
+					_buildCtrlItem("送风低温告警", suffix: "℃"),
+					_buildCtrlItem("回风高湿告警", suffix: "%"),
+					_buildCtrlItem("回风低湿告警", suffix: "%"),
 				]
 			)
 		))
@@ -162,7 +215,10 @@ class SettingPageState extends BasePageState<Page> {
 		final TextStyle titleTextStyle = TextStyle(fontSize: 25, color: const Color(0xFF757575));
 		final TextStyle subTtlTextStyle = TextStyle(fontSize: 20, color: const Color(0xFF757575));
 		final TextStyle contentTextStyle = TextStyle(fontSize: 20, color: global.primaryColor);
-		return Expanded(flex: 2, child: Padding(
+		final TextEditingController yearCtrl = TextEditingController();
+		final TextEditingController monthCtrl = TextEditingController();
+		final TextEditingController dayCtrl = TextEditingController();
+		return Expanded(flex: 3, child: Padding(
 			padding: EdgeInsets.only(top: 20),
 			child: Column(children: <Widget>[
 				Column(
@@ -174,27 +230,75 @@ class SettingPageState extends BasePageState<Page> {
 							Expanded(child: Text("日", textAlign: TextAlign.center, style: subTtlTextStyle)),
 						]),
 						Row(children: <Widget>[
-							Expanded(child: Text("17", textAlign: TextAlign.center, style: contentTextStyle)),
-							Expanded(child: Text("7", textAlign: TextAlign.center, style: contentTextStyle)),
-							Expanded(child: Text("25", textAlign: TextAlign.center, style: contentTextStyle)),
+							Expanded(child: Text(
+								_settings["电池跟换间隔"].substring(0, 2),
+								textAlign: TextAlign.center,
+								style: contentTextStyle
+							)),
+							Expanded(child: Text(
+								_settings["电池跟换间隔"].substring(2, 4),
+								textAlign: TextAlign.center,
+								style: contentTextStyle
+							)),
+							Expanded(child: Text(
+								_settings["电池跟换间隔"].substring(4, 6),
+								textAlign: TextAlign.center,
+								style: contentTextStyle
+							)),
 						])
 					]
 				),
 				Padding(padding: EdgeInsets.symmetric(horizontal: 40), child: Row(
 					mainAxisAlignment: MainAxisAlignment.center,
 					children: <Widget>[
-						Expanded(child: TextField()),
-						VerticalDivider(width: 25, color: Colors.white),
-						OutlineButton(
-							borderSide: BorderSide(color: global.primaryColor),
-							child: Text("设定", style: TextStyle(
-								color: global.primaryColor,
-								fontSize: 20
-							)),
-							onPressed: () {}
-						)
+						Expanded(child: TextField(
+							controller: yearCtrl,
+							keyboardType: TextInputType.number,
+							maxLength: 2,
+						)),
+						Padding(
+							padding: EdgeInsets.symmetric(horizontal: 20),
+							child: Text("-", style: titleTextStyle)
+						),
+						Expanded(child: TextField(
+							controller: monthCtrl,
+							keyboardType: TextInputType.number,
+							maxLength: 2,
+						)),
+						Padding(
+							padding: EdgeInsets.symmetric(horizontal: 20),
+							child: Text("-", style: titleTextStyle)
+						),
+						Expanded(child: TextField(
+							controller: dayCtrl,
+							keyboardType: TextInputType.number,
+							maxLength: 2,
+						)),
 					]
-				))
+				)),
+				Padding(padding: EdgeInsets.only(
+					top: 10, left: 40, right: 40
+				), child: Row(children: <Widget>[
+					Expanded(child: OutlineButton(
+						borderSide: BorderSide(color: global.primaryColor),
+						child: Text("设定", style: TextStyle(
+							color: global.primaryColor,
+							fontSize: 20
+						)),
+						onPressed: () => setState(() {
+							if (yearCtrl.value.text.isNotEmpty) {
+								_settings["电池跟换间隔"] = yearCtrl.value.text + _settings["电池跟换间隔"].substring(2);
+							}
+							if (monthCtrl.value.text.isNotEmpty) {
+								_settings["电池跟换间隔"] = _settings["电池跟换间隔"].substring(0, 2)
+									+ monthCtrl.value.text + _settings["电池跟换间隔"].substring(4);
+							}
+							if (dayCtrl.value.text.isNotEmpty) {
+								_settings["电池跟换间隔"] = _settings["电池跟换间隔"].substring(0, 4) + dayCtrl.value.text;
+							}
+						})
+					))
+				]))
 			])
 		));
 	}
@@ -205,25 +309,55 @@ class SettingPageState extends BasePageState<Page> {
 			child: Column(
 				mainAxisAlignment: MainAxisAlignment.center,
 				children: <Widget>[
-					_buildCtrlItem("蜂鸣器开启", "是", ctrlType: CtrlType.SWITCH_SETTING),
-					_buildCtrlItem("旁路禁止使能", "是", ctrlType: CtrlType.SWITCH_SETTING),
-					_buildCtrlItem("关闭时使能旁路", "是", ctrlType: CtrlType.SWITCH_SETTING),
-					_buildCtrlItem("高效模式使能", "是", ctrlType: CtrlType.SWITCH_SETTING),
-					_buildCtrlItem("旁路高切换电压", "253.00", subTitle: "(253、231、242、264)", suffix: "V", ctrlType: CtrlType.INPUT_SETTING),
-					_buildCtrlItem("旁路低切换电压", "253.00", subTitle: "(187、176、165、154)", suffix: "V", ctrlType: CtrlType.INPUT_SETTING),
-					_buildCtrlItem("高效模式电压上限", "253.00", suffix: "V", ctrlType: CtrlType.INPUT_SETTING),
-					_buildCtrlItem("高效模式电压下限", "253.00", suffix: "V", ctrlType: CtrlType.INPUT_SETTING),
+					_buildCtrlItem("蜂鸣器开启", ctrlType: CtrlType.SWITCH_SETTING),
+					_buildCtrlItem("旁路禁止使能", ctrlType: CtrlType.SWITCH_SETTING, swchMapper: {
+						true: "是", false: "否"
+					}),
+					_buildCtrlItem("关闭时使能旁路", ctrlType: CtrlType.SWITCH_SETTING, swchMapper: {
+						true: "是", false: "否"
+					}),
+					_buildCtrlItem("高效模式使能", ctrlType: CtrlType.SWITCH_SETTING, swchMapper: {
+						true: "是", false: "否"
+					}),
+					_buildCtrlItem("旁路高切换电压",
+						subTitle: "(253、231、242、264)",
+						maxInt: 3,
+						valFrac: 2,
+						suffix: "V",
+						ctrlType: CtrlType.INPUT_SETTING
+					),
+					_buildCtrlItem("旁路低切换电压",
+						subTitle: "(187、176、165、154)",
+						maxInt: 3,
+						valFrac: 2,
+						suffix: "V",
+						ctrlType: CtrlType.INPUT_SETTING
+					),
+					_buildCtrlItem("高效模式电压上限",
+						maxInt: 3,
+						valFrac: 2,
+						suffix: "V",
+						ctrlType: CtrlType.INPUT_SETTING
+					),
+					_buildCtrlItem("高效模式电压下限",
+						maxInt: 3,
+						valFrac: 2,
+						suffix: "V",
+						ctrlType: CtrlType.INPUT_SETTING
+					),
 				]
 			)
 		)),
 		Expanded(child: Column(children: <Widget>[
 			DataCard(title: "UPS电池", flex: 2, child: Column(children: <Widget>[
-				_buildCtrlItem("电池AH数设置", "100", subSize: 8),
-				_buildCtrlItem("电池并联组数", "0", subSize: 8),
+				_buildCtrlItem("电池AH数设置", subSize: 8, valFrac: 0),
+				_buildCtrlItem("电池并联组数", subSize: 8, valFrac: 0),
 				_buildBatteryChangeInterval()
 			])),
 			DataCard(title: "UPS紧急开关机", child: Row(children: <Widget>[
-				_buildCtrlItem("UPS状态", "在线模式", ctrlType: CtrlType.SWITCH_SETTING)
+				_buildCtrlItem("UPS状态", ctrlType: CtrlType.SWITCH_SETTING, swchMapper: {
+					true: "在线模式", false: "离线模式"
+				})
 			])),
 		]),)
 	]);
@@ -231,20 +365,20 @@ class SettingPageState extends BasePageState<Page> {
 	Widget _envSettingContent() => Column(children: <Widget>[
 		Expanded(child: Row(children: <Widget>[
 			DataCard(title: "微环境冷通道", child: Column(children: <Widget>[
-				_buildCtrlItem("高温报警值", "32.0"),
-				_buildCtrlItem("低温报警值", "32.0"),
-				_buildCtrlItem("高湿报警值", "32.0"),
+				_buildCtrlItem("高温报警值", category: "冷通道"),
+				_buildCtrlItem("低温报警值", category: "冷通道"),
+				_buildCtrlItem("高湿报警值", category: "冷通道"),
 			])),
 			DataCard(title: "微环境热通道", child: Column(children: <Widget>[
-				_buildCtrlItem("高温报警值", "32.0"),
-				_buildCtrlItem("低温报警值", "32.0"),
-				_buildCtrlItem("高湿报警值", "32.0"),
+				_buildCtrlItem("高温报警值", category: "热通道"),
+				_buildCtrlItem("低温报警值", category: "热通道"),
+				_buildCtrlItem("高湿报警值", category: "热通道"),
 			]))
 		])),
 		DataCard(title: "应急风扇控制", child: Column(children: <Widget>[
-			_buildCtrlItem("风扇状态", "关闭", ctrlType: CtrlType.SWITCH_SETTING),
-			_buildCtrlItem("风扇启动温度", "0.0"),
-			_buildCtrlItem("风扇停止温度", "0.0"),
+			_buildCtrlItem("风扇状态", ctrlType: CtrlType.SWITCH_SETTING),
+			_buildCtrlItem("风扇启动温度"),
+			_buildCtrlItem("风扇停止温度"),
 		]))
 	]);
 
@@ -257,7 +391,7 @@ class SettingPageState extends BasePageState<Page> {
 
 	List<Widget> _genSettingBtns() {
 		List<Widget> ret = [];
-		var stgBtns = _settings.values.toList();
+		var stgBtns = _settingTabs.values.toList();
 		for (int i = 0; i < stgBtns.length; i++) {
 			var btn = stgBtns[i];
 			ShapeBorder btnBorder = RoundedRectangleBorder();
@@ -292,11 +426,13 @@ class SettingPageState extends BasePageState<Page> {
 
 	@override
 	Widget build(BuildContext context) {
-		Widget content = _settings[_selSetting].func();
+		Widget content = _settingTabs[_selSetting].func();
 		return Column(children: <Widget>[
 			Row(mainAxisAlignment: MainAxisAlignment.center, children: _genSettingBtns()),
 			Divider(),
-			Expanded(child: content)
+			Expanded(child: GestureDetector(child: content, onTap: () {
+				FocusScope.of(context).requestFocus(FocusNode());
+			}))
 		]);
 	}
 
