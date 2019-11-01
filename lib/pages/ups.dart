@@ -68,7 +68,7 @@ class UpsPageState extends BasePageState<Page> {
 		data[2]["battery"] = data[2]["battery"].replaceFirst("{data}", _values["电池电量不足"]);
 		data[2]["others"] = data[2]["others"].replaceFirst("{data}", _values["电池过充"]);
 
-		return Container(padding: const EdgeInsets.all(2.5), child: Row(children: <Widget>[
+		return Row(children: <Widget>[
 			Expanded(child: Column(children: <Widget>[
 				DataCard(title: "UPS输入信息", child: Padding(padding: _infoPdg, child: Column(children: <Widget>[
 					DescListItem(
@@ -127,7 +127,7 @@ class UpsPageState extends BasePageState<Page> {
 							value: double.parse(_values["UPS负载率"])
 						)
 					)),
-					DataCard(title: "UPS状态", tailing: IconButton(icon: Icon(Icons.info_outline, color: Theme.of(context).primaryColor), onPressed: () {
+					DataCard(title: "UPS状态", tailing: IconButton(icon: Icon(Icons.info_outline, color: global.primaryColor), onPressed: () {
 						setState(() {
 							_showDetail = !_showDetail;
 						});
@@ -203,7 +203,7 @@ class UpsPageState extends BasePageState<Page> {
 					"其他": MyDataHeader("others", 0.25)
 				}, data, vpadding: 15.0))
 			]))
-		]));
+		]);
 	}
 
 	List<Map<String, String>> _genTempData() => [{

@@ -41,7 +41,7 @@ class MyAppState extends State<MyApp> {
 	void dispose() {
 		super.dispose();
 		global.refreshTimer.cancel();
-		global.ledCtrl.invokeMethod("lightDown");
+//		global.ledCtrl.invokeMethod("lightDown");
 	}
 }
 
@@ -159,15 +159,15 @@ class Dashboard extends StatelessWidget {
 	Dashboard(this._content);
 
 	@override
-	Widget build(BuildContext context) => Scaffold(
-		appBar: MyAppBar(),
-		body: Builder(builder: (context) => Container(
-			color: Colors.grey[300],
-			padding: const EdgeInsets.all(2.5),
-			child: Container(
+	Widget build(BuildContext context) {
+		global.primaryColor = Theme.of(context).primaryColor;
+		return Scaffold(
+			appBar: MyAppBar(),
+			body: Builder(builder: (context) => Container(
 				color: Colors.white,
+				padding: const EdgeInsets.all(2.5),
 				child: _content
-			)
-		))
-	);
+			))
+		);
+	}
 }

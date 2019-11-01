@@ -104,77 +104,71 @@ class HistoryPageState extends BasePageState<Page> {
 		return pages;
 	}
 
-	List<Widget> _genCompRdoGrp() {
-		return _devPoints.map<Widget>((poi) => RadioListTile(
-			activeColor: Theme.of(context).primaryColor,
-			title: Text(poi.name, style: TextStyle(color: Colors.grey[600])),
-			value: poi.poiID,
-			groupValue: _selPoi,
-			onChanged: (int value) {
-				setState(() { _selPoi = value; });
-				global.refreshTimer.refresh(context, global.currentDevID, null);
-			}
-		)).toList();
-	}
+	List<Widget> _genCompRdoGrp() => _devPoints.map<Widget>((poi) => RadioListTile(
+		activeColor: global.primaryColor,
+		title: Text(poi.name, style: TextStyle(color: Colors.grey[600])),
+		value: poi.poiID,
+		groupValue: _selPoi,
+		onChanged: (int value) {
+			setState(() { _selPoi = value; });
+			global.refreshTimer.refresh(context, global.currentDevID, null);
+		}
+	)).toList();
 
-	Widget _genToolbar() {
-		final primaryColor = Theme.of(context).primaryColor;
-		return Row(children: <Widget>[
-			OutlineButton(
-				borderSide: BorderSide(color: primaryColor),
-				child: Text(global.dtFmter.format(_begTime), style: TextStyle(color: primaryColor)),
-				onPressed: () async {
-					DateTime pkTime = await showDatePicker(
-						context: context,
-						initialDate: _begTime,
-						firstDate: DateTime(2000),
-						lastDate: DateTime(2050)
-					);
-					if (pkTime != null) {
-						setState(() {
-							_begTime = pkTime;
-						});
-						global.refreshTimer.refresh(context, global.currentDevID, null);
-					}
-				}
-			),
-			Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text("-")),
-			OutlineButton(
-				borderSide: BorderSide(color: primaryColor),
-				child: Text(global.dtFmter.format(_endTime), style: TextStyle(color: primaryColor)),
-				onPressed: () async {
-					DateTime pkTime = await showDatePicker(
-						context: context,
-						initialDate: _endTime,
-						firstDate: DateTime(2000),
-						lastDate: DateTime(2050)
-					);
-					if (pkTime != null) {
-						setState(() {
-							_endTime = pkTime;
-						});
-						global.refreshTimer.refresh(context, global.currentDevID, null);
-					}
-				}
-			),
-			_historyPanel ? Row(children: <Widget>[
-				Padding(padding: EdgeInsets.only(left: 10), child: Text(!_showActive ? "历史数据" : "实时数据")),
-				Switch(activeColor: primaryColor, onChanged: (bool value) => setState(() {
-					_showActive = !_showActive;
-					global.refreshTimer.getJob("getDeviceEventHistory").doActive(!_showActive);
-					global.refreshTimer.getJob("getDeviceEventActive").doActive(_showActive);
-					_curPage = 1;
+	Widget _genToolbar() => Row(children: <Widget>[
+		OutlineButton(
+			borderSide: BorderSide(color: global.primaryColor),
+			child: Text(global.dtFmter.format(_begTime), style: TextStyle(color: global.primaryColor)),
+			onPressed: () async {
+				DateTime pkTime = await showDatePicker(
+					context: context,
+					initialDate: _begTime,
+					firstDate: DateTime(2000),
+					lastDate: DateTime(2050)
+				);
+				if (pkTime != null) {
+					setState(() {
+						_begTime = pkTime;
+					});
 					global.refreshTimer.refresh(context, global.currentDevID, null);
-				}), value: _showActive)
-			]) : Expanded(child: Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
-				Text("*点位栏可滚动", style: TextStyle(color: primaryColor))
-			]))
-		]);
-	}
+				}
+			}
+		),
+		Padding(padding: EdgeInsets.symmetric(horizontal: 10), child: Text("-")),
+		OutlineButton(
+			borderSide: BorderSide(color: global.primaryColor),
+			child: Text(global.dtFmter.format(_endTime), style: TextStyle(color: global.primaryColor)),
+			onPressed: () async {
+				DateTime pkTime = await showDatePicker(
+					context: context,
+					initialDate: _endTime,
+					firstDate: DateTime(2000),
+					lastDate: DateTime(2050)
+				);
+				if (pkTime != null) {
+					setState(() {
+						_endTime = pkTime;
+					});
+					global.refreshTimer.refresh(context, global.currentDevID, null);
+				}
+			}
+		),
+		_historyPanel ? Row(children: <Widget>[
+			Padding(padding: EdgeInsets.only(left: 10), child: Text(!_showActive ? "历史数据" : "实时数据")),
+			Switch(activeColor: global.primaryColor, onChanged: (bool value) => setState(() {
+				_showActive = !_showActive;
+				global.refreshTimer.getJob("getDeviceEventHistory").doActive(!_showActive);
+				global.refreshTimer.getJob("getDeviceEventActive").doActive(_showActive);
+				_curPage = 1;
+				global.refreshTimer.refresh(context, global.currentDevID, null);
+			}), value: _showActive)
+		]) : Expanded(child: Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
+			Text("*点位栏可滚动", style: TextStyle(color: global.primaryColor))
+		]))
+	]);
 
 	@override
 	Widget build(BuildContext context) {
-		final primaryColor = Theme.of(context).primaryColor;
 		_numPage = (_events.length ~/ _maxItmPerPage).toInt() + 1;
 		var sttIdx = (_curPage - 1) * _maxItmPerPage;
 		var endIdx = _events.length - sttIdx > _maxItmPerPage ? sttIdx + _maxItmPerPage : _events.length;
@@ -230,7 +224,7 @@ class HistoryPageState extends BasePageState<Page> {
 		} else {
 			subPanel.addAll([
 				Container(height: 150, decoration: BoxDecoration(
-					border: Border.all(color: primaryColor),
+					border: Border.all(color: global.primaryColor),
 				), child: GridView.count(
 					crossAxisCount: 4,
 					childAspectRatio: 5,
@@ -251,110 +245,107 @@ class HistoryPageState extends BasePageState<Page> {
 				)))
 			]);
 		}
-		return Container(
-			padding: const EdgeInsets.all(2.5),
-			child: Column(children: <Widget>[
-				Row(children: <Widget>[
-					_historyPanel ? Expanded(child: Container(
-						padding: EdgeInsets.symmetric(vertical: 8),
-						color: primaryColor,
-						child: Center(child: Text("历史告警", style: TextStyle(color: Colors.white))),
-					)) : Expanded(child: OutlineButton(
-						borderSide: BorderSide(color: primaryColor),
-						textColor: primaryColor,
-						shape: _noBorderRadius,
-						child: Text("历史告警"),
-						onPressed: () => setState(() {
-							_historyPanel = true;
-							global.refreshTimer.getJob("getDevicePointHistory").doActive(false);
-						}))
-					),
-					_historyPanel ? Expanded(child: OutlineButton(
-						borderSide: BorderSide(color: primaryColor),
-						textColor: primaryColor,
-						shape: _noBorderRadius,
-						child: Text("历史数据"),
-						onPressed: () async {
-							List<DevPoint> points = [];
-							if (global.currentDevID.isNotEmpty) {
-								ResponseInfo ri = await getDevPoints();
-								if (ri.data != null) {
-									points = ri.data;
-								}
+		return Column(children: <Widget>[
+			Row(children: <Widget>[
+				_historyPanel ? Expanded(child: Container(
+					padding: EdgeInsets.symmetric(vertical: 8),
+					color: global.primaryColor,
+					child: Center(child: Text("历史告警", style: TextStyle(color: Colors.white))),
+				)) : Expanded(child: OutlineButton(
+					borderSide: BorderSide(color: global.primaryColor),
+					textColor: global.primaryColor,
+					shape: _noBorderRadius,
+					child: Text("历史告警"),
+					onPressed: () => setState(() {
+						_historyPanel = true;
+						global.refreshTimer.getJob("getDevicePointHistory").doActive(false);
+					}))
+				),
+				_historyPanel ? Expanded(child: OutlineButton(
+					borderSide: BorderSide(color: global.primaryColor),
+					textColor: global.primaryColor,
+					shape: _noBorderRadius,
+					child: Text("历史数据"),
+					onPressed: () async {
+						List<DevPoint> points = [];
+						if (global.currentDevID.isNotEmpty) {
+							ResponseInfo ri = await getDevPoints();
+							if (ri.data != null) {
+								points = ri.data;
 							}
-							setState(() {
-								_devPoints = points;
-								_historyPanel = false;
-								global.refreshTimer.getJob("getDevicePointHistory").doActive(true);
-							});
-						})
-					) : Expanded(child: Container(
-						padding: EdgeInsets.symmetric(vertical: 8),
-						color: primaryColor,
-						child: Center(child: Text("历史数据", style: TextStyle(color: Colors.white))),
-					))
-				]),
-				Expanded(child: Row(children: <Widget>[
-					Expanded(child: Column(children: <Widget>[
-						Row(children: <Widget>[
-							Expanded(child: OutlineButton(
-								borderSide: BorderSide(color: Theme.of(context).primaryColor),
-								textColor: Theme.of(context).primaryColor,
-								shape: _noBorderRadius,
-								child: Text(_selType),
-								onPressed: () async {
-									await showDialog(
-										context: context,
-										builder: (BuildContext context) {
-											List<String> types = _devices.keys.toList();
-											return SimpleDialog(children: types.map<Widget>((typ) {
-												return SimpleDialogOption(child: Text(typ), onPressed: () => setState(() {
-													_selType = typ;
-													Navigator.pop(context);
-												}));
-											}).toList());
-										}
-									);
-								}))
-						]),
-						Expanded(child: Container(
-							padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-							decoration: BoxDecoration(
-								border: Border.all(color: Theme.of(context).primaryColor)
-							),
-							child: ListView(children: (_selType != "选择设备类型" && _devices.isNotEmpty ?
-								_devices[_selType].map<Widget>((device) {
-									if (global.currentDevID == device.id) {
-										return FlatButton(
-											disabledColor: primaryColor,
-											disabledTextColor: Colors.white,
-											child: Text(device.name),
-											onPressed: null
-										);
-									} else {
-										return OutlineButton(
-											borderSide: BorderSide(color: primaryColor),
-											child: Text(device.name, style: TextStyle(color: primaryColor)),
-											onPressed: () {
-												global.refreshTimer.refresh(context, device.id, () async {
-													ResponseInfo ri = await getDevPoints();
-													setState(() {
-														_curPage = 1;
-														_devPoints = ri.data != null ? ri.data : [];
-														_poiVals = [];
-													});
-												});
-											}
-										);
+						}
+						setState(() {
+							_devPoints = points;
+							_historyPanel = false;
+							global.refreshTimer.getJob("getDevicePointHistory").doActive(true);
+						});
+					})
+				) : Expanded(child: Container(
+					padding: EdgeInsets.symmetric(vertical: 8),
+					color: global.primaryColor,
+					child: Center(child: Text("历史数据", style: TextStyle(color: Colors.white))),
+				))
+			]),
+			Expanded(child: Row(children: <Widget>[
+				Expanded(child: Column(children: <Widget>[
+					Row(children: <Widget>[
+						Expanded(child: OutlineButton(
+							borderSide: BorderSide(color: global.primaryColor),
+							textColor: global.primaryColor,
+							shape: _noBorderRadius,
+							child: Text(_selType),
+							onPressed: () async {
+								await showDialog(
+									context: context,
+									builder: (BuildContext context) {
+										List<String> types = _devices.keys.toList();
+										return SimpleDialog(children: types.map<Widget>((typ) {
+											return SimpleDialogOption(child: Text(typ), onPressed: () => setState(() {
+												_selType = typ;
+												Navigator.pop(context);
+											}));
+										}).toList());
 									}
-								}).toList() : []
-							))
+								);
+							}))
+					]),
+					Expanded(child: Container(
+						padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+						decoration: BoxDecoration(
+							border: Border.all(color: global.primaryColor)
+						),
+						child: ListView(children: (_selType != "选择设备类型" && _devices.isNotEmpty ?
+						_devices[_selType].map<Widget>((device) {
+							if (global.currentDevID == device.id) {
+								return FlatButton(
+									disabledColor: global.primaryColor,
+									disabledTextColor: Colors.white,
+									child: Text(device.name),
+									onPressed: null
+								);
+							} else {
+								return OutlineButton(
+									borderSide: BorderSide(color: global.primaryColor),
+									child: Text(device.name, style: TextStyle(color: global.primaryColor)),
+									onPressed: () {
+										global.refreshTimer.refresh(context, device.id, () async {
+											ResponseInfo ri = await getDevPoints();
+											setState(() {
+												_curPage = 1;
+												_devPoints = ri.data != null ? ri.data : [];
+												_poiVals = [];
+											});
+										});
+									}
+								);
+							}
+						}).toList() : []
 						))
-					])),
-					Expanded(flex: 3, child: Padding(padding: EdgeInsets.only(left: 5), child: Column(children: subPanel)))
-				]))
-			])
-		);
+					))
+				])),
+				Expanded(flex: 3, child: Padding(padding: EdgeInsets.only(left: 5), child: Column(children: subPanel)))
+			]))
+		]);
 	}
 
 	@override

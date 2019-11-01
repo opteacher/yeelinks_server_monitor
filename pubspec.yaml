@@ -34,7 +34,7 @@ dependencies:
   intl: ^0.15.1
   flutter_spinkit: ^2.1.0
   package_info: ^0.3.2+1
-
+  keyboard_visibility: any
   flutter_ijk:
     git:
       url: https://github.com/jadennn/flutter_ijk.git

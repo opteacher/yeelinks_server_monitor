@@ -59,24 +59,23 @@ class AircondPageState extends BasePageState<Page> {
 		final double _titleSize = 20.0;
 		final double _sufSpace = 3.0;
 		final double _htlPadding = 30.0;
-		final primaryColor = Theme.of(context).primaryColor;
-		return Container(padding: const EdgeInsets.all(2.5), child: Row(children: <Widget>[
+		return Row(children: <Widget>[
 			Expanded(child: Container(
 				decoration: BoxDecoration(
-					border: Border.all(color: primaryColor),
+					border: Border.all(color: global.primaryColor),
 				),
 				margin: EdgeInsets.all(3.5),
 				padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
 				child: ListView(children: _airconds.map<Widget>((acd) => (global.currentDevID == acd.id ? FlatButton(
 					shape: RoundedRectangleBorder(
-						side: BorderSide(color: primaryColor),
+						side: BorderSide(color: global.primaryColor),
 						borderRadius: BorderRadius.all(Radius.circular(3))
 					),
-					disabledColor: primaryColor,
+					disabledColor: global.primaryColor,
 					child: Text(acd.name, style: TextStyle(color: Colors.white)), onPressed: null,
 				) : OutlineButton(
-					textColor: primaryColor,
-					borderSide: BorderSide(color: primaryColor),
+					textColor: global.primaryColor,
+					borderSide: BorderSide(color: global.primaryColor),
 					child: Text(acd.name), onPressed: () => setState(() {
 					global.refreshTimer.refresh(context, acd.id, () async {
 						global.idenDevs = [acd.id];
@@ -128,7 +127,7 @@ class AircondPageState extends BasePageState<Page> {
 				])),
 				Expanded(child: Row(children: <Widget>[
 					DataCard(flex: 2, title: "实时数据", tailing: IconButton(
-						icon: Icon(Icons.info_outline, color: primaryColor),
+						icon: Icon(Icons.info_outline, color: global.primaryColor),
 						onPressed: () => setState(() {
 							_showDetail = !_showDetail;
 							global.refreshTimer.getJob("listAircondDetail").doActive(_showDetail);
@@ -226,7 +225,7 @@ class AircondPageState extends BasePageState<Page> {
 					))
 				]))
 			]))
-		]));
+		]);
 	}
 
 	@override

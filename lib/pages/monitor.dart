@@ -22,14 +22,11 @@ class MonitorPageState extends BasePageState<Page> {
 
 	@override
 	Widget build(BuildContext context) {
-		return Container(
-			padding: const EdgeInsets.all(2.5),
-			child: _controller == null ? Container() : Center(
-				child: _controller.value.initialized ? AspectRatio(
-					aspectRatio: _controller.value.aspectRatio,
-					child: IjkPlayer(_controller)
-				) : Container()
-			)
+		return _controller == null ? Container() : Center(
+			child: _controller.value.initialized ? AspectRatio(
+				aspectRatio: _controller.value.aspectRatio,
+				child: IjkPlayer(_controller)
+			) : Container()
 		);
 	}
 

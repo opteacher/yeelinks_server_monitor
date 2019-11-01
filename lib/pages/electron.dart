@@ -29,136 +29,133 @@ class ElectronPageState extends BasePageState<Page> {
 	};
 
 	@override
-	Widget build(BuildContext context) {
-		final primaryColor = Theme.of(context).primaryColor;
-		return Container(padding: const EdgeInsets.all(2.5), child: Row(children: <Widget>[
-			Expanded(child: Container(
-				margin: EdgeInsets.all(3.5),
-				padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-				decoration: BoxDecoration(
-					border: Border.all(color: Theme.of(context).primaryColor),
+	Widget build(BuildContext context) => Row(children: <Widget>[
+		Expanded(child: Container(
+			margin: EdgeInsets.all(3.5),
+			padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+			decoration: BoxDecoration(
+				border: Border.all(color: global.primaryColor),
+			),
+			child: ListView(children: _pdus.map<Widget>((pdu) => (global.currentDevID == pdu.id ? FlatButton(
+				shape: RoundedRectangleBorder(
+					side: BorderSide(color: global.primaryColor),
+					borderRadius: BorderRadius.all(Radius.circular(3))
 				),
-				child: ListView(children: _pdus.map<Widget>((pdu) => (global.currentDevID == pdu.id ? FlatButton(
-					shape: RoundedRectangleBorder(
-						side: BorderSide(color: primaryColor),
-						borderRadius: BorderRadius.all(Radius.circular(3))
-					),
-					disabledColor: primaryColor,
-					child: Text(pdu.name, style: TextStyle(color: Colors.white)), onPressed: null,
-				) : OutlineButton(
-					textColor: primaryColor,
-					borderSide: BorderSide(color: primaryColor),
-					child: Text(pdu.name), onPressed: () => setState(() {
-						global.idenDevs = [pdu.id];
-						if (_mainEleID.isNotEmpty) {
-							global.idenDevs.add(_mainEleID);
-						}
-						global.refreshTimer.refresh(context, pdu.id, null);
-					}))
-				)).toList())
-			)),
-			Expanded(flex: 4, child: Column(children: <Widget>[
-				DataCard(title: "主路输入", child: Padding(padding: EdgeInsets.all(20), child: Row(children: <Widget>[
-					Expanded(child: Padding(padding: EdgeInsets.only(top: 10),
-						child: Instrument(
-							radius: 120.0,
-							numScales: 10,
-							max: 300.0,
-							scalesColor: {
-								Offset(0, 180): Colors.grey,
+				disabledColor: global.primaryColor,
+				child: Text(pdu.name, style: TextStyle(color: Colors.white)), onPressed: null,
+			) : OutlineButton(
+				textColor: global.primaryColor,
+				borderSide: BorderSide(color: global.primaryColor),
+				child: Text(pdu.name), onPressed: () => setState(() {
+				global.idenDevs = [pdu.id];
+				if (_mainEleID.isNotEmpty) {
+					global.idenDevs.add(_mainEleID);
+				}
+				global.refreshTimer.refresh(context, pdu.id, null);
+			}))
+			)).toList())
+		)),
+		Expanded(flex: 4, child: Column(children: <Widget>[
+			DataCard(title: "主路输入", child: Padding(padding: EdgeInsets.all(20), child: Row(children: <Widget>[
+				Expanded(child: Padding(padding: EdgeInsets.only(top: 10),
+					child: Instrument(
+						radius: 120.0,
+						numScales: 10,
+						max: 300.0,
+						scalesColor: {
+							Offset(0, 180): Colors.grey,
 //								Offset(180, 240): Colors.green,
-								Offset(240, 300): Colors.red
-							},
-							value: double.parse(_eleVals["电压"]),
-							suffix: "V"
-						)
-					)),
-					VerticalDivider(width: 50),
-					Expanded(child: Padding(padding: EdgeInsets.only(top: 10),
-						child: Instrument(
-							radius: 120.0,
-							numScales: 8,
-							max: 20.0,
-							scalesColor: {
-								Offset(16, 20): Colors.red
-							},
-							value: double.parse(_eleVals["电流"]),
-							suffix: "A"
-						)
-					)),
-					VerticalDivider(width: 50),
-					Expanded(child: Column(children: <Widget>[
-						DescListItem(
-							DescListItemTitle("有功功率"),
-							DescListItemContent(_eleVals["有功功率"], horizontal: 10.0, blocked: true),
-							suffix: DescListItemSuffix(text: "kW"),
-							contentWidth: 150,
-						),
-						DescListItem(
-							DescListItemTitle("有功电能"),
-							DescListItemContent(_eleVals["有功电能"], horizontal: 10.0, blocked: true),
-							suffix: DescListItemSuffix(text: "kWh"),
-							contentWidth: 150,
-						),
-						DescListItem(
-							DescListItemTitle("功率因数"),
-							DescListItemContent(_eleVals["功率因数"], horizontal: 10.0, blocked: true),
-							suffix: DescListItemSuffix(text: "PF"),
-							contentWidth: 150,
-						),
-						DescListItem(
-							DescListItemTitle("输入频率"),
-							DescListItemContent(_eleVals["输入频率"], horizontal: 10.0, blocked: true),
-							suffix: DescListItemSuffix(text: "Hz"),
-							contentWidth: 150,
-						),
-					]))
-				]))),
-				DataCard(title: "PDU", child: Row(children: <Widget>[
-					Expanded(child: Column(children: <Widget>[
-						DescListItem(
-							DescListItemTitle("输出电压"),
-							DescListItemContent(_pduVals["PDU-输出电压"], horizontal: 50.0),
-							suffix: DescListItemSuffix(text: "V"),
-							horizontal: 50.0
-						),
-						DescListItem(
-							DescListItemTitle("输出电流"),
-							DescListItemContent(_pduVals["PDU-输出电流"], horizontal: 50.0),
-							suffix: DescListItemSuffix(text: "A"),
-							horizontal: 50.0
-						),
-						DescListItem(
-							DescListItemTitle("有功功率"),
-							DescListItemContent(_pduVals["PDU-有功功率"], horizontal: 50.0),
-							suffix: DescListItemSuffix(text: "kW"),
-							horizontal: 50.0
-						),
-					])),
-					Expanded(child: Column(children: <Widget>[
-						DescListItem(
-							DescListItemTitle("功率因数"),
-							DescListItemContent(_pduVals["PDU-功率因数"], horizontal: 50.0),
-							suffix: DescListItemSuffix(text: "PF"),
-							horizontal: 50.0
-						),
-						DescListItem(
-							DescListItemTitle("输出频率"),
-							DescListItemContent(_pduVals["PDU-输出频率"], horizontal: 50.0),
-							suffix: DescListItemSuffix(text: "Hz"),
-							horizontal: 50.0
-						),
-						DescListItem(
-							DescListItemTitle("有功电能"),
-							DescListItemContent(_pduVals["PDU-有功电能"], horizontal: 50.0),
-							suffix: DescListItemSuffix(text: "kWh"),
-							horizontal: 50.0
-						),
-					]))
+							Offset(240, 300): Colors.red
+						},
+						value: double.parse(_eleVals["电压"]),
+						suffix: "V"
+					)
+				)),
+				VerticalDivider(width: 50),
+				Expanded(child: Padding(padding: EdgeInsets.only(top: 10),
+					child: Instrument(
+						radius: 120.0,
+						numScales: 8,
+						max: 20.0,
+						scalesColor: {
+							Offset(16, 20): Colors.red
+						},
+						value: double.parse(_eleVals["电流"]),
+						suffix: "A"
+					)
+				)),
+				VerticalDivider(width: 50),
+				Expanded(child: Column(children: <Widget>[
+					DescListItem(
+						DescListItemTitle("有功功率"),
+						DescListItemContent(_eleVals["有功功率"], horizontal: 10.0, blocked: true),
+						suffix: DescListItemSuffix(text: "kW"),
+						contentWidth: 150,
+					),
+					DescListItem(
+						DescListItemTitle("有功电能"),
+						DescListItemContent(_eleVals["有功电能"], horizontal: 10.0, blocked: true),
+						suffix: DescListItemSuffix(text: "kWh"),
+						contentWidth: 150,
+					),
+					DescListItem(
+						DescListItemTitle("功率因数"),
+						DescListItemContent(_eleVals["功率因数"], horizontal: 10.0, blocked: true),
+						suffix: DescListItemSuffix(text: "PF"),
+						contentWidth: 150,
+					),
+					DescListItem(
+						DescListItemTitle("输入频率"),
+						DescListItemContent(_eleVals["输入频率"], horizontal: 10.0, blocked: true),
+						suffix: DescListItemSuffix(text: "Hz"),
+						contentWidth: 150,
+					),
+				]))
+			]))),
+			DataCard(title: "PDU", child: Row(children: <Widget>[
+				Expanded(child: Column(children: <Widget>[
+					DescListItem(
+						DescListItemTitle("输出电压"),
+						DescListItemContent(_pduVals["PDU-输出电压"], horizontal: 50.0),
+						suffix: DescListItemSuffix(text: "V"),
+						horizontal: 50.0
+					),
+					DescListItem(
+						DescListItemTitle("输出电流"),
+						DescListItemContent(_pduVals["PDU-输出电流"], horizontal: 50.0),
+						suffix: DescListItemSuffix(text: "A"),
+						horizontal: 50.0
+					),
+					DescListItem(
+						DescListItemTitle("有功功率"),
+						DescListItemContent(_pduVals["PDU-有功功率"], horizontal: 50.0),
+						suffix: DescListItemSuffix(text: "kW"),
+						horizontal: 50.0
+					),
+				])),
+				Expanded(child: Column(children: <Widget>[
+					DescListItem(
+						DescListItemTitle("功率因数"),
+						DescListItemContent(_pduVals["PDU-功率因数"], horizontal: 50.0),
+						suffix: DescListItemSuffix(text: "PF"),
+						horizontal: 50.0
+					),
+					DescListItem(
+						DescListItemTitle("输出频率"),
+						DescListItemContent(_pduVals["PDU-输出频率"], horizontal: 50.0),
+						suffix: DescListItemSuffix(text: "Hz"),
+						horizontal: 50.0
+					),
+					DescListItem(
+						DescListItemTitle("有功电能"),
+						DescListItemContent(_pduVals["PDU-有功电能"], horizontal: 50.0),
+						suffix: DescListItemSuffix(text: "kWh"),
+						horizontal: 50.0
+					),
 				]))
 			]))
-		]));
-	}
+		]))
+	]);
 
 	@override
 	String pageId() => "electron";

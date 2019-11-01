@@ -49,7 +49,7 @@ class HomePageState extends BasePageState<Page> {
 				)
 			));
 		}
-		return Container(padding: const EdgeInsets.all(2.5), child: Column(children: <Widget>[
+		return Column(children: <Widget>[
 			Expanded(child: Row(children: <Widget>[
 				DataCard(title: "PUE", child: Padding(
 					padding: EdgeInsets.only(top: 20),
@@ -149,7 +149,7 @@ class HomePageState extends BasePageState<Page> {
 					children: eveRcdList
 				))
 			]))
-		]));
+		]);
 	}
 
 	@override

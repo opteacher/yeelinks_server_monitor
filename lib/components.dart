@@ -499,15 +499,15 @@ class RefreshTimer {
 	String _idenPrefix = "";
 	Map<String, TimerJob> _jobs = {
 		"alarmLighter": TimerJob(hasAlarms, (dynamic data) {
-			if (data) {
-				global.ledCtrl.invokeMethod("lightUp", {
-					"color": "RED", "brightness": 50
-				});
-			} else {
-				global.ledCtrl.invokeMethod("lightUp", {
-					"color": "GREEN", "brightness": 50
-				});
-			}
+//			if (data) {
+//				global.ledCtrl.invokeMethod("lightUp", {
+//					"color": "RED", "brightness": 50
+//				});
+//			} else {
+//				global.ledCtrl.invokeMethod("lightUp", {
+//					"color": "GREEN", "brightness": 50
+//				});
+//			}
 		})
 	};
 
@@ -533,33 +533,33 @@ class RefreshTimer {
 	}
 
 	_refresh(Timer t) async {
-		for (var id in _jobs.keys.toList()) {
-			if (_idenPrefix.isNotEmpty) {
-				if (!id.startsWith(_idenPrefix)) {
-					continue;
-				}
-			}
-			var job = _jobs[id];
-			if (job._conditions[TimerJob.PAGE_IDEN] != null) {
-				if (job._conditions[TimerJob.PAGE_IDEN] != global.currentPageID) {
-					continue;
-				}
-			}
-			if (job._conditions[TimerJob.ACTV_IDEN] != null) {
-				if (job._conditions[TimerJob.ACTV_IDEN].isEmpty) {
-					continue;
-				}
-			}
-
-			ResponseInfo ri = await job._job();
-			if (ri == null || ri.data == null) {
-				continue;
-			}
-			print(ri.data);
-			if (job._callback != null) {
-				job._callback(ri.data);
-			}
-		}
+//		for (var id in _jobs.keys.toList()) {
+//			if (_idenPrefix.isNotEmpty) {
+//				if (!id.startsWith(_idenPrefix)) {
+//					continue;
+//				}
+//			}
+//			var job = _jobs[id];
+//			if (job._conditions[TimerJob.PAGE_IDEN] != null) {
+//				if (job._conditions[TimerJob.PAGE_IDEN] != global.currentPageID) {
+//					continue;
+//				}
+//			}
+//			if (job._conditions[TimerJob.ACTV_IDEN] != null) {
+//				if (job._conditions[TimerJob.ACTV_IDEN].isEmpty) {
+//					continue;
+//				}
+//			}
+//
+//			ResponseInfo ri = await job._job();
+//			if (ri == null || ri.data == null) {
+//				continue;
+//			}
+//			print(ri.data);
+//			if (job._callback != null) {
+//				job._callback(ri.data);
+//			}
+//		}
 		_idenPrefix = "";
 	}
 
@@ -797,8 +797,9 @@ class UpsRunningModPainter extends CustomPainter {
 class NamedWithID {
 	int _id;
 	String _name;
+	Widget Function() _func;
 
-	NamedWithID(this._id, this._name);
+	NamedWithID(this._id, this._name, this._func);
 
 	String get name => _name;
 
@@ -811,4 +812,6 @@ class NamedWithID {
 	set id(int value) {
 		_id = value;
 	}
+
+	Function get func => _func;
 }

@@ -29,7 +29,7 @@ class EnvPageState extends BasePageState<Page> {
 	};
 
 	@override
-	Widget build(BuildContext context) => Container(padding: const EdgeInsets.all(2.5), child: Row(children: <Widget>[
+	Widget build(BuildContext context) => Row(children: <Widget>[
 		Expanded(child: Column(children: <Widget>[
 			DataCard(title: "冷通道环境", child: Padding(padding: _envBlkPdg,
 				child: Column(children: _genHumiTempCard(_cloudDevs.values.toList()))
@@ -60,14 +60,14 @@ class EnvPageState extends BasePageState<Page> {
 				child: Column(children: _genHumiTempCard(_hotDevs.values.toList()))
 			))
 		])),
-	]));
+	]);
 
 	List<Widget> _genHumiTempCard(List<Device> devices) => devices.map<Widget>((dev) {
 		Widget titleBar;
 		if (global.currentDevID.isNotEmpty && global.currentDevID == dev.id) {
 			titleBar = FlatButton(padding: EdgeInsets.all(0), child: ListTile(
 				title: Text(dev.name, style: _dividerTxtStyle),
-				trailing: Icon(Icons.check_circle, color: Theme.of(context).primaryColor)
+				trailing: Icon(Icons.check_circle, color: global.primaryColor)
 			), disabledColor: Colors.grey[100], onPressed: null);
 		} else {
 			titleBar = FlatButton(padding: EdgeInsets.all(0), child: ListTile(
