@@ -26,6 +26,19 @@ class SettingPageState extends BasePageState<Page> {
 	Map<int, NamedWithID> _settings = {};
 	int _selSetting = DEV_SETTING;
 
+	Map<String, String> _aircondSettings = {
+		"空调开关机": "关机",
+		"回风温度设定": "30.0",
+		"送风温度设定": "30.0",
+		"最小湿度设定": "30.0",
+		"最大湿度设定": "30.0",
+		"回风高温告警": "30.0",
+		"送风高温告警": "30.0",
+		"送风低温告警": "30.0",
+		"回风高湿告警": "30.0",
+		"回风低湿告警": "30.0"
+	};
+
 	@override
 	void initState() {
 		global.refreshTimer.register("listDevicesOfSetting", TimerJob(getDevList, hdlDevices, {
@@ -130,16 +143,16 @@ class SettingPageState extends BasePageState<Page> {
 			child: Column(
 				mainAxisAlignment: MainAxisAlignment.center,
 				children: <Widget>[
-					_buildCtrlItem("空调开关机", "关机", ctrlType: CtrlType.SWITCH_SETTING),
-					_buildCtrlItem("回风温度设定", "35.0", suffix: "℃"),
-					_buildCtrlItem("送风温度设定", "22.0", suffix: "℃"),
-					_buildCtrlItem("最小湿度设定", "35.0", suffix: "%"),
-					_buildCtrlItem("最大湿度设定", "35.0", suffix: "%"),
-					_buildCtrlItem("回风高温告警", "35.0", suffix: "℃"),
-					_buildCtrlItem("送风高温告警", "35.0", suffix: "℃"),
-					_buildCtrlItem("送风低温告警", "35.0", suffix: "℃"),
-					_buildCtrlItem("回风高湿告警", "35.0", suffix: "%"),
-					_buildCtrlItem("回风低湿告警", "35.0", suffix: "%"),
+					_buildCtrlItem("空调开关机", _aircondSettings["空调开关机"], ctrlType: CtrlType.SWITCH_SETTING),
+					_buildCtrlItem("回风温度设定", _aircondSettings["回风温度设定"], suffix: "℃"),
+					_buildCtrlItem("送风温度设定", _aircondSettings["送风温度设定"], suffix: "℃"),
+					_buildCtrlItem("最小湿度设定", _aircondSettings["最小湿度设定"], suffix: "%"),
+					_buildCtrlItem("最大湿度设定", _aircondSettings["最大湿度设定"], suffix: "%"),
+					_buildCtrlItem("回风高温告警", _aircondSettings["回风高温告警"], suffix: "℃"),
+					_buildCtrlItem("送风高温告警", _aircondSettings["送风高温告警"], suffix: "℃"),
+					_buildCtrlItem("送风低温告警", _aircondSettings["送风低温告警"], suffix: "℃"),
+					_buildCtrlItem("回风高湿告警", _aircondSettings["回风高湿告警"], suffix: "%"),
+					_buildCtrlItem("回风低湿告警", _aircondSettings["回风低湿告警"], suffix: "%"),
 				]
 			)
 		))
