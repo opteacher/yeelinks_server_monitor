@@ -50,7 +50,7 @@ class MyAppBar extends StatefulWidget implements PreferredSizeWidget {
 	State<StatefulWidget> createState() => MyAppBarState();
 
 	@override
-	Size get preferredSize => Size.fromHeight(75.0);
+	Size get preferredSize => Size.fromHeight(global.appBarHeight);
 }
 
 class MyAppBarState extends State<MyAppBar> {
@@ -163,11 +163,12 @@ class Dashboard extends StatelessWidget {
 		global.primaryColor = Theme.of(context).primaryColor;
 		return Scaffold(
 			appBar: MyAppBar(),
-			body: Builder(builder: (context) => Container(
+			body: Builder(builder: (context) => SingleChildScrollView(child: Container(
 				color: Colors.white,
 				padding: const EdgeInsets.all(2.5),
+				height: MediaQuery.of(context).size.height - global.appBarHeight,
 				child: _content
-			))
+			)))
 		);
 	}
 }

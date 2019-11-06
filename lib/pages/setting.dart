@@ -218,8 +218,8 @@ class SettingPageState extends BasePageState<Page> {
 		final TextEditingController yearCtrl = TextEditingController();
 		final TextEditingController monthCtrl = TextEditingController();
 		final TextEditingController dayCtrl = TextEditingController();
-		return Expanded(flex: 3, child: Padding(
-			padding: EdgeInsets.only(top: 20),
+		return Expanded(flex: 4, child: Padding(
+			padding: EdgeInsets.only(top: 15),
 			child: Column(children: <Widget>[
 				Column(
 					children: <Widget>[
@@ -424,26 +424,15 @@ class SettingPageState extends BasePageState<Page> {
 		return ret;
 	}
 
-	GlobalKey globalKey = GlobalKey();
-
 	@override
 	Widget build(BuildContext context) {
 		Widget content = _settingTabs[_selSetting].func();
-		double height = 0.0;
-		if (globalKey.currentContext != null) {
-			RenderBox rb = globalKey.currentContext.findRenderObject();
-			height += rb.localToGlobal(Offset.zero).dy;
-			height += rb.size.height;
-		}
 		return Column(children: <Widget>[
 			Row(mainAxisAlignment: MainAxisAlignment.center, children: _genSettingBtns()),
-			Divider(key: globalKey),
-			Expanded(child: SingleChildScrollView(child: SizedBox(
-				height: MediaQuery.of(context).size.height - height,
-				child: GestureDetector(child: content, onTap: () {
-					FocusScope.of(context).requestFocus(FocusNode());
-				})
-			)))
+			Divider(),
+			Expanded(child: GestureDetector(child: content, onTap: () {
+				FocusScope.of(context).requestFocus(FocusNode());
+			}))
 		]);
 	}
 

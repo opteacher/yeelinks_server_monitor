@@ -22,6 +22,7 @@ String currentPageID = "home";
 String currentGroup = "AnBKy5wyBwMLNaoc";
 String currentDevID = "";
 List<Device> devices = [];
+const double appBarHeight = 75.0;
 int upsMode = 17408;
 Color primaryColor;
 class ComponentInfo {
