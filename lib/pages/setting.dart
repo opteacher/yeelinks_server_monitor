@@ -82,9 +82,7 @@ class SettingPageState extends BasePageState<Page> {
 	Widget _systemSettingContent() => Center(child: FlatButton(
 		color: global.primaryColor,
 		child: Text("检查更新", style: TextStyle(color: Colors.white)),
-		onPressed: () {
-
-		})
+		onPressed: checkNewVersion)
 	);
 
 	Widget _buildCtrlItem(String title, {

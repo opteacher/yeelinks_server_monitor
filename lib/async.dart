@@ -1,9 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:http/http.dart' as http;
-import 'global.dart' as global;
-import 'components.dart';
 import 'package:package_info/package_info.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'components.dart';
+import 'global.dart' as global;
 
 class RequestInfo {
 	final String _method;
@@ -94,7 +100,9 @@ final _getAcDetail = RequestInfo("GET", "/api/v1/devices/points", {
 	"id": "",
 	"point_type": 2
 });
-const updateURL = "http://py9z68s8h.bkt.clouddn.com/apk-release-v{version}.apk";
+const updateUrl = "http://10.168.22.166:4000";
+const _getVersion = "/app/version.json";
+const _getAppApk = "/app/{version}.apk";
 
 class DeviceComponent {
 	String _id;
@@ -416,19 +424,49 @@ postAddDev(
 		.body)
 ), (dynamic data) => data);
 
-checkVersionForUpdate() async {
-	PackageInfo pi = await PackageInfo.fromPlatform();
-	List<String> subVers = pi.version.split(".");
-	int v1 = int.parse(subVers[0]);
-	int v2 = int.parse(subVers[1]);
-	int v3 = int.parse(subVers[2]);
-	for (int i = 0; i <= 5; i++) {
-		for (int j = 0; j <= 10; j++) {
-			for (int t = 0; t <= 15; t++) {
-				String ver = "${v1 + i}.${v2 + j}.${v3 + t}";
-				print(ver);
+checkNewVersion() async {
+	try {
+		final res = await http.get(updateUrl + _getVersion);
+		if (res.statusCode == 200) {
+			final Map<String, dynamic> body = json.decode(res.body);
+			if (defaultTargetPlatform == TargetPlatform.android) {
+				final packageInfo = await PackageInfo.fromPlatform();
+				final newVersion = body["android"];
+				print(packageInfo.version);
+				print(newVersion);
+				if (newVersion.compareTo(packageInfo.version) == 1) {
+					downloadNewVersion(newVersion);
+				}
 			}
 		}
+	} catch(e) {}
+}
+
+String _taskId = "";
+String _apkFile = "";
+
+downloadNewVersion(String version) async {
+	final directory = await getExternalStorageDirectory();
+	print(updateUrl + _getAppApk.replaceFirst("{version}", version));
+	_taskId = await FlutterDownloader.enqueue(
+		url: updateUrl + _getAppApk.replaceFirst("{version}", version),
+		savedDir: directory.path,
+		showNotification: true,
+		openFileFromNotification: true
+	);
+	_apkFile = directory.path + "/$version.apk";
+	print(_apkFile);
+	print(FlutterDownloader.registerCallback(_regCallback));
+}
+
+_regCallback(id, status, progress) async {
+	print(progress);
+	if (_taskId == id && status == DownloadTaskStatus.complete) {
+		final packageInfo = await PackageInfo.fromPlatform();
+		print(packageInfo.packageName);
+		// TODO: 安装文件下载下来了，不过安装不了
+//		String result = await InstallPlugin.installApk(_apkFile, packageInfo.appName);
+//		print(result);
 	}
 }
 
