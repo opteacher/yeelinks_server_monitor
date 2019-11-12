@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
+import 'package:package_info/package_info.dart';
 import 'pages/home.dart' as home;
 import 'pages/initialize.dart' as initialize;
 import 'pages/electron.dart' as electron;
@@ -63,6 +65,9 @@ toIdenPage(BuildContext context, String pid) {
 }
 final RefreshTimer refreshTimer = RefreshTimer();
 bool manualLight = false;
+PackageInfo packageInfo;
+String taskId = "";
+ReceivePort receivePort = ReceivePort();
 const companyCode = "dd738dbb-0b28-4fa2-8934-efad4d8f9c88";
 const roomCode = "swDMvFDTI6JBKcd0";
 List<String> idenDevs = [];

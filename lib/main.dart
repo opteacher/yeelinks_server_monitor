@@ -16,7 +16,13 @@ void main() {
 	]);
 	SystemChrome.setEnabledSystemUIOverlays([]);
 //	global.brightnessCtrl.invokeMethod("turnOff");
+	initialize();
 	return runApp(MyApp());
+}
+
+initialize() async {
+	await FlutterDownloader.initialize();
+//	await checkNewVersion();
 }
 
 class MyApp extends StatefulWidget {

@@ -1,12 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:http/http.dart' as http;
+import 'package:install_plugin/install_plugin.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'components.dart';
 import 'global.dart' as global;
@@ -424,50 +428,92 @@ postAddDev(
 		.body)
 ), (dynamic data) => data);
 
-checkNewVersion() async {
-	try {
-		final res = await http.get(updateUrl + _getVersion);
-		if (res.statusCode == 200) {
-			final Map<String, dynamic> body = json.decode(res.body);
-			if (defaultTargetPlatform == TargetPlatform.android) {
-				final packageInfo = await PackageInfo.fromPlatform();
-				final newVersion = body["android"];
-				print(packageInfo.version);
-				print(newVersion);
-				if (newVersion.compareTo(packageInfo.version) == 1) {
-					downloadNewVersion(newVersion);
-				}
-			}
-		}
-	} catch(e) {}
+Future<String> checkNewVersion() async {
+	final res = await http.get(updateUrl + _getVersion);
+	if (res.statusCode != 200) {
+		throw Exception("网络异常");
+	}
+	final Map<String, dynamic> body = json.decode(res.body);
+	if (defaultTargetPlatform != TargetPlatform.android) {
+		throw Exception("运行平台非安卓");
+	}
+	global.packageInfo = await PackageInfo.fromPlatform();
+	final newVersion = body["android"];
+	print(newVersion);
+	if (newVersion.compareTo(global.packageInfo.version) == 1) {
+		return newVersion;
+	} else {
+		return "";
+	}
 }
 
-String _taskId = "";
-String _apkFile = "";
+downloadNewVersion(BuildContext context, String version) async {
+	if (global.taskId.isNotEmpty) {
+		FlutterDownloader.cancelAll();
+		FlutterDownloader.remove(taskId: global.taskId);
+		IsolateNameServer.removePortNameMapping(global.taskId);
+		sleep(Duration(milliseconds: 200));
+	}
 
-downloadNewVersion(String version) async {
 	final directory = await getExternalStorageDirectory();
 	print(updateUrl + _getAppApk.replaceFirst("{version}", version));
-	_taskId = await FlutterDownloader.enqueue(
+	global.taskId = await FlutterDownloader.enqueue(
 		url: updateUrl + _getAppApk.replaceFirst("{version}", version),
 		savedDir: directory.path,
 		showNotification: true,
 		openFileFromNotification: true
 	);
-	_apkFile = directory.path + "/$version.apk";
-	print(_apkFile);
-	print(FlutterDownloader.registerCallback(_regCallback));
+	String apkFile = directory.path + "/$version.apk";
+
+	IsolateNameServer.registerPortWithName(global.receivePort.sendPort, global.taskId);
+	global.receivePort.listen((dynamic data) async {
+		print(data);
+		if (data[1] == DownloadTaskStatus.complete) {
+			IsolateNameServer.removePortNameMapping(global.taskId);
+			Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler()
+				.requestPermissions([PermissionGroup.storage]);
+			if (permissions[PermissionGroup.storage] == PermissionStatus.granted) {
+				try {
+					String result = await InstallPlugin.installApk(
+						apkFile,
+						global.packageInfo.appName
+					);
+					print("install apk $result");
+				} catch(e) {
+					print("install apk error: $e");
+				}
+			} else {
+				print('Permission request fail!');
+			}
+		}
+	});
+	FlutterDownloader.registerCallback(_regCallback);
+
+	showDialog(context: context, builder: (BuildContext context) => AlertDialog(
+		title: Row(children: <Widget>[
+			Padding(
+				padding: EdgeInsets.only(right: 10),
+				child: Icon(Icons.file_download)
+			),
+			Text("下载中")
+		]),
+		content: Row(children: <Widget>[
+			LinearProgressIndicator(value: 10),
+			Text("0%")
+		]),
+		actions: <Widget>[
+			FlatButton(child: Text("取消"), onPressed: () {
+				Navigator.of(context).pop();
+			})
+		]
+	));
 }
 
-_regCallback(id, status, progress) async {
-	print(progress);
-	if (_taskId == id && status == DownloadTaskStatus.complete) {
-		final packageInfo = await PackageInfo.fromPlatform();
-		print(packageInfo.packageName);
-		// TODO: 安装文件下载下来了，不过安装不了
-//		String result = await InstallPlugin.installApk(_apkFile, packageInfo.appName);
-//		print(result);
-	}
+String getAppApk(String version) => _getAppApk.replaceFirst("{version}", version);
+
+void _regCallback(String id, DownloadTaskStatus status, int progress) async {
+	final SendPort send = IsolateNameServer.lookupPortByName(id);
+	send.send([id, status, progress]);
 }
 
 Future<dynamic> getAcDetail() => reqTempFunc(http.get(

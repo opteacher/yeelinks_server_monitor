@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:package_info/package_info.dart';
 import 'package:yeelinks/async.dart';
 import '../components.dart';
 import '../global.dart' as global;
@@ -25,6 +26,7 @@ class SettingPageState extends BasePageState<Page> {
 	List<Device> _devices = [];
 	Map<int, NamedWithID> _settingTabs = {};
 	int _selSetting = DEV_SETTING;
+	String _curVers = "";
 
 	Map<String, String> _settings = {
 		"空调开关机": "关机",
@@ -79,11 +81,52 @@ class SettingPageState extends BasePageState<Page> {
 		});
 	}
 
-	Widget _systemSettingContent() => Center(child: FlatButton(
-		color: global.primaryColor,
-		child: Text("检查更新", style: TextStyle(color: Colors.white)),
-		onPressed: checkNewVersion)
-	);
+	Widget _systemSettingContent() => Center(child: Column(children: <Widget>[
+	 	Text("当前版本：$_curVers"),
+		FlatButton(
+			color: global.primaryColor,
+			child: Text("检查更新", style: TextStyle(color: Colors.white)),
+			onPressed: () async {
+				_showChkVersDlg(await checkNewVersion());
+			})
+	]));
+
+	_showChkVersDlg(String newVers) {
+		showDialog(
+			context: context,
+			builder: (BuildContext context) => (newVers.isEmpty ? AlertDialog(
+				content: Row(children: <Widget>[
+					Padding(
+						padding: EdgeInsets.only(right: 20),
+						child: Icon(Icons.check_circle)
+					),
+					Text("已升级到最新版本！")
+				]),
+				actions: <Widget>[
+					FlatButton(child: Text("确定"), onPressed: () {
+						Navigator.of(context).pop();
+					})
+				]
+			) : AlertDialog(
+				content: Row(children: <Widget>[
+					Padding(
+						padding: EdgeInsets.only(right: 20),
+						child: Icon(Icons.info)
+					),
+					Text("发现新版本：$newVers，是否更新？")
+				]),
+				actions: <Widget>[
+					FlatButton(child: Text("确定"), onPressed: () {
+						Navigator.of(context).pop();
+						showDialog(context: context, builder: (BuildContext context) => UpdateContent(newVers));
+					}),
+					FlatButton(child: Text("取消"), onPressed: () {
+						Navigator.of(context).pop();
+					})
+				]
+			))
+		);
+	}
 
 	Widget _buildCtrlItem(String title, {
 		String category = "",
@@ -415,6 +458,12 @@ class SettingPageState extends BasePageState<Page> {
 					shape: btnBorder,
 					onPressed: () => setState(() {
 						_selSetting = btn.id;
+						if (_selSetting == SYS_SETTING) {
+							PackageInfo.fromPlatform().then((PackageInfo pi) {
+								global.packageInfo = pi;
+								_curVers = global.packageInfo.version;
+							});
+						}
 					})
 				));
 			}

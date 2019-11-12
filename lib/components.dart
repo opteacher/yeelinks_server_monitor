@@ -1,11 +1,18 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:isolate';
 import 'dart:math';
+import 'dart:ui';
 import 'package:english_words/english_words.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/services.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:install_plugin/install_plugin.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:toast/toast.dart';
 import 'async.dart';
 import 'global.dart' as global;
@@ -814,4 +821,99 @@ class NamedWithID {
 	}
 
 	Function get func => _func;
+}
+
+class UpdateContent extends StatefulWidget {
+	final String _version;
+
+	const UpdateContent(this._version);
+
+	@override
+	State<StatefulWidget> createState() => UpdateContentState();
+}
+
+class UpdateContentState extends State<UpdateContent> {
+	String _taskId = "";
+	ReceivePort _port = ReceivePort();
+	int _progress = 0;
+
+	@override
+	void initState() {
+		super.initState();
+		startDownload();
+	}
+
+	startDownload() async {
+		if (_taskId.isNotEmpty) {
+			FlutterDownloader.cancelAll();
+			FlutterDownloader.remove(taskId: _taskId);
+			IsolateNameServer.removePortNameMapping(_taskId);
+			sleep(Duration(milliseconds: 200));
+		}
+
+		final version = widget._version;
+		final directory = await getExternalStorageDirectory();
+		_taskId = await FlutterDownloader.enqueue(
+			url: updateUrl + getAppApk(version),
+			savedDir: directory.path,
+			showNotification: true,
+			openFileFromNotification: true
+		);
+		String apkFile = directory.path + "/$version.apk";
+
+		IsolateNameServer.registerPortWithName(_port.sendPort, _taskId);
+		_port.listen((dynamic data) async {
+			print(data);
+			setState(() {
+				_progress = data[2];
+			});
+			if (data[1] == DownloadTaskStatus.complete) {
+				IsolateNameServer.removePortNameMapping(_taskId);
+				Navigator.of(context).pop();
+				final permissions = await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+				if (permissions[PermissionGroup.storage] != PermissionStatus.granted) {
+					print('Permission request fail!');
+					return;
+				}
+				try {
+					String result = await InstallPlugin.installApk(
+						apkFile,
+						global.packageInfo.appName
+					);
+					print("install apk $result");
+				} catch(e) {
+					print("install apk error: $e");
+				}
+			}
+		});
+		FlutterDownloader.registerCallback(_regCallback);
+	}
+
+	static _regCallback(String id, DownloadTaskStatus status, int progress) async {
+		final SendPort send = IsolateNameServer.lookupPortByName(id);
+		send.send([id, status, progress]);
+	}
+
+	@override
+	Widget build(BuildContext context) => AlertDialog(
+		title: Row(children: <Widget>[
+			Padding(
+				padding: EdgeInsets.only(right: 10),
+				child: Icon(Icons.file_download)
+			),
+			Text("下载中...")
+		]),
+		content: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+			Text("$_progress%"),
+			LinearProgressIndicator(value: _progress/100, backgroundColor: global.primaryColor)
+		]),
+		actions: <Widget>[
+			FlatButton(child: Text("取消"), onPressed: () {
+				FlutterDownloader.cancel(taskId: _taskId);
+				FlutterDownloader.remove(taskId: _taskId);
+				IsolateNameServer.removePortNameMapping(_taskId);
+				Navigator.of(context).pop();
+			})
+		]
+	);
 }
