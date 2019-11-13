@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
 import '../async.dart';
 import '../global.dart' as global;
 import '../components.dart';
@@ -53,104 +54,181 @@ class HomePageState extends BasePageState<Page> {
 			Expanded(child: Row(children: <Widget>[
 				DataCard(title: "PUE", child: Padding(
 					padding: EdgeInsets.only(top: 20),
-					child: Instrument(
-						radius: 110.0,
-						numScales: 4,
-						max: 4.0,
-						min: 1.0,
-						scalesColor: {
-							Offset(2.5, 3.25): Colors.orange,
-							Offset(3.25, 4): Colors.red
-						},
-						value: _pue,
-					)
+					child: Column(children: <Widget>[
+						Instrument(
+							radius: 110.0,
+							numScales: 4,
+							max: 4.0,
+							min: 1.0,
+							scalesColor: {
+								Offset(2.5, 3.25): Colors.orange,
+								Offset(3.25, 4): Colors.red
+							},
+							value: _pue,
+						),
+						DescListItem(
+							DescListItemTitle("总用电量", size: 20.0),
+							DescListItemContent("17.3", blocked: true),
+							contentAlign: TextAlign.center,
+							contentWidth: 120,
+							horizontal: 60,
+							suffix: DescListItemSuffix(text: "KW")
+						),
+						DescListItem(
+							DescListItemTitle("IT用电量", size: 20.0),
+							DescListItemContent("15.6", blocked: true),
+							contentAlign: TextAlign.center,
+							contentWidth: 120,
+							horizontal: 60,
+							suffix: DescListItemSuffix(text: "KW")
+						)
+					])
 				)),
-				DataCard(title: "UPS运行模式", child: Padding(
-					padding: EdgeInsets.only(top: 20),
-					child: UpsRunningMod()
-				)),
-				DataCard(title: "UPS负载率", child: Padding(
-					padding: EdgeInsets.only(top: 20),
-					child: Instrument(
-						radius: 110.0,
-						numScales: 10,
-						max: 120.0,
-						scalesColor: {
-							Offset(60, 78): Colors.orange,
-							Offset(78, 120): Colors.red
-						},
-						suffix: "%",
-						value: _load,
-					)
+				DataCard(title: "UPS运行模式", flex: 2, child: UpsRunningMod()),
+				DataCard(title: "配电信息", flex: 2, child: Padding(
+					padding: EdgeInsets.all(10),
+					child: Column(children: <Widget>[
+						Expanded(child: charts.TimeSeriesChart(
+							[
+								charts.Series<TimeSeriesSales, DateTime>(
+									id: "Sales",
+									colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+									domainFn: (TimeSeriesSales sales, _) => sales.time,
+									measureFn: (TimeSeriesSales sales, _) => sales.sales,
+									data: [],
+								)
+							],
+							animate: false,
+							dateTimeFactory: const charts.LocalDateTimeFactory(),
+						)),
+
+						Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[Text("市电相电压")]),
+						Expanded(child: charts.TimeSeriesChart(
+							[
+								charts.Series<TimeSeriesSales, DateTime>(
+									id: "Sales",
+									colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+									domainFn: (TimeSeriesSales sales, _) => sales.time,
+									measureFn: (TimeSeriesSales sales, _) => sales.sales,
+									data: [],
+								)
+							],
+							animate: false,
+							dateTimeFactory: const charts.LocalDateTimeFactory(),
+						)),
+						Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[Text("UPS输出相电压")])
+					])
 				))
 			])),
 			Expanded(child: Row(children: <Widget>[
-				DataCard(title: "环境信息", child: Padding(padding: EdgeInsets.all(10.0), child: Row(children: <Widget>[
-					Expanded(child: Column(children: <Widget>[
+				DataCard(title: "环境信息", child: Padding(
+					padding: EdgeInsets.all(10.0),
+					child: Column(children: <Widget>[
 						DescListItem(
-							DescListItemTitle("冷通道温度", size: 18.0),
-							DescListItemContent(_values["冷通道温"], blocked: true),
+							DescListItemTitle("温湿度 1", size: 20.0),
+							DescListItemContent("000.0 ℃  100.0 %", blocked: true),
 							contentAlign: TextAlign.center,
-							contentWidth: 90,
-							suffix: DescListItemSuffix(text: "℃")
+							contentWidth: 200,
+							horizontal: 30
 						),
 						DescListItem(
-							DescListItemTitle("热通道温度", size: 18.0),
-							DescListItemContent(_values["热通道温"], blocked: true),
+							DescListItemTitle("温湿度 1", size: 20.0),
+							DescListItemContent("000.0 ℃  100.0 %", blocked: true),
 							contentAlign: TextAlign.center,
-							contentWidth: 90,
-							suffix: DescListItemSuffix(text: "℃")
+							contentWidth: 200,
+							horizontal: 30
 						),
-						DescListItem(
-							DescListItemTitle("烟            感", size: 18.0),
-							DescListItemContent(_values["烟感"], blocked: true),
-							contentAlign: TextAlign.center,
-							contentWidth: 90,
-						),
-						DescListItem(
-							DescListItemTitle("漏            水", size: 18.0),
-							DescListItemContent(_values["漏水"], blocked: true),
-							contentAlign: TextAlign.center,
-							contentWidth: 90,
-						),
-					])),
-					VerticalDivider(width: 15),
-					Expanded(child: Column(children: <Widget>[
-						DescListItem(
-							DescListItemTitle("冷通道湿度", size: 18.0),
-							DescListItemContent(_values["冷通道湿"], blocked: true),
-							contentAlign: TextAlign.center,
-							contentWidth: 90,
-							suffix: DescListItemSuffix(text: "%")
-						),
-						DescListItem(
-							DescListItemTitle("热通道湿度", size: 18.0),
-							DescListItemContent(_values["热通道湿"], blocked: true),
-							contentAlign: TextAlign.center,
-							contentWidth: 90,
-							suffix: DescListItemSuffix(text: "%")
-						),
-						DescListItem(
-							DescListItemTitle("门            禁", size: 18.0),
-							DescListItemContent(_values["门禁"], blocked: true),
-							contentAlign: TextAlign.center,
-							contentWidth: 90,
-						),
-						DescListItem(
-							DescListItemTitle("防            雷", size: 18.0),
-							DescListItemContent(_values["防雷"], blocked: true),
-							contentAlign: TextAlign.center,
-							contentWidth: 90,
-						),
-					]))
-				]))),
+						Expanded(child: Padding(
+							padding: EdgeInsets.symmetric(horizontal: 30),
+							child: Row(children: <Widget>[
+								DescListItem(
+									DescListItemTitle("烟感", size: 20.0),
+									DescListItemContent("未知", blocked: true),
+									contentAlign: TextAlign.center,
+									contentWidth: 80
+								),
+								VerticalDivider(color: Colors.white, width: 20),
+								DescListItem(
+									DescListItemTitle("门禁", size: 20.0),
+									DescListItemContent("未知", blocked: true),
+									contentAlign: TextAlign.center,
+									contentWidth: 80
+								)
+							])
+						)),
+						Expanded(child: Padding(
+							padding: EdgeInsets.symmetric(horizontal: 30),
+							child: Row(children: <Widget>[
+								DescListItem(
+									DescListItemTitle("漏水", size: 20.0),
+									DescListItemContent("未知", blocked: true),
+									contentAlign: TextAlign.center,
+									contentWidth: 80
+								),
+								VerticalDivider(color: Colors.white, width: 20),
+								DescListItem(
+									DescListItemTitle("天窗", size: 20.0),
+									DescListItemContent("未知", blocked: true),
+									contentAlign: TextAlign.center,
+									contentWidth: 80
+								)
+							])
+						))
+					])
+				)),
 				DataCard(title: "事件记录", flex: 2, child: ListView(
 					padding: const EdgeInsets.all(10),
 					children: eveRcdList
+				)),
+				DataCard(title: "通讯状态", flex: 2, child: Padding(
+					padding: EdgeInsets.all(20),
+					child: Column(children: <Widget>[
+						Expanded(child: Row(children: <Widget>[
+							_commuState("UPS", true),
+							VerticalDivider(color: global.primaryColor),
+							_commuState("市电", false),
+							VerticalDivider(color: global.primaryColor),
+							_commuState("PDU", true),
+							VerticalDivider(color: global.primaryColor),
+							_commuState("空调", false),
+							VerticalDivider(color: global.primaryColor),
+							_commuState("温湿度", false),
+						])),
+						Divider(color: global.primaryColor, height: 0),
+						Expanded(child: Row(children: <Widget>[
+							_commuState("烟感", true),
+							VerticalDivider(color: global.primaryColor),
+							_commuState("门禁", false),
+							VerticalDivider(color: global.primaryColor),
+							_commuState("漏水", true),
+							VerticalDivider(color: global.primaryColor),
+							_commuState("天窗", false),
+							VerticalDivider(color: global.primaryColor),
+							_commuState("录像机", false),
+						]))
+					]),
 				))
 			]))
 		]);
 	}
+
+	Widget _commuState(String title, bool state) => Expanded(child: Container(
+		child: Column(
+			mainAxisAlignment: MainAxisAlignment.center,
+			crossAxisAlignment: CrossAxisAlignment.center,
+			children: <Widget>[
+				state ? Icon(Icons.check_circle,
+					color: Colors.green,
+					size: 40
+				) : Icon(Icons.cancel,
+					color: Colors.red,
+					size: 40
+				),
+				Divider(color: Colors.white),
+				Text(title, style: TextStyle(fontSize: 20))
+			]
+		)
+	));
 
 	@override
 	String pageId() => "home";

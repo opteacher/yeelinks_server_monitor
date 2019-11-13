@@ -88,6 +88,7 @@ class DescListItem extends StatelessWidget {
 	final DescListItemContent content;
 	DescListItemSuffix suffix;
 	EdgeInsets outPadding;
+	TextAlign titleAlign;
 	TextAlign contentAlign;
 	double titleWidth;
 	double contentWidth;
@@ -97,6 +98,7 @@ class DescListItem extends StatelessWidget {
 		double left = 0.0, double top = 0.0,
 		double right = 0.0, bottom = 0.0,
 		double horizontal = 0.0, double vertical = 0.0,
+		this.titleAlign = TextAlign.left,
 		this.contentAlign = TextAlign.left,
 		this.titleWidth = -1,
 		this.contentWidth = -1
@@ -113,7 +115,7 @@ class DescListItem extends StatelessWidget {
 
 	@override
 	Widget build(BuildContext context) {
-		var ttl = Text(title.text, style: TextStyle(fontSize: title.size, color: title.color));
+		var ttl = Text(title.text, textAlign: titleAlign, style: TextStyle(fontSize: title.size, color: title.color));
 		return Expanded(child: Padding(padding: outPadding, child: Row(children: [
 			titleWidth == -1 ? Expanded(child: ttl) : Container(width: titleWidth, child: ttl),
 			Container(
@@ -630,10 +632,15 @@ class UpsRunningModState extends State<UpsRunningMod> {
 	ui.Image _imgBatt;
 
 	@override
-	Widget build(BuildContext context) => Center(child: CustomPaint(
-		size: Size(400, 400),
-		painter: UpsRunningModPainter( _imgBYPASS, _imgInput, _imgACDC, _imgDCAC, _imgBatt)
-	));
+	Widget build(BuildContext context) => Column(
+		mainAxisAlignment: MainAxisAlignment.center,
+		children: <Widget>[
+			CustomPaint(
+				size: Size(800, 400),
+				painter: UpsRunningModPainter( _imgBYPASS, _imgInput, _imgACDC, _imgDCAC, _imgBatt)
+			)
+		]
+	);
 
 	@override
 	void initState() {
@@ -672,13 +679,15 @@ class UpsRunningModPainter extends CustomPainter {
 			return;
 		}
 
-		double lblkWid = 100;
-		double sblkWid = 50;
-		double blkHgt = 50;
+		print(size.height);
+
+		double lblkWid = 200;
+		double sblkWid = 80;
+		double blkHgt = 80;
 		double hfWid = size.width / 2;
 		double ofWid = hfWid / 2;
 		double margin = (ofWid - sblkWid) / 2;
-		double otHgt = size.height / 4;
+		double otHgt = size.height / 3;
 
 		Paint _paint = Paint()
 			..color = Color(0xffc2c2c2);
@@ -791,7 +800,7 @@ class UpsRunningModPainter extends CustomPainter {
 			_paint);
 		canvas.drawImageRect(_imgBatt,
 			Rect.fromLTWH(0, 0, _imgBatt.width.toDouble(), _imgBatt.height.toDouble()),
-			Rect.fromLTWH(hfWid - 25, otHgt * 2, sblkWid, blkHgt),
+			Rect.fromLTWH(hfWid - sblkWid / 2, otHgt * 2, sblkWid, blkHgt),
 			_paint);
 	}
 

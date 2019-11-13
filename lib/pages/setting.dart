@@ -453,7 +453,8 @@ class SettingPageState extends BasePageState<Page> {
 					child: Text(btn.name, style: TextStyle(color: Colors.white)),
 					disabledColor: global.primaryColor,
 					shape: btnBorder,
-					onPressed: null));
+					onPressed: null
+				));
 			} else {
 				ret.add(OutlineButton(
 					child: Text(btn.name, style: TextStyle(color: global.primaryColor)),
