@@ -899,16 +899,20 @@ class UpdateContentState extends State<UpdateContent> {
 		title: Row(children: <Widget>[
 			Padding(
 				padding: EdgeInsets.only(right: 10),
-				child: Icon(Icons.file_download)
+				child: Icon(Icons.file_download, size: 30, color: global.primaryColor)
 			),
 			Text("下载中...")
 		]),
 		content: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
 			Text("$_progress%"),
-			LinearProgressIndicator(value: _progress/100, backgroundColor: global.primaryColor)
+			LinearProgressIndicator(
+				value: _progress/100,
+				valueColor: AlwaysStoppedAnimation<Color>(global.primaryColor),
+				backgroundColor: Colors.grey
+			)
 		]),
 		actions: <Widget>[
-			FlatButton(child: Text("取消"), onPressed: () {
+			FlatButton(child: Text("取消"), textColor: global.primaryColor, onPressed: () {
 				FlutterDownloader.cancel(taskId: _taskId);
 				FlutterDownloader.remove(taskId: _taskId);
 				IsolateNameServer.removePortNameMapping(_taskId);

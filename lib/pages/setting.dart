@@ -81,15 +81,18 @@ class SettingPageState extends BasePageState<Page> {
 		});
 	}
 
-	Widget _systemSettingContent() => Center(child: Column(children: <Widget>[
-	 	Text("当前版本：$_curVers"),
-		FlatButton(
-			color: global.primaryColor,
-			child: Text("检查更新", style: TextStyle(color: Colors.white)),
-			onPressed: () async {
-				_showChkVersDlg(await checkNewVersion());
-			})
-	]));
+	Widget _systemSettingContent() => Column(
+		mainAxisAlignment: MainAxisAlignment.center,
+		children: <Widget>[
+		    Text("当前版本：$_curVers"),
+			FlatButton(
+				color: global.primaryColor,
+				child: Text("检查更新", style: TextStyle(color: Colors.white)),
+				onPressed: () async {
+					_showChkVersDlg(await checkNewVersion());
+				})
+		]
+	);
 
 	_showChkVersDlg(String newVers) {
 		showDialog(
@@ -98,12 +101,12 @@ class SettingPageState extends BasePageState<Page> {
 				content: Row(children: <Widget>[
 					Padding(
 						padding: EdgeInsets.only(right: 20),
-						child: Icon(Icons.check_circle)
+						child: Icon(Icons.check_circle, size: 30, color: global.primaryColor)
 					),
 					Text("已升级到最新版本！")
 				]),
 				actions: <Widget>[
-					FlatButton(child: Text("确定"), onPressed: () {
+					FlatButton(child: Text("确定"), textColor: global.primaryColor, onPressed: () {
 						Navigator.of(context).pop();
 					})
 				]
@@ -111,16 +114,16 @@ class SettingPageState extends BasePageState<Page> {
 				content: Row(children: <Widget>[
 					Padding(
 						padding: EdgeInsets.only(right: 20),
-						child: Icon(Icons.info)
+						child: Icon(Icons.info, size: 30, color: global.primaryColor)
 					),
 					Text("发现新版本：$newVers，是否更新？")
 				]),
 				actions: <Widget>[
-					FlatButton(child: Text("确定"), onPressed: () {
+					FlatButton(child: Text("确定"), textColor: global.primaryColor, onPressed: () {
 						Navigator.of(context).pop();
 						showDialog(context: context, builder: (BuildContext context) => UpdateContent(newVers));
 					}),
-					FlatButton(child: Text("取消"), onPressed: () {
+					FlatButton(child: Text("取消"), textColor: global.primaryColor, onPressed: () {
 						Navigator.of(context).pop();
 					})
 				]
