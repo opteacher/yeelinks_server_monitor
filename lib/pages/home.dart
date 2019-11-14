@@ -68,19 +68,17 @@ class HomePageState extends BasePageState<Page> {
 						),
 						DescListItem(
 							DescListItemTitle("总用电量", size: 20.0),
-							DescListItemContent("17.3", blocked: true),
+							[DescListItemContent("17.3", blocked: true, suffixText: "KW")],
 							contentAlign: TextAlign.center,
 							contentWidth: 120,
-							horizontal: 60,
-							suffix: DescListItemSuffix(text: "KW")
+							horizontal: 60
 						),
 						DescListItem(
 							DescListItemTitle("IT用电量", size: 20.0),
-							DescListItemContent("15.6", blocked: true),
+							[DescListItemContent("15.6", blocked: true, suffixText: "KW")],
 							contentAlign: TextAlign.center,
 							contentWidth: 120,
-							horizontal: 60,
-							suffix: DescListItemSuffix(text: "KW")
+							horizontal: 60
 						)
 					])
 				)),
@@ -126,14 +124,20 @@ class HomePageState extends BasePageState<Page> {
 					child: Column(children: <Widget>[
 						DescListItem(
 							DescListItemTitle("温湿度 1", size: 20.0),
-							DescListItemContent("000.0 ℃  100.0 %", blocked: true),
+							[
+								DescListItemContent("000.0", blocked: true, suffixText: "℃"),
+								DescListItemContent("100.0", blocked: true, suffixText: "%")
+							],
 							contentAlign: TextAlign.center,
 							contentWidth: 200,
-							horizontal: 30
+							horizontal: 30,
 						),
 						DescListItem(
 							DescListItemTitle("温湿度 1", size: 20.0),
-							DescListItemContent("000.0 ℃  100.0 %", blocked: true),
+							[
+								DescListItemContent("000.0", blocked: true, suffixText: "℃"),
+								DescListItemContent("100.0", blocked: true, suffixText: "%")
+							],
 							contentAlign: TextAlign.center,
 							contentWidth: 200,
 							horizontal: 30
@@ -143,14 +147,14 @@ class HomePageState extends BasePageState<Page> {
 							child: Row(children: <Widget>[
 								DescListItem(
 									DescListItemTitle("烟感", size: 20.0),
-									DescListItemContent("未知", blocked: true),
+									[DescListItemContent("未知", blocked: true)],
 									contentAlign: TextAlign.center,
 									contentWidth: 80
 								),
 								VerticalDivider(color: Colors.white, width: 20),
 								DescListItem(
 									DescListItemTitle("门禁", size: 20.0),
-									DescListItemContent("未知", blocked: true),
+									[DescListItemContent("未知", blocked: true)],
 									contentAlign: TextAlign.center,
 									contentWidth: 80
 								)
@@ -161,14 +165,14 @@ class HomePageState extends BasePageState<Page> {
 							child: Row(children: <Widget>[
 								DescListItem(
 									DescListItemTitle("漏水", size: 20.0),
-									DescListItemContent("未知", blocked: true),
+									[DescListItemContent("未知", blocked: true)],
 									contentAlign: TextAlign.center,
 									contentWidth: 80
 								),
 								VerticalDivider(color: Colors.white, width: 20),
 								DescListItem(
 									DescListItemTitle("天窗", size: 20.0),
-									DescListItemContent("未知", blocked: true),
+									[DescListItemContent("未知", blocked: true)],
 									contentAlign: TextAlign.center,
 									contentWidth: 80
 								)

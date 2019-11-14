@@ -139,50 +139,42 @@ class AircondPageState extends BasePageState<Page> {
 							Expanded(child: Column(children: <Widget>[
 								DescListItem(
 									DescListItemTitle("外风机转速", size: _titleSize),
-									DescListItemContent(_values["外风机转速"], right: _sufSpace),
-									suffix: DescListItemSuffix(text: "N")
+									[DescListItemContent(_values["外风机转速"], right: _sufSpace, suffixText: "N")]
 								),
 								DescListItem(
 									DescListItemTitle("内风机转速", size: _titleSize),
-									DescListItemContent(_values["内风机转速"], right: _sufSpace),
-									suffix: DescListItemSuffix(text: "N")
+									[DescListItemContent(_values["内风机转速"], right: _sufSpace, suffixText: "N")]
 								),
 								DescListItem(
 									DescListItemTitle("压缩机转速", size: _titleSize),
-									DescListItemContent(_values["压缩机转速"], right: _sufSpace),
-									suffix: DescListItemSuffix(text: "N")
+									[DescListItemContent(_values["压缩机转速"], right: _sufSpace, suffixText: "N")]
 								),
 								DescListItem(
 									DescListItemTitle("加热器电流", size: _titleSize),
-									DescListItemContent(_values["加热器电流"], right: _sufSpace),
-									suffix: DescListItemSuffix(text: "A")
+									[DescListItemContent(_values["加热器电流"], right: _sufSpace, suffixText: "A")]
 								),
 								DescListItem(
 									DescListItemTitle("电子膨胀阀开度", size: _titleSize),
-									DescListItemContent(_values["膨胀阀开度"], right: _sufSpace)
+									[DescListItemContent(_values["膨胀阀开度"], right: _sufSpace)]
 								)
 							])),
 							VerticalDivider(width: 60),
 							Expanded(child: Column(children: <Widget>[
 								DescListItem(
 									DescListItemTitle("环境温度", size: _titleSize),
-									DescListItemContent(_values["环境温度"], right: _sufSpace),
-									suffix: DescListItemSuffix(text: "℃")
+									[DescListItemContent(_values["环境温度"], right: _sufSpace, suffixText: "℃")]
 								),
 								DescListItem(
 									DescListItemTitle("回气温度", size: _titleSize),
-									DescListItemContent(_values["回气温度"], right: _sufSpace),
-									suffix: DescListItemSuffix(text: "℃")
+									[DescListItemContent(_values["回气温度"], right: _sufSpace, suffixText: "℃")]
 								),
 								DescListItem(
 									DescListItemTitle("电源电压值", size: _titleSize),
-									DescListItemContent(_values["电源电压值"], right: _sufSpace),
-									suffix: DescListItemSuffix(text: "V")
+									[DescListItemContent(_values["电源电压值"], right: _sufSpace, suffixText: "V")]
 								),
 								DescListItem(
 									DescListItemTitle("冷凝温度", size: _titleSize),
-									DescListItemContent(_values["冷凝温度"], right: _sufSpace),
-									suffix: DescListItemSuffix(text: "℃")
+									[DescListItemContent(_values["冷凝温度"], right: _sufSpace, suffixText: "℃")]
 								)
 							]))
 						]) : ListView(children: _details.map<Widget>((pv) => ListTile(
@@ -195,31 +187,31 @@ class AircondPageState extends BasePageState<Page> {
 						child: Column(children: <Widget>[
 							DescListItem(
 								DescListItemTitle("运行状态", size: _titleSize),
-								DescListItemContent(_values["运行状态"], right: _sufSpace)
+								[DescListItemContent(_values["运行状态"], right: _sufSpace)]
 							),
 							DescListItem(
 								DescListItemTitle("制冷状态", size: _titleSize),
-								DescListItemContent(_values["制冷状态"], right: _sufSpace)
+								[DescListItemContent(_values["制冷状态"], right: _sufSpace)]
 							),
 							DescListItem(
 								DescListItemTitle("加热状态", size: _titleSize),
-								DescListItemContent(_values["加热状态"], right: _sufSpace)
+								[DescListItemContent(_values["加热状态"], right: _sufSpace)]
 							),
 							DescListItem(
 								DescListItemTitle("除湿状态", size: _titleSize),
-								DescListItemContent(_values["除湿状态"], right: _sufSpace)
+								[DescListItemContent(_values["除湿状态"], right: _sufSpace)]
 							),
 							DescListItem(
 								DescListItemTitle("内风机", size: _titleSize),
-								DescListItemContent(_values["内风机"], right: _sufSpace)
+								[DescListItemContent(_values["内风机"], right: _sufSpace)]
 							),
 							DescListItem(
 								DescListItemTitle("外风机", size: _titleSize),
-								DescListItemContent(_values["外风机"], right: _sufSpace)
+								[DescListItemContent(_values["外风机"], right: _sufSpace)]
 							),
 							DescListItem(
 								DescListItemTitle("压缩机", size: _titleSize),
-								DescListItemContent(_values["压缩机"], right: _sufSpace)
+								[DescListItemContent(_values["压缩机"], right: _sufSpace)]
 							)
 						])
 					))

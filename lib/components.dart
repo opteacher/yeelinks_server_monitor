@@ -60,14 +60,22 @@ class DescListItemContent {
 	bool blocked;
 	Color color;
 	EdgeInsets padding;
+	DescListItemSuffix suffix;
 
 	DescListItemContent(this.text, {
+		this.suffix,
+		String suffixText = "",
 		this.blocked = false,
 		this.color = Colors.blueAccent,
 		double left = 0.0, double top = 0.0,
 		double right = 0.0, bottom = 0.0,
 		double horizontal = 0.0, double vertical = 0.0
 	}) {
+		if (suffixText.isNotEmpty) {
+			suffix = DescListItemSuffix(text: suffixText);
+		} else {
+			suffix = DescListItemSuffix();
+		}
 		if (horizontal != 0.0 || vertical != 0.0) {
 			padding = EdgeInsets.symmetric(vertical: vertical, horizontal: horizontal);
 		} else {
@@ -85,27 +93,24 @@ class DescListItemSuffix {
 
 class DescListItem extends StatelessWidget {
 	final DescListItemTitle title;
-	final DescListItemContent content;
-	DescListItemSuffix suffix;
+	final List<DescListItemContent> contents;
 	EdgeInsets outPadding;
 	TextAlign titleAlign;
 	TextAlign contentAlign;
 	double titleWidth;
 	double contentWidth;
+	bool expanded;
 
-	DescListItem(this.title, this.content, {
-		this.suffix = null,
+	DescListItem(this.title, this.contents, {
 		double left = 0.0, double top = 0.0,
 		double right = 0.0, bottom = 0.0,
 		double horizontal = 0.0, double vertical = 0.0,
 		this.titleAlign = TextAlign.left,
 		this.contentAlign = TextAlign.left,
 		this.titleWidth = -1,
-		this.contentWidth = -1
+		this.contentWidth = -1,
+		this.expanded = true
 	}) {
-		if (suffix == null) {
-			suffix = DescListItemSuffix();
-		}
 		if (horizontal != 0.0 || vertical != 0.0) {
 			outPadding = EdgeInsets.symmetric(vertical: vertical, horizontal: horizontal);
 		} else {
@@ -113,37 +118,45 @@ class DescListItem extends StatelessWidget {
 		}
 	}
 
+	Widget _buildContent(DescListItemContent content) => Container(
+		padding: content.blocked ? EdgeInsets.symmetric(
+			vertical: 5, horizontal: 10
+		) : null,
+		decoration: content.blocked ? BoxDecoration(
+			color: Colors.grey[100],
+			borderRadius: BorderRadius.all(Radius.circular(4))
+		) : null,
+		child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+			Padding(
+				padding: content.padding,
+				child: Text(
+					content.text,
+					style: TextStyle(fontSize: title.size, color: content.color),
+					textAlign: contentAlign
+				)
+			),
+			content.suffix.text.isNotEmpty ? Text(
+				content.suffix.text,
+				style: TextStyle(fontSize: title.size, color: content.suffix.color),
+				textAlign: contentAlign
+			) : Text(" ")
+		])
+	);
+
 	@override
 	Widget build(BuildContext context) {
 		var ttl = Text(title.text, textAlign: titleAlign, style: TextStyle(fontSize: title.size, color: title.color));
-		return Expanded(child: Padding(padding: outPadding, child: Row(children: [
+		final body = Padding(padding: outPadding, child: Row(children: [
 			titleWidth == -1 ? Expanded(child: ttl) : Container(width: titleWidth, child: ttl),
-			Container(
+			SizedBox(
 				width: contentWidth != -1 ? contentWidth : null,
-				padding: content.blocked ? EdgeInsets.symmetric(
-					vertical: 5, horizontal: 10
-				) : null,
-				decoration: content.blocked ? BoxDecoration(
-					color: Colors.grey[100],
-					borderRadius: BorderRadius.all(Radius.circular(4))
-				) : null,
-				child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-					Padding(
-						padding: content.padding,
-						child: Text(
-							content.text,
-							style: TextStyle(fontSize: title.size, color: content.color),
-							textAlign: contentAlign
-						)
-					),
-					suffix.text.isNotEmpty ? Text(
-						suffix.text,
-						style: TextStyle(fontSize: title.size, color: suffix.color),
-						textAlign: contentAlign
-					) : Text(" ")
-				])
+				child: Row(children: contents.map<Widget>((content) => Row(children: <Widget>[
+					_buildContent(content),
+					VerticalDivider(color: Colors.white, width: 10)
+				])).toList())
 			)
-		])));
+		]));
+		return expanded ? Expanded(child: body) : body;
 	}
 }
 

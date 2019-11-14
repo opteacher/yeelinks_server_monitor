@@ -24,35 +24,31 @@ class MonitorPageState extends BasePageState<Page> {
 	@override
 	Widget build(BuildContext context) {
 		return Row(children: <Widget>[
-			Expanded(child: Container(
-				decoration: BoxDecoration(
-					border: Border.all(color: global.primaryColor),
-				),
-				margin: EdgeInsets.all(3.5),
-				padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-				child: ListView(children: global.devices.map<Widget>(
+			DataCard(title: "录像机", child: ListView(children: global.devices.map<Widget>(
 					(dev) => (global.currentDevID == dev.id ? FlatButton(
-						shape: RoundedRectangleBorder(
-							side: BorderSide(color: global.primaryColor),
-							borderRadius: BorderRadius.all(Radius.circular(3))
-						),
-						disabledColor: global.primaryColor,
-						child: Text(dev.name, style: TextStyle(color: Colors.white)), onPressed: null,
-					) : OutlineButton(
-						textColor: global.primaryColor,
-						borderSide: BorderSide(color: global.primaryColor),
-						child: Text(dev.name), onPressed: () => setState(() {
-						global.refreshTimer.refresh(context, dev.id, () async {
-							global.idenDevs = [dev.id];
-						});
-					})))
-				).toList())
-			)),
-			Expanded(flex: 4, child: _controller == null ? Container() : Center(
-				child: _controller.value.initialized ? AspectRatio(
-					aspectRatio: _controller.value.aspectRatio,
-					child: IjkPlayer(_controller)
-				) : Container()
+					shape: RoundedRectangleBorder(
+						side: BorderSide(color: global.primaryColor),
+						borderRadius: BorderRadius.all(Radius.circular(3))
+					),
+					disabledColor: global.primaryColor,
+					child: Text(dev.name, style: TextStyle(color: Colors.white)), onPressed: null,
+				) : OutlineButton(
+					textColor: global.primaryColor,
+					borderSide: BorderSide(color: global.primaryColor),
+					child: Text(dev.name), onPressed: () => setState(() {
+					global.refreshTimer.refresh(context, dev.id, () async {
+						global.idenDevs = [dev.id];
+					});
+				})))
+			).toList())),
+			DataCard(title: "画面", flex: 4, child: Padding(
+				padding: EdgeInsets.symmetric(vertical: 20),
+				child: _controller == null ? Container() : Center(
+					child: _controller.value.initialized ? AspectRatio(
+						aspectRatio: _controller.value.aspectRatio,
+						child: IjkPlayer(_controller)
+					) : Container()
+				)
 			))
 		]);
 	}

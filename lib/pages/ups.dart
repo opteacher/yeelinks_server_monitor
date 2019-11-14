@@ -86,6 +86,10 @@ class UpsPageState extends BasePageState<Page> {
 						borderRadius: BorderRadius.all(Radius.zero),
 					),
 					onPressed: () => setState(() {})
+				),
+				IconButton(
+					icon: Icon(Icons.info_outline, color: global.primaryColor),
+					onPressed: () => setState(() {})
 				)
 			]),
 			Expanded(child: Row(children: <Widget>[
@@ -182,16 +186,167 @@ class UpsPageState extends BasePageState<Page> {
 			])),
 			Expanded(flex: 2, child: Row(children: <Widget>[
 				DataCard(title: "输出", flex: 2, child: Padding(
-					padding: EdgeInsets.all(10),
-					child: Row(children: <Widget>[])
+					padding: EdgeInsets.all(20),
+					child: Column(children: <Widget>[
+						Expanded(child: Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+							Expanded(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+								Instrument(
+									radius: 100.0,
+									numScales: 10,
+									max: 300.0,
+									scalesColor: {
+										Offset(0, 180): Colors.grey,
+										Offset(240, 300): Colors.red
+									},
+									value: double.parse("0.0"),
+									suffix: "V"
+								),
+								Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+									Text("A-相电压", style: TextStyle(fontSize: 20))
+								])
+							])),
+							Expanded(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+								Instrument(
+									radius: 100.0,
+									numScales: 10,
+									max: 300.0,
+									scalesColor: {
+										Offset(0, 180): Colors.grey,
+										Offset(240, 300): Colors.red
+									},
+									value: double.parse("0.0"),
+									suffix: "V"
+								),
+								Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+									Text("B-相电压", style: TextStyle(fontSize: 20))
+								])
+							])),
+							Expanded(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+								Instrument(
+									radius: 100.0,
+									numScales: 10,
+									max: 300.0,
+									scalesColor: {
+										Offset(0, 180): Colors.grey,
+										Offset(240, 300): Colors.red
+									},
+									value: double.parse("0.0"),
+									suffix: "V"
+								),
+								Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+									Text("C-相电压", style: TextStyle(fontSize: 20))
+								])
+							]))
+						])),
+						Expanded(child: Row(children: <Widget>[
+							Expanded(child: Column(children: <Widget>[
+								DescListItem(
+									DescListItemTitle("A相电压", size: 20.0),
+									[DescListItemContent("-220.0", blocked: true, suffixText: "V")],
+									contentAlign: TextAlign.center,
+									contentWidth: 200,
+									horizontal: 50
+								),
+								DescListItem(
+									DescListItemTitle("B相电压", size: 20.0),
+									[DescListItemContent("-220.0", blocked: true, suffixText: "V")],
+									contentAlign: TextAlign.center,
+									contentWidth: 200,
+									horizontal: 50
+								),
+								DescListItem(
+									DescListItemTitle("C相电压", size: 20.0),
+									[DescListItemContent("-220.0", blocked: true, suffixText: "V")],
+									contentAlign: TextAlign.center,
+									contentWidth: 200,
+									horizontal: 50
+								)
+							])),
+							VerticalDivider(),
+							Expanded(child: Column(children: <Widget>[
+								DescListItem(
+									DescListItemTitle("A相电流", size: 20.0),
+									[DescListItemContent("-20.0", blocked: true, suffixText: "A")],
+									contentAlign: TextAlign.center,
+									contentWidth: 200,
+									horizontal: 50
+								),
+								DescListItem(
+									DescListItemTitle("B相电流", size: 20.0),
+									[DescListItemContent("-20.0", blocked: true, suffixText: "A")],
+									contentAlign: TextAlign.center,
+									contentWidth: 200,
+									horizontal: 50
+								),
+								DescListItem(
+									DescListItemTitle("C相电流", size: 20.0),
+									[DescListItemContent("-20.0", blocked: true, suffixText: "A")],
+									contentAlign: TextAlign.center,
+									contentWidth: 200,
+									horizontal: 50
+								)
+							]))
+						]))
+					])
 				)),
 				DataCard(title: "电池", child: Padding(
-					padding: EdgeInsets.all(10),
-					child: Row(children: <Widget>[])
+					padding: EdgeInsets.only(top: 60),
+					child: Column(children: <Widget>[
+						Instrument(
+							radius: 150.0,
+							numScales: 10,
+							max: 300.0,
+							scalesColor: {
+								Offset(0, 180): Colors.grey,
+								Offset(240, 300): Colors.red
+							},
+							value: double.parse("0.0"),
+							suffix: "%"
+						),
+						Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+							Text("电池容量", style: TextStyle(fontSize: 40))
+						])
+					])
 				)),
 				DataCard(title: "状态", child: Padding(
 					padding: EdgeInsets.all(10),
-					child: Row(children: <Widget>[])
+					child: Column(children: <Widget>[
+						DescListItem(
+							DescListItemTitle("UPS运行状态", size: 20.0),
+							[DescListItemContent("未知模式", blocked: true)],
+							contentAlign: TextAlign.center,
+							contentWidth: 200,
+							horizontal: 50
+						),
+						DescListItem(
+							DescListItemTitle("电池过载", size: 20.0),
+							[DescListItemContent("未知", blocked: true)],
+							contentAlign: TextAlign.center,
+							contentWidth: 200,
+							horizontal: 50
+						),
+						DescListItem(
+							DescListItemTitle("电池过充", size: 20.0),
+							[DescListItemContent("未知", blocked: true)],
+							contentAlign: TextAlign.center,
+							contentWidth: 200,
+							horizontal: 50
+						),
+						DescListItem(
+							DescListItemTitle("低电池电压", size: 20.0),
+							[DescListItemContent("未知", blocked: true)],
+							contentAlign: TextAlign.center,
+							contentWidth: 200,
+							horizontal: 50
+						),
+						DescListItem(
+							DescListItemTitle("电池更换告警", size: 20.0),
+							[DescListItemContent("未知", blocked: true)],
+							contentAlign: TextAlign.center,
+							contentWidth: 200,
+							horizontal: 50
+						)
+					])
 				))
 			]))
 		]);

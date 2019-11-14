@@ -29,38 +29,133 @@ class EnvPageState extends BasePageState<Page> {
 	};
 
 	@override
-	Widget build(BuildContext context) => Row(children: <Widget>[
-		Expanded(child: Column(children: <Widget>[
-			DataCard(title: "冷通道环境", child: Padding(padding: _envBlkPdg,
-				child: Column(children: _genHumiTempCard(_cloudDevs.values.toList()))
-			))
-		])),
-		Expanded(flex: 2, child: Column(children: <Widget>[
-			DataCard(title: "历史曲线", child: SimpleTimeSeriesChart()),
-			DataCard(title: "机柜状态", height: 200, child: Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Row(children: <Widget>[
-				Expanded(child: Column(children: <Widget>[
-					Text("漏水"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["漏水"]))
-				])),
-				VerticalDivider(),
-				Expanded(child: Column(children: <Widget>[
-					Text("烟感"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["烟感"]))
-				])),
-				VerticalDivider(),
-				Expanded(child: Column(children: <Widget>[
-					Text("防雷"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["防雷"]))
-				])),
-				VerticalDivider(),
-				Expanded(child: Column(children: <Widget>[
-					Text("门禁"), RaisedButton(elevation: 0, onPressed: () {}, child: Text(_switcher["门禁"]))
-				]))
-			])))
-		])),
-		Expanded(child: Column(children: <Widget>[
-			DataCard(title: "热通道环境", child: Padding(padding: _envBlkPdg,
-				child: Column(children: _genHumiTempCard(_hotDevs.values.toList()))
-			))
-		])),
+	Widget build(BuildContext context) => Column(children: <Widget>[
+		DataCard(title: "温湿度", flex: 2, tailing: IconButton(
+			icon: Icon(Icons.keyboard_arrow_down, color: global.primaryColor),
+			onPressed: () => setState(() {})
+		), child: Padding(
+			padding: EdgeInsets.symmetric(vertical: 20),
+			child: Row(children: <Widget>[
+				_humiTempItem("温湿度1"),
+				VerticalDivider(color: global.primaryColor),
+				_humiTempItem("温湿度2")
+			])
+		)),
+		DataCard(title: "烟感", tailing: IconButton(
+			icon: Icon(Icons.keyboard_arrow_down, color: global.primaryColor),
+			onPressed: () => setState(() {})
+		), child: Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Row(children: <Widget>[
+			_infoItem("烟感1"),
+			VerticalDivider(color: global.primaryColor),
+			_infoItem("烟感2"),
+			VerticalDivider(color: global.primaryColor),
+			_infoItem("烟感3"),
+			VerticalDivider(color: global.primaryColor),
+			_infoItem("烟感4"),
+			VerticalDivider(color: global.primaryColor),
+			_infoItem("烟感5"),
+			VerticalDivider(color: global.primaryColor),
+			_infoItem("烟感6"),
+		]))),
+		DataCard(title: "门禁", tailing: IconButton(
+			icon: Icon(Icons.keyboard_arrow_down, color: global.primaryColor),
+			onPressed: () => setState(() {})
+		), child: Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Row(children: <Widget>[
+			_infoItem("前门", desc: "未知"),
+			VerticalDivider(color: global.primaryColor),
+			_infoItem("后门", desc: "未知"),
+		]))),
+		DataCard(title: "漏水", tailing: IconButton(
+			icon: Icon(Icons.keyboard_arrow_down, color: global.primaryColor),
+			onPressed: () => setState(() {})
+		), child: Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Row(children: <Widget>[
+			_infoItem("漏水1"),
+			VerticalDivider(color: global.primaryColor),
+			_infoItem("漏水2"),
+			VerticalDivider(color: global.primaryColor),
+			_infoItem("漏水3"),
+			VerticalDivider(color: global.primaryColor),
+			_infoItem("漏水4"),
+			VerticalDivider(color: global.primaryColor),
+			_infoItem("漏水5"),
+			VerticalDivider(color: global.primaryColor),
+			_infoItem("漏水6"),
+		]))),
+		DataCard(title: "天窗", tailing: IconButton(
+			icon: Icon(Icons.keyboard_arrow_down, color: global.primaryColor),
+			onPressed: () => setState(() {})
+		), child: Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Row(children: <Widget>[
+			_infoItem("天窗1", ctrl: Row(children: <Widget>[
+				Switch(value: false, onChanged: (value) {}), Text("关闭")
+			])),
+			VerticalDivider(color: global.primaryColor),
+			_infoItem("天窗2", ctrl: Row(children: <Widget>[
+				Switch(value: false, onChanged: (value) {}), Text("关闭")
+			])),
+			VerticalDivider(color: global.primaryColor),
+			_infoItem("天窗3", ctrl: Row(children: <Widget>[
+				Switch(value: false, onChanged: (value) {}), Text("关闭")
+			])),
+			VerticalDivider(color: global.primaryColor),
+			_infoItem("天窗4", ctrl: Row(children: <Widget>[
+				Switch(value: false, onChanged: (value) {}), Text("关闭")
+			]))
+		])))
 	]);
+
+	Widget _humiTempItem(String name) => Expanded(child: Column(children: <Widget>[
+		Text(name),
+		Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+			Instrument(
+				radius: 100.0,
+				numScales: 10,
+				max: 300.0,
+				scalesColor: {
+					Offset(0, 180): Colors.grey,
+					Offset(240, 300): Colors.red
+				},
+				value: double.parse("0.0"),
+				suffix: "V"
+			),
+			VerticalDivider(color: Colors.white, width: 30),
+			Instrument(
+				radius: 100.0,
+				numScales: 10,
+				max: 300.0,
+				scalesColor: {
+					Offset(0, 180): Colors.grey,
+					Offset(240, 300): Colors.red
+				},
+				value: double.parse("0.0"),
+				suffix: "V"
+			)
+		])
+	]));
+
+	Widget _infoItem(String name, {
+		bool state = false,
+		String desc = "",
+		Widget ctrl
+	}) {
+		if (ctrl == null) {
+			if (desc.isNotEmpty) {
+				ctrl = Text(desc);
+			} else {
+				ctrl = Icon(Icons.lens, color: (state
+					? Colors.green
+					: Colors.red
+				));
+			}
+		}
+		return Expanded(child: Row(
+			mainAxisAlignment: MainAxisAlignment.center,
+			children: <Widget>[
+				Text(name),
+				VerticalDivider(color: Colors.white),
+				ctrl
+			]
+		));
+	}
 
 	List<Widget> _genHumiTempCard(List<Device> devices) => devices.map<Widget>((dev) {
 		Widget titleBar;
@@ -81,18 +176,16 @@ class EnvPageState extends BasePageState<Page> {
 			Container(margin: EdgeInsets.only(top: 10), child: Row(children: <Widget>[
 				DescListItem(
 					DescListItemTitle("温度", size: 20.0),
-					DescListItemContent(dev.temp.toStringAsFixed(1), blocked: true),
+					[DescListItemContent(dev.temp.toStringAsFixed(1), blocked: true, suffixText: "℃")],
 					contentAlign: TextAlign.center,
-					contentWidth: 80,
-					suffix: DescListItemSuffix(text: "℃")
+					contentWidth: 80
 				),
 				VerticalDivider(width: 5),
 				DescListItem(
 					DescListItemTitle("湿度", size: 20.0),
-					DescListItemContent(dev.humi.toStringAsFixed(1), blocked: true),
+					[DescListItemContent(dev.humi.toStringAsFixed(1), blocked: true, suffixText: "%")],
 					contentAlign: TextAlign.center,
-					contentWidth: 80,
-					suffix: DescListItemSuffix(text: "%")
+					contentWidth: 80
 				)
 			])),
 		]));
