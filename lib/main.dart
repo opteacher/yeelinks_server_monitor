@@ -17,6 +17,7 @@ void main() {
 	SystemChrome.setEnabledSystemUIOverlays([]);
 //	global.brightnessCtrl.invokeMethod("turnOff");
 	initialize();
+	global.database.invokeMethod("ping");
 	return runApp(MyApp());
 }
 
