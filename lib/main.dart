@@ -17,13 +17,17 @@ void main() {
 	SystemChrome.setEnabledSystemUIOverlays([]);
 //	global.brightnessCtrl.invokeMethod("turnOff");
 	initialize();
-	global.database.invokeMethod("ping");
 	return runApp(MyApp());
 }
 
 initialize() async {
 	await FlutterDownloader.initialize();
 //	await checkNewVersion();
+	global.dbHelpSubsc = global.dbHelp.receiveBroadcastStream().listen(_onRecvData);
+}
+
+void _onRecvData(dynamic data) {
+	print(data);
 }
 
 class MyApp extends StatefulWidget {
@@ -50,6 +54,10 @@ class MyAppState extends State<MyApp> {
 		super.dispose();
 		global.refreshTimer.cancel();
 //		global.ledCtrl.invokeMethod("lightDown");
+		if (global.dbHelpSubsc != null) {
+			global.dbHelpSubsc.cancel();
+			global.dbHelpSubsc = null;
+		}
 	}
 }
 

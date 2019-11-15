@@ -188,6 +188,8 @@ const Map<String, String> protocolMapper = {
 };
 const ledCtrl = const MethodChannel("com.yeelinks.plugins/led_ctrl");
 const database = const MethodChannel("com.yeelinks.plugins/database");
+const dbHelp = const EventChannel("com.yeelinks.plugins/db_help");
+var dbHelpSubsc = null;
 //const brightnessCtrl = const MethodChannel("com.yeelinks.plugins/bright_ctrl");
 const lightColors = ["RED", "GREEN", "BLUE"];
 enum ConfirmCancel {
