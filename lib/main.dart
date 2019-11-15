@@ -15,7 +15,6 @@ void main() {
 		DeviceOrientation.landscapeLeft
 	]);
 	SystemChrome.setEnabledSystemUIOverlays([]);
-//	global.brightnessCtrl.invokeMethod("turnOff");
 	initialize();
 	return runApp(MyApp());
 }
@@ -23,6 +22,21 @@ void main() {
 initialize() async {
 	await FlutterDownloader.initialize();
 //	await checkNewVersion();
+//	global.brightnessCtrl.invokeMethod("turnOff");
+	global.dbHelpSubsc = global.dbHelp.receiveBroadcastStream().listen(_onRecvData);
+}
+
+void _onRecvData(dynamic data) {
+	print(data);
+}
+
+dispose() async {
+	global.refreshTimer.cancel();
+//  global.ledCtrl.invokeMethod("lightDown");
+	if (global.dbHelpSubsc != null) {
+		global.dbHelpSubsc.cancel();
+		global.dbHelpSubsc = null;
+	}
 }
 
 class MyApp extends StatefulWidget {
@@ -47,8 +61,7 @@ class MyAppState extends State<MyApp> {
 	@override
 	void dispose() {
 		super.dispose();
-		global.refreshTimer.cancel();
-//		global.ledCtrl.invokeMethod("lightDown");
+		dispose();
 	}
 }
 

@@ -187,8 +187,9 @@ const Map<String, String> protocolMapper = {
 	"18359908": "烟感"
 };
 const ledCtrl = const MethodChannel("com.yeelinks.plugins/led_ctrl");
-//const brightnessCtrl = const MethodChannel("com.yeelinks.plugins/bright_ctrl");
 const lightColors = ["RED", "GREEN", "BLUE"];
+const dbHelp = const EventChannel("com.yeelinks.plugins/db_help");
+var dbHelpSubsc = null;
 enum ConfirmCancel {
 	CONFIRMED, CANCELED
 }
