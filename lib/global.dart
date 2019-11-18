@@ -72,6 +72,80 @@ const companyCode = "dd738dbb-0b28-4fa2-8934-efad4d8f9c88";
 const roomCode = "swDMvFDTI6JBKcd0";
 List<String> idenDevs = [];
 List<PointVal> pointValues = [];
+Map<String, PointVal> values = {
+	// 首页
+	"PUE":			PointVal("点位ID", "PUE", ""),
+	"UPS运行模式":	PointVal("点位ID", "UPS运行模式", ""),
+	"UPS负载率":		PointVal("点位ID", "UPS负载率", ""),
+	"冷通道温度":		PointVal("点位ID", "冷通道温度", ""),
+	"冷通道湿度":		PointVal("点位ID", "冷通道湿度", ""),
+	"热通道温度":		PointVal("点位ID", "热通道温度", ""),
+	"热通道湿度":		PointVal("点位ID", "热通道湿度", ""),
+
+	// 配电
+	"电压":			PointVal("点位ID", "电压", ""),
+	"电流":			PointVal("点位ID", "电流", ""),
+	"有功功率":		PointVal("点位ID", "有功功率", ""),
+	"有功电能":		PointVal("点位ID", "有功电能", ""),
+	"功率因数":		PointVal("点位ID", "功率因数", ""),
+	"输入频率":		PointVal("点位ID", "输入频率", ""),
+	"PDU输出电压":	PointVal("点位ID", "PDU输出电压", "设备ID"),
+	"PDU输出电流":	PointVal("点位ID", "PDU输出电流", "设备ID"),
+	"PDU输出电流":	PointVal("点位ID", "PDU输出电流", "设备ID"),
+	"PDU有功功率":	PointVal("点位ID", "PDU有功功率", "设备ID"),
+	"PDU功率因数":	PointVal("点位ID", "PDU功率因数", "设备ID"),
+	"PDU输出频率":	PointVal("点位ID", "PDU输出频率", "设备ID"),
+	"PDU有功电能":	PointVal("点位ID", "PDU有功电能", "设备ID"),
+
+	// UPS
+	"UPS运行模式":	PointVal("点位ID", "UPS运行模式", ""),
+	"电池容量":		PointVal("点位ID", "电池容量", ""),
+	"UPS负载率":		PointVal("点位ID", "UPS负载率", ""),
+	"UPS输入电压":	PointVal("点位ID", "UPS输入电压", ""),
+	"UPS输入频率":	PointVal("点位ID", "UPS输入频率", ""),
+	"UPS旁路电压":	PointVal("点位ID", "UPS旁路电压", ""),
+	"UPS输出电压":	PointVal("点位ID", "UPS输出电压", ""),
+	"UPS输出电流":	PointVal("点位ID", "UPS输出电流", ""),
+	"UPS输出频率":	PointVal("点位ID", "UPS输出频率", ""),
+	"电池电压":		PointVal("点位ID", "电池电压", ""),
+	"电池电流":		PointVal("点位ID", "电池电流", ""),
+	"电池更换告警":	PointVal("点位ID", "电池更换告警", ""),
+	"过载":			PointVal("点位ID", "过载", ""),
+	"低电池电压":		PointVal("点位ID", "低电池电压", ""),
+	"电池过充":		PointVal("点位ID", "电池过充", ""),
+
+	// 空调
+	"送风温度":		PointVal("点位ID", "送风温度", "设备ID"),
+	"回风温度":		PointVal("点位ID", "回风温度", "设备ID"),
+	"回风湿度":		PointVal("点位ID", "回风湿度", "设备ID"),
+	"外风机转速":		PointVal("点位ID", "外风机转速", "设备ID"),
+	"内风机转速":		PointVal("点位ID", "内风机转速", "设备ID"),
+	"压缩机转速":		PointVal("点位ID", "压缩机转速", "设备ID"),
+	"加热器电流":		PointVal("点位ID", "加热器电流", "设备ID"),
+	"电子膨胀阀开度":		PointVal("点位ID", "加热器电流", "设备ID"),
+	"环境温度":		PointVal("点位ID", "环境温度", "设备ID"),
+	"回气温度":		PointVal("点位ID", "回气温度", "设备ID"),
+	"电源电压值":		PointVal("点位ID", "电源电压值", "设备ID"),
+	"冷凝温度":		PointVal("点位ID", "加热器电流", "设备ID"),
+	"运行状态":		PointVal("点位ID", "运行状态", "设备ID"),
+	"制冷状态":		PointVal("点位ID", "制冷状态", "设备ID"),
+	"加热状态":		PointVal("点位ID", "加热状态", "设备ID"),
+	"除湿状态":		PointVal("点位ID", "除湿状态", "设备ID"),
+	"内风机":		PointVal("点位ID", "内风机", "设备ID"),
+	"外风机":		PointVal("点位ID", "外风机", "设备ID"),
+	"压缩机":		PointVal("点位ID", "压缩机", "设备ID"),
+
+	// 环境（设备需要指名冷热通道）
+	"通道温度":		PointVal("点位ID", "通道温度", "设备ID"),
+	"通道湿度":		PointVal("点位ID", "通道湿度", "设备ID"),
+	"漏水":			PointVal("点位ID", "漏水", "设备ID"),
+	"烟感":			PointVal("点位ID", "烟感", "设备ID"),
+	"防雷":			PointVal("点位ID", "防雷", "设备ID"),
+	"门禁":			PointVal("点位ID", "门禁", "设备ID"),
+
+	// 设置
+	//"所有设备":
+};
 const Map<String, String> protocolMapper = {
 	"15285839":	"温度",
 	"15039855":	"湿度",

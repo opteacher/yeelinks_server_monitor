@@ -24,21 +24,21 @@ object DbHelpPlugin : EventChannel.StreamHandler {
 
     override fun onListen(args: Any?, events: EventChannel.EventSink?) {
         eventSink = events
-        Thread(Runnable {
-            dbHelper = DbHelper(
-                    "jdbc:mysql://139.224.16.230:3306/dap", "dap", "admin"
-            )
-            Log.d("yeelinks", "Database ping: " + dbHelper!!.ping())
-        }).start()
         queryJob = object : Thread() {
             override fun run() {
                 while (!isInterrupted) {
                     if (dbHelper == null || !dbHelper!!.isConnected()) {
+                        dbHelper = DbHelper(
+                                "jdbc:mysql://139.224.16.230:3306/dap?characterEncoding=UTF-8",
+                                "dap", "admin"
+                        )
+                        Log.d("yeelinks", "Database ping: " + dbHelper!!.ping())
+                    }
+                    if (dbHelper!!.isWorking()) {
                         continue
                     }
-                    handler.sendMessage(handler.obtainMessage(
-                            1, dbHelper!!.selectAllFromUPS()
-                    ))
+                    val result =  dbHelper!!.selectAllPointByRSName("青海环保厅")
+                    handler.sendMessage(handler.obtainMessage(1, result))
                     sleep(2000)
                 }
             }

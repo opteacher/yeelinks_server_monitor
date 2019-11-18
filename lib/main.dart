@@ -15,28 +15,7 @@ void main() {
 		DeviceOrientation.landscapeLeft
 	]);
 	SystemChrome.setEnabledSystemUIOverlays([]);
-	initialize();
 	return runApp(MyApp());
-}
-
-initialize() async {
-	await FlutterDownloader.initialize();
-//	await checkNewVersion();
-//	global.brightnessCtrl.invokeMethod("turnOff");
-	global.dbHelpSubsc = global.dbHelp.receiveBroadcastStream().listen(_onRecvData);
-}
-
-void _onRecvData(dynamic data) {
-	print(data);
-}
-
-dispose() async {
-	global.refreshTimer.cancel();
-//  global.ledCtrl.invokeMethod("lightDown");
-	if (global.dbHelpSubsc != null) {
-		global.dbHelpSubsc.cancel();
-		global.dbHelpSubsc = null;
-	}
 }
 
 class MyApp extends StatefulWidget {
@@ -58,10 +37,38 @@ class MyAppState extends State<MyApp> {
 		debugShowCheckedModeBanner: false,
 	);
 
+
+	@override
+	void initState() {
+		super.initState();
+		initialize();
+	}
+
 	@override
 	void dispose() {
 		super.dispose();
-		dispose();
+		uninitialize();
+	}
+
+	initialize() async {
+		await FlutterDownloader.initialize();
+//	await checkNewVersion();
+//	global.brightnessCtrl.invokeMethod("turnOff");
+		global.dbHelpSubsc = global.dbHelp.receiveBroadcastStream().listen(_onRecvData);
+	}
+
+	_onRecvData(dynamic data) {
+		print(data);
+		setState(() {});
+	}
+
+	uninitialize() async {
+		global.refreshTimer.cancel();
+//  global.ledCtrl.invokeMethod("lightDown");
+		if (global.dbHelpSubsc != null) {
+			global.dbHelpSubsc.cancel();
+			global.dbHelpSubsc = null;
+		}
 	}
 }
 
