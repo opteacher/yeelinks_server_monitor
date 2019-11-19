@@ -7,17 +7,12 @@ import 'package:yeelinks/async.dart';
 import '../components.dart';
 import '../global.dart' as global;
 
-class Page extends StatefulWidget {
-	@override
-	State<StatefulWidget> createState() => SettingPageState();
-}
-
 enum CtrlType {
 	INPUT_SETTING,
 	SWITCH_SETTING
 }
 
-class SettingPageState extends BasePageState<Page> {
+class SettingPageState extends State<Page> {
 	static const SYS_SETTING = 1;
 	static const DEV_SETTING = 2;
 	static const ARCD_SETTING = 3;

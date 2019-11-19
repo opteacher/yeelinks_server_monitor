@@ -3,12 +3,7 @@ import '../async.dart';
 import '../components.dart';
 import '../global.dart' as global;
 
-class Page extends StatefulWidget {
-	@override
-	State<StatefulWidget> createState() => EnvPageState();
-}
-
-class EnvPageState extends BasePageState<Page> {
+class EnvPageState extends State<Page> {
 	final _dividerTxtStyle = TextStyle(
 		fontSize: 20,
 		fontWeight: FontWeight.w900,
@@ -27,81 +22,161 @@ class EnvPageState extends BasePageState<Page> {
 		"漏水": "正常",
 		"烟感": "正常"
 	};
+	bool _showAllSmoke = false;
+
+	final GlobalKey _oneRow = GlobalKey();
+	final GlobalKey _twoRow = GlobalKey();
+	double _oneRowHeight = -1;
+	double _twoRowHeight = -1;
+	double _humiTempSesHgt = -1;
+	double _smokeSesHgt = -1;
+	double _doorSesHgt = -1;
+	double _leakSesHgt = -1;
+	double _skylightSesHgt = -1;
 
 	@override
-	Widget build(BuildContext context) => Column(children: <Widget>[
-		DataCard(title: "温湿度", flex: 2, tailing: IconButton(
-			icon: Icon(Icons.keyboard_arrow_down, color: global.primaryColor),
-			onPressed: () => setState(() {})
-		), child: Padding(
-			padding: EdgeInsets.symmetric(vertical: 20),
-			child: Row(children: <Widget>[
-				_humiTempItem("温湿度1"),
-				VerticalDivider(color: global.primaryColor),
-				_humiTempItem("温湿度2")
+	Widget build(BuildContext context) {
+		if (_oneRow.currentContext != null) {
+			RenderBox rb = _oneRow.currentContext.findRenderObject();
+			if (_oneRowHeight < 0) {
+				_oneRowHeight = rb.size.height;
+			}
+			_smokeSesHgt = !_showAllSmoke ? _oneRowHeight : _oneRowHeight * 2;
+			_doorSesHgt = _oneRowHeight;
+			_leakSesHgt = _oneRowHeight;
+			_skylightSesHgt = _oneRowHeight;
+		}
+		if (_twoRow.currentContext != null) {
+			RenderBox rb = _twoRow.currentContext.findRenderObject();
+			if (_twoRowHeight < 0) {
+				_twoRowHeight = rb.size.height;
+			}
+			_humiTempSesHgt = _twoRowHeight;
+		}
+		double overflowHgt = 0;
+		if (_oneRow.currentContext != null && _twoRow.currentContext != null) {
+			overflowHgt = (_humiTempSesHgt
+				+ _smokeSesHgt
+				+ _doorSesHgt
+				+ _leakSesHgt
+				+ _skylightSesHgt
+			) - (_twoRowHeight
+				+ _oneRowHeight
+				+ _oneRowHeight
+				+ _oneRowHeight
+				+ _oneRowHeight
+			);
+		}
+		return Builder(builder: (context) => SingleChildScrollView(child: SizedBox(
+			height: MediaQuery.of(context).size.height - global.appBarHeight - 5 + overflowHgt,
+			child: Column(children: <Widget>[
+				DataCard(title: "温湿度", height: _humiTempSesHgt, flex: 2, tailing: IconButton(
+					icon: Icon(Icons.keyboard_arrow_down, color: global.primaryColor),
+					onPressed: () => setState(() {})
+				), child: Padding(
+					key: _twoRow,
+					padding: EdgeInsets.symmetric(vertical: 20),
+					child: Row(children: <Widget>[
+						_humiTempItem("温湿度1"),
+						VerticalDivider(color: global.primaryColor),
+						_humiTempItem("温湿度2")
+					])
+				)),
+				DataCard(title: "烟感", height: _smokeSesHgt, tailing: IconButton(
+					icon: Icon(!_showAllSmoke
+						? Icons.keyboard_arrow_down
+						: Icons.keyboard_arrow_up,
+						color: global.primaryColor
+					),
+					onPressed: () => setState(() {
+						_showAllSmoke = !_showAllSmoke;
+					})
+				), child: !_showAllSmoke ? Padding(
+					padding: EdgeInsets.symmetric(vertical: 20),
+					child: Row(children: <Widget>[
+						_infoItem("烟感1"), VerticalDivider(color: global.primaryColor),
+						_infoItem("烟感2"), VerticalDivider(color: global.primaryColor),
+						_infoItem("烟感3"), VerticalDivider(color: global.primaryColor),
+						_infoItem("烟感4"), VerticalDivider(color: global.primaryColor),
+						_infoItem("烟感5"), VerticalDivider(color: global.primaryColor),
+						_infoItem("烟感6"),
+					])
+				) : Column(children: <Widget>[
+					Expanded(child: Padding(
+						padding: EdgeInsets.symmetric(vertical: 20),
+						child: Row(children: <Widget>[
+							_infoItem("烟感1"), VerticalDivider(color: global.primaryColor),
+							_infoItem("烟感2"), VerticalDivider(color: global.primaryColor),
+							_infoItem("烟感3"), VerticalDivider(color: global.primaryColor),
+							_infoItem("烟感4"), VerticalDivider(color: global.primaryColor),
+							_infoItem("烟感5"), VerticalDivider(color: global.primaryColor),
+							_infoItem("烟感6"),
+						])
+					)),
+					Expanded(child: Padding(
+						padding: EdgeInsets.symmetric(vertical: 20),
+						child: Row(children: <Widget>[
+							_infoItem("烟感1"), VerticalDivider(color: global.primaryColor),
+							_infoItem("烟感2"), VerticalDivider(color: global.primaryColor),
+							_infoItem("烟感3"), VerticalDivider(color: global.primaryColor),
+							_infoItem("烟感4"), VerticalDivider(color: global.primaryColor),
+							_infoItem("烟感5"), VerticalDivider(color: global.primaryColor),
+							_infoItem("烟感6"),
+						])
+					))
+				])),
+				DataCard(title: "门禁", height: _doorSesHgt, tailing: IconButton(
+					icon: Icon(Icons.keyboard_arrow_down, color: global.primaryColor),
+					onPressed: () => setState(() {})
+				), child: Padding(
+					key: _oneRow,
+					padding: EdgeInsets.symmetric(vertical: 20),
+					child: Row(children: <Widget>[
+						_infoItem("前门", desc: "未知"),
+						VerticalDivider(color: global.primaryColor),
+						_infoItem("后门", desc: "未知"),
+					])
+				)),
+				DataCard(title: "漏水", height: _leakSesHgt, tailing: IconButton(
+					icon: Icon(Icons.keyboard_arrow_down, color: global.primaryColor),
+					onPressed: () => setState(() {})
+				), child: Padding(
+					padding: EdgeInsets.symmetric(vertical: 20),
+					child: Row(children: <Widget>[
+						_infoItem("漏水1"), VerticalDivider(color: global.primaryColor),
+						_infoItem("漏水2"), VerticalDivider(color: global.primaryColor),
+						_infoItem("漏水3"), VerticalDivider(color: global.primaryColor),
+						_infoItem("漏水4"), VerticalDivider(color: global.primaryColor),
+						_infoItem("漏水5"), VerticalDivider(color: global.primaryColor),
+						_infoItem("漏水6"),
+					])
+				)),
+				DataCard(title: "天窗", height: _skylightSesHgt, tailing: IconButton(
+					icon: Icon(Icons.keyboard_arrow_down, color: global.primaryColor),
+					onPressed: () => setState(() {})
+				), child: Padding(
+					padding: EdgeInsets.symmetric(vertical: 20),
+					child: Row(children: <Widget>[
+						_infoItem("天窗1", ctrl: Row(children: <Widget>[
+							Switch(value: false, onChanged: (value) {}), Text("关闭")
+						])),
+						VerticalDivider(color: global.primaryColor),
+						_infoItem("天窗2", ctrl: Row(children: <Widget>[
+							Switch(value: false, onChanged: (value) {}), Text("关闭")
+						])),
+						VerticalDivider(color: global.primaryColor),
+						_infoItem("天窗3", ctrl: Row(children: <Widget>[
+							Switch(value: false, onChanged: (value) {}), Text("关闭")
+						])),
+						VerticalDivider(color: global.primaryColor),
+						_infoItem("天窗4", ctrl: Row(children: <Widget>[
+							Switch(value: false, onChanged: (value) {}), Text("关闭")
+						]))
+					])
+				))
 			])
-		)),
-		DataCard(title: "烟感", tailing: IconButton(
-			icon: Icon(Icons.keyboard_arrow_down, color: global.primaryColor),
-			onPressed: () => setState(() {})
-		), child: Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Row(children: <Widget>[
-			_infoItem("烟感1"),
-			VerticalDivider(color: global.primaryColor),
-			_infoItem("烟感2"),
-			VerticalDivider(color: global.primaryColor),
-			_infoItem("烟感3"),
-			VerticalDivider(color: global.primaryColor),
-			_infoItem("烟感4"),
-			VerticalDivider(color: global.primaryColor),
-			_infoItem("烟感5"),
-			VerticalDivider(color: global.primaryColor),
-			_infoItem("烟感6"),
-		]))),
-		DataCard(title: "门禁", tailing: IconButton(
-			icon: Icon(Icons.keyboard_arrow_down, color: global.primaryColor),
-			onPressed: () => setState(() {})
-		), child: Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Row(children: <Widget>[
-			_infoItem("前门", desc: "未知"),
-			VerticalDivider(color: global.primaryColor),
-			_infoItem("后门", desc: "未知"),
-		]))),
-		DataCard(title: "漏水", tailing: IconButton(
-			icon: Icon(Icons.keyboard_arrow_down, color: global.primaryColor),
-			onPressed: () => setState(() {})
-		), child: Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Row(children: <Widget>[
-			_infoItem("漏水1"),
-			VerticalDivider(color: global.primaryColor),
-			_infoItem("漏水2"),
-			VerticalDivider(color: global.primaryColor),
-			_infoItem("漏水3"),
-			VerticalDivider(color: global.primaryColor),
-			_infoItem("漏水4"),
-			VerticalDivider(color: global.primaryColor),
-			_infoItem("漏水5"),
-			VerticalDivider(color: global.primaryColor),
-			_infoItem("漏水6"),
-		]))),
-		DataCard(title: "天窗", tailing: IconButton(
-			icon: Icon(Icons.keyboard_arrow_down, color: global.primaryColor),
-			onPressed: () => setState(() {})
-		), child: Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Row(children: <Widget>[
-			_infoItem("天窗1", ctrl: Row(children: <Widget>[
-				Switch(value: false, onChanged: (value) {}), Text("关闭")
-			])),
-			VerticalDivider(color: global.primaryColor),
-			_infoItem("天窗2", ctrl: Row(children: <Widget>[
-				Switch(value: false, onChanged: (value) {}), Text("关闭")
-			])),
-			VerticalDivider(color: global.primaryColor),
-			_infoItem("天窗3", ctrl: Row(children: <Widget>[
-				Switch(value: false, onChanged: (value) {}), Text("关闭")
-			])),
-			VerticalDivider(color: global.primaryColor),
-			_infoItem("天窗4", ctrl: Row(children: <Widget>[
-				Switch(value: false, onChanged: (value) {}), Text("关闭")
-			]))
-		])))
-	]);
+		)));
+	}
 
 	Widget _humiTempItem(String name) => Expanded(child: Column(children: <Widget>[
 		Text(name),

@@ -159,11 +159,11 @@ class PointVal {
 	final String _id;
 	final String _name;
 	final String _deviceId;
-	final double _value;
-	final String _unit;
+	double _value;
+	String _unit;
 	String _desc;
 
-	PointVal(this._id, this._name, this._deviceId, this._value, this._desc, this._unit);
+	PointVal(this._id, this._name, this._deviceId);
 
 	PointVal.fromJSON(Map json):
 		_id = json["id"].toString(), _name = json["name"], _deviceId = json["device_id"],

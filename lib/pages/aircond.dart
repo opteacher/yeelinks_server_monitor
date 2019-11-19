@@ -3,13 +3,7 @@ import '../async.dart';
 import '../components.dart';
 import '../global.dart' as global;
 
-class Page extends StatefulWidget {
-	@override
-	State<StatefulWidget> createState() => AircondPageState();
-
-}
-
-class AircondPageState extends BasePageState<Page> {
+class AircondPageState extends State<Page> {
 	bool _showDetail = false;
 	List<Device> _airconds = [];
 	Map<String, String> _values = {

@@ -7,12 +7,7 @@ import '../async.dart';
 import '../global.dart' as global;
 import '../components.dart';
 
-class Page extends StatefulWidget {
-	@override
-	State<StatefulWidget> createState() => HomePageState();
-}
-
-class HomePageState extends BasePageState<Page> {
+class HomePageState extends State<Page> {
 	List<Map<String, String>> _eventRecords = [];
 	Map<String, String> _values = {
 		"冷通道温": "0.0",

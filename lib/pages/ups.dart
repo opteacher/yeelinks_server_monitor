@@ -4,12 +4,7 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import '../components.dart';
 import '../global.dart' as global;
 
-class Page extends StatefulWidget {
-	@override
-	State<StatefulWidget> createState() => UpsPageState();
-}
-
-class UpsPageState extends BasePageState<Page> {
+class UpsPageState extends State<Page> {
 	final _infoPdg = const EdgeInsets.symmetric(vertical: 10, horizontal: 15);
 	final Map<double, String> _modMap = {
 		20480: "开机模式",

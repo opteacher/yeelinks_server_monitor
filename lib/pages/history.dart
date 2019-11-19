@@ -6,12 +6,7 @@ import 'package:yeelinks/components.dart';
 import '../global.dart' as global;
 import 'package:charts_flutter/flutter.dart' as charts;
 
-class Page extends StatefulWidget {
-	@override
-	State<StatefulWidget> createState() => HistoryPageState();
-}
-
-class HistoryPageState extends BasePageState<Page> {
+class HistoryPageState extends State<Page> {
 	final _noBorderRadius = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0)));
 	final _WngClrLvlMap = <String, Color>{
 		"0": Colors.grey,

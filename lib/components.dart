@@ -3,21 +3,20 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 import 'dart:ui';
-import 'package:english_words/english_words.dart';
+import 'dart:ui' as ui;
+
+import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:install_plugin/install_plugin.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:toast/toast.dart';
+
 import 'async.dart';
 import 'global.dart' as global;
-import 'pages/home.dart' as home;
-import 'dart:ui' as ui;
 
 class DataCard extends StatelessWidget {
 	final String title;
@@ -43,7 +42,7 @@ class DataCard extends StatelessWidget {
 //			Divider(height: 0),
 			Expanded(child: child)
 		])));
-		return height == -1 ? Expanded(flex: flex, child: dataCard) : Container(height: height, child: dataCard);
+		return height == -1 ? Expanded(flex: flex, child: dataCard) : Container(height: height + 60, child: dataCard);
 	}
 }
 
@@ -480,24 +479,19 @@ class MyDataTable extends StatelessWidget {
 	}
 }
 
-abstract class BasePageState<T extends StatefulWidget> extends State<T> {
+class Page extends StatefulWidget {
+	final State Function() newStateBuilder;
+	State _state;
+
+    Page(this.newStateBuilder);
+
 	@override
-	void initState() {
-		super.initState();
-		String pid = pageId();
-		global.refreshTimer.register("devPageOf${pid.toUpperCase()}", TimerJob(() {
-			return getDevices(global.componentInfos[pid].index);
-		}, hdlDevices, { TimerJob.PAGE_IDEN: pid }));
-		global.refreshTimer.register("poiValueOf${pid.toUpperCase()}", TimerJob(() {
-			return getPointSensor(global.idenDevs);
-		}, hdlPointVals, { TimerJob.PAGE_IDEN: pid }));
+	State<StatefulWidget> createState() {
+		_state = newStateBuilder();
+		return _state;
 	}
 
-	String pageId();
-
-	void hdlDevices(dynamic data);
-
-	void hdlPointVals(dynamic data);
+	update() => _state.setState(() {});
 }
 
 class TimerJob {
@@ -691,8 +685,6 @@ class UpsRunningModPainter extends CustomPainter {
 		if (_imgBYPASS == null || _imgInput == null || _imgACDC == null || _imgDCAC == null || _imgBatt == null) {
 			return;
 		}
-
-		print(size.height);
 
 		double lblkWid = 200;
 		double sblkWid = 80;

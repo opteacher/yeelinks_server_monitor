@@ -1,11 +1,8 @@
-import 'dart:async';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:toast/toast.dart';
-import 'async.dart';
+
 import 'components.dart';
 import 'global.dart' as global;
 
@@ -15,19 +12,7 @@ void main() {
 		DeviceOrientation.landscapeLeft
 	]);
 	SystemChrome.setEnabledSystemUIOverlays([]);
-//	global.brightnessCtrl.invokeMethod("turnOff");
-	initialize();
 	return runApp(MyApp());
-}
-
-initialize() async {
-	await FlutterDownloader.initialize();
-//	await checkNewVersion();
-	global.dbHelpSubsc = global.dbHelp.receiveBroadcastStream().listen(_onRecvData);
-}
-
-void _onRecvData(dynamic data) {
-	print(data);
 }
 
 class MyApp extends StatefulWidget {
@@ -45,13 +30,34 @@ class MyAppState extends State<MyApp> {
 			primaryColorDark: const Color(0xff009530),
 			dividerColor: const Color(0xffE7F9E9),
 		),
-		home: global.componentInfos["home"].page,
+		home: global.components["home"].page,
 		debugShowCheckedModeBanner: false,
 	);
+
+
+	@override
+	void initState() {
+		super.initState();
+		initialize();
+	}
 
 	@override
 	void dispose() {
 		super.dispose();
+		uninitialize();
+	}
+
+	initialize() async {
+		await FlutterDownloader.initialize();
+		global.dbHelpSubsc = global.dbHelp.receiveBroadcastStream().listen(_onRecvData);
+	}
+
+	_onRecvData(dynamic data) {
+		print(data);
+		global.components[global.currentPageID].page.page.update();
+	}
+
+	uninitialize() async {
 		global.refreshTimer.cancel();
 //		global.ledCtrl.invokeMethod("lightDown");
 		if (global.dbHelpSubsc != null) {
@@ -92,45 +98,10 @@ class MyAppBarState extends State<MyAppBar> {
 				_buildTitleButton(context, "监控", "monitor", icon: Icons.videocam)
 			])),
 			_buildTitleButton(context, "", "setting", icon: Icons.settings, callback: () async {
-				final _formKey = GlobalKey<FormState>();
-				String _account = "";
-				String _password = "";
-				switch(await showDialog<global.ConfirmCancel>(context: context, builder: (BuildContext context) => SimpleDialog(
-					title: Text("管理员认证"),
-					children: <Widget>[Padding(padding: EdgeInsets.all(20), child: Form(key: _formKey, child: Column(children: <Widget>[
-						TextFormField(
-							decoration: InputDecoration(hintText: "输入管理员账号"),
-							autofocus: true,
-							onSaved: (content) {
-								_account = content;
-							},
-						),
-						TextFormField(
-							decoration: InputDecoration(hintText: "输入密码"),
-							obscureText: true,
-							onSaved: (content) {
-								_password = content;
-							},
-						),
-						Padding(padding: EdgeInsets.only(top: 16), child: FlatButton(
-							color: Theme.of(context).primaryColor,
-							child: Text("登录", style: TextStyle(color: Colors.white)),
-							onPressed: () {
-								var _form = _formKey.currentState;
-								if (!_form.validate()) {
-									return;
-								}
-								_form.save();
-								if (_account != "admin" || _password != "admin") {
-									Navigator.pop(context, global.ConfirmCancel.CANCELED);
-									Toast.show("管理员账户或密码错误！", context);
-								} else {
-									Navigator.pop(context, global.ConfirmCancel.CONFIRMED);
-								}
-							})
-						)
-					])))]
-				))) {
+				switch(await showDialog<global.ConfirmCancel>(
+					context: context,
+					builder: _buildAdminLoginDlg
+				)) {
 					case global.ConfirmCancel.CONFIRMED:
 						global.toIdenPage(context, "setting");
 						break;
@@ -141,6 +112,48 @@ class MyAppBarState extends State<MyAppBar> {
 			})
 		]),
 	);
+
+	Widget _buildAdminLoginDlg(BuildContext context) {
+		final _formKey = GlobalKey<FormState>();
+		String _account = "";
+		String _password = "";
+		return SimpleDialog(
+			title: Text("管理员认证"),
+			children: <Widget>[Padding(padding: EdgeInsets.all(20), child: Form(key: _formKey, child: Column(children: <Widget>[
+				TextFormField(
+					decoration: InputDecoration(hintText: "输入管理员账号"),
+					autofocus: true,
+					onSaved: (content) {
+						_account = content;
+					},
+				),
+				TextFormField(
+					decoration: InputDecoration(hintText: "输入密码"),
+					obscureText: true,
+					onSaved: (content) {
+						_password = content;
+					},
+				),
+				Padding(padding: EdgeInsets.only(top: 16), child: FlatButton(
+					color: Theme.of(context).primaryColor,
+					child: Text("登录", style: TextStyle(color: Colors.white)),
+					onPressed: () {
+						var _form = _formKey.currentState;
+						if (!_form.validate()) {
+							return;
+						}
+						_form.save();
+						if (_account != "admin" || _password != "admin") {
+							Navigator.pop(context, global.ConfirmCancel.CANCELED);
+							Toast.show("管理员账户或密码错误！", context);
+						} else {
+							Navigator.pop(context, global.ConfirmCancel.CONFIRMED);
+						}
+					})
+				)
+			])))]
+		);
+	}
 
 	_buildTitleButton(BuildContext context, String label, String pid, {IconData icon, void Function() callback}) {
 		List<Widget> btnContent = [Text(label, style: _titleStyle)];
@@ -170,9 +183,9 @@ class MyAppBarState extends State<MyAppBar> {
 }
 
 class Dashboard extends StatelessWidget {
-	final Widget _content;
+	final Page page;
 
-	Dashboard(this._content);
+	Dashboard(this.page);
 
 	@override
 	Widget build(BuildContext context) {
@@ -183,7 +196,7 @@ class Dashboard extends StatelessWidget {
 				color: Colors.white,
 				padding: const EdgeInsets.all(2.5),
 				height: MediaQuery.of(context).size.height - global.appBarHeight,
-				child: _content
+				child: page
 			)))
 		);
 	}

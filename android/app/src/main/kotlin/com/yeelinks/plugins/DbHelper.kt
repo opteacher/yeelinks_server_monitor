@@ -1,12 +1,13 @@
 package com.yeelinks.plugins
 
+import android.util.Log
 import java.sql.Connection
 import java.sql.DriverManager
-import java.sql.Statement
+import java.sql.PreparedStatement
 
-class DbHelper(url: String, username: String, password: String) {
+class DbHelper(private val url: String, private val username: String, private val password: String) {
     private var conn: Connection
-    private var stat: Statement? = null
+    private var stat: PreparedStatement? = null
 
     init {
         Class.forName("com.mysql.jdbc.Driver").newInstance()
@@ -17,33 +18,60 @@ class DbHelper(url: String, username: String, password: String) {
         if (conn.isClosed) {
             throw Exception("Connection closed")
         }
-        stat = conn.createStatement()
-        val rs = stat!!.executeQuery("SHOW TABLES")
+        stat = conn.prepareStatement("SHOW TABLES")
+        val rs = stat!!.executeQuery()
         val result = rs.next()
         stat!!.close()
+        stat = null
         return result
     }
 
     fun disconnect() {
         conn.close()
         stat!!.close()
+        stat = null
     }
 
     fun isConnected(): Boolean {
         return !conn.isClosed
     }
 
-    fun selectAllFromUPS(): MutableList<String> {
+    fun isWorking(): Boolean {
+        return stat != null
+    }
+
+    fun selectAllPoints(): List<Map<String, Any>> {
         if (conn.isClosed) {
-            throw Exception("Connection closed")
+            conn = DriverManager.getConnection(url, username, password)
         }
-        stat = conn.createStatement()
-        val rs = stat!!.executeQuery("SELECT * FROM `ups`")
-        val result: MutableList<String> = ArrayList()
+        stat = conn.prepareStatement("SELECT `PointID`, `BayName`, `PointName`, `GroupName` FROM `ptai`")
+        var rs = stat!!.executeQuery()
+        val result: MutableMap<String, Map<String, Any>> = HashMap()
         while (rs.next()) {
-            result.add(rs.getString("name"))
+            val pointID = rs.getString("PointID")
+            result[pointID] = mapOf(
+                    "BayName" to rs.getString("BayName"),
+                    "GroupName" to rs.getString("GroupName"),
+                    "PointName" to rs.getString("PointName"),
+                    "PointID" to pointID
+            )
+        }
+        rs.close()
+        stat!!.close()
+        stat = conn.prepareStatement("SELECT `PointID`, `Status`, `ADate`, `ATime` FROM `ptsts`")
+        rs = stat!!.executeQuery()
+        while (rs.next()) {
+            val pointID = rs.getString("PointID")
+            if (!result.containsKey(pointID)) {
+                continue
+            }
+            result[pointID]!!.plus(mapOf(
+                    "Status" to rs.getString("Status"),
+                    "Time" to "${rs.getString("ADate")} ${rs.getString("ATime")}"
+            ))
         }
         stat!!.close()
-        return result
+        stat = null
+        return result.values.toList()
     }
 }

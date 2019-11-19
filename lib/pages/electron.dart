@@ -5,12 +5,7 @@ import '../async.dart';
 import '../components.dart';
 import '../global.dart' as global;
 
-class Page extends StatefulWidget {
-	@override
-	State<StatefulWidget> createState() => ElectronPageState();
-}
-
-class ElectronPageState extends BasePageState<Page> {
+class ElectronPageState extends State<Page> {
 	List<Device> _pdus = [];
 	String _mainEleID = "";
 	Map<String, String> _eleVals = {
@@ -200,9 +195,9 @@ class ElectronPageState extends BasePageState<Page> {
 				child: Row(
 					mainAxisAlignment: MainAxisAlignment.center,
 					children: [false, true].map<Widget>((index) => Container(
-						width: 8.0,
-						height: 8.0,
-						margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+						width: 12.0,
+						height: 12.0,
+						margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),
 						decoration: BoxDecoration(
 							shape: BoxShape.circle,
 							color: index == _showDetail ? Color.fromRGBO(0, 0, 0, 0.9) : Color.fromRGBO(0, 0, 0, 0.4)
@@ -230,8 +225,9 @@ class ElectronPageState extends BasePageState<Page> {
 									data: [],
 								)
 							],
-							animate: false,
-							dateTimeFactory: const charts.LocalDateTimeFactory(),
+							defaultRenderer: new charts.BarRendererConfig<DateTime>(),
+							defaultInteractions: false,
+							behaviors: [new charts.SelectNearest(), new charts.DomainHighlighter()],
 						)),
 						Expanded(child: charts.TimeSeriesChart(
 							[
@@ -260,8 +256,9 @@ class ElectronPageState extends BasePageState<Page> {
 									data: [],
 								)
 							],
-							animate: false,
-							dateTimeFactory: const charts.LocalDateTimeFactory(),
+							defaultRenderer: new charts.BarRendererConfig<DateTime>(),
+							defaultInteractions: false,
+							behaviors: [new charts.SelectNearest(), new charts.DomainHighlighter()],
 						)),
 						Expanded(child: charts.TimeSeriesChart(
 							[

@@ -4,12 +4,7 @@ import 'package:flutter_ijk/flutter_ijk.dart';
 import '../components.dart';
 import '../global.dart' as global;
 
-class Page extends StatefulWidget {
-	@override
-	State<StatefulWidget> createState() => MonitorPageState();
-}
-
-class MonitorPageState extends BasePageState<Page> {
+class MonitorPageState extends State<Page> {
 	IjkPlayerController _controller;
 
 	@override
