@@ -61,7 +61,11 @@ class ElectronPageState extends State<Page> {
 							Offset(0, 180): Colors.grey,
 							Offset(240, 300): Colors.red
 						},
-						value: double.parse("0.0"),
+						value: double.parse(
+							global.values["配电系统-市电输入-AB相电压"] != null ?
+							global.values["配电系统-市电输入-AB相电压"].status :
+							"0.00"
+						),
 						suffix: "V"
 					),
 					Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
@@ -78,7 +82,11 @@ class ElectronPageState extends State<Page> {
 							Offset(0, 180): Colors.grey,
 							Offset(240, 300): Colors.red
 						},
-						value: double.parse("0.0"),
+						value: double.parse(
+							global.values["配电系统-市电输入-BC相电压"] != null ?
+							global.values["配电系统-市电输入-BC相电压"].status :
+							"0.00"
+						),
 						suffix: "V"
 					),
 					Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
@@ -95,7 +103,11 @@ class ElectronPageState extends State<Page> {
 							Offset(0, 180): Colors.grey,
 							Offset(240, 300): Colors.red
 						},
-						value: double.parse("0.0"),
+						value: double.parse(
+							global.values["配电系统-市电输入-CA相电压"] != null ?
+							global.values["配电系统-市电输入-CA相电压"].status :
+							"0.00"
+						),
 						suffix: "V"
 					),
 					Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
@@ -109,21 +121,42 @@ class ElectronPageState extends State<Page> {
 			Expanded(child: Column(children: <Widget>[
 				DescListItem(
 					DescListItemTitle("A 相电压", size: 20.0),
-					[DescListItemContent("-1.0", blocked: true, suffixText: "V")],
+					[DescListItemContent(
+						global.values["配电系统-市电输入-A相电压"] != null ?
+						global.values["配电系统-市电输入-A相电压"].status :
+						"0.00",
+						blocked: true,
+						suffixText: "V",
+						horizontal: 10
+					)],
 					titleAlign: TextAlign.center,
 					contentAlign: TextAlign.center,
 					contentWidth: 200
 				),
 				DescListItem(
 					DescListItemTitle("B 相电压", size: 20.0),
-					[DescListItemContent("-1.0", blocked: true, suffixText: "V")],
+					[DescListItemContent(
+						global.values["配电系统-市电输入-B相电压"] != null ?
+						global.values["配电系统-市电输入-B相电压"].status :
+						"0.00",
+						blocked: true,
+						suffixText: "V",
+						horizontal: 10
+					)],
 					titleAlign: TextAlign.center,
 					contentAlign: TextAlign.center,
 					contentWidth: 200
 				),
 				DescListItem(
 					DescListItemTitle("C 相电压", size: 20.0),
-					[DescListItemContent("-1.0", blocked: true, suffixText: "V")],
+					[DescListItemContent(
+						global.values["配电系统-市电输入-C相电压"] != null ?
+						global.values["配电系统-市电输入-C相电压"].status :
+						"0.00",
+						blocked: true,
+						suffixText: "V",
+						horizontal: 10
+					)],
 					titleAlign: TextAlign.center,
 					contentAlign: TextAlign.center,
 					contentWidth: 200
@@ -140,28 +173,56 @@ class ElectronPageState extends State<Page> {
 			Expanded(child: Column(children: <Widget>[
 				DescListItem(
 					DescListItemTitle("有功功率", size: 20.0),
-					[DescListItemContent("-1.0", blocked: true, suffixText: "V")],
+					[DescListItemContent(
+						global.values["配电系统-市电输入-有功功率"] != null ?
+						global.values["配电系统-市电输入-有功功率"].status :
+						"0.00",
+						blocked: true,
+						suffixText: "kW",
+						horizontal: 10
+					)],
 					titleAlign: TextAlign.center,
 					contentAlign: TextAlign.center,
 					contentWidth: 200
 				),
 				DescListItem(
 					DescListItemTitle("无功功率", size: 20.0),
-					[DescListItemContent("-1.0", blocked: true, suffixText: "V")],
+					[DescListItemContent(
+						global.values["配电系统-市电输入-无功功率"] != null ?
+						global.values["配电系统-市电输入-无功功率"].status :
+						"0.00",
+						blocked: true,
+						suffixText: "kW",
+						horizontal: 10
+					)],
 					titleAlign: TextAlign.center,
 					contentAlign: TextAlign.center,
 					contentWidth: 200
 				),
 				DescListItem(
 					DescListItemTitle("视在功率", size: 20.0),
-					[DescListItemContent("-1.0", blocked: true, suffixText: "V")],
+					[DescListItemContent(
+						global.values["配电系统-市电输入-视在功率"] != null ?
+						global.values["配电系统-市电输入-视在功率"].status :
+						"0.00",
+						blocked: true,
+						suffixText: "kW",
+						horizontal: 10
+					)],
 					titleAlign: TextAlign.center,
 					contentAlign: TextAlign.center,
 					contentWidth: 200
 				),
 				DescListItem(
 					DescListItemTitle("频率", size: 20.0),
-					[DescListItemContent("-1.0", blocked: true, suffixText: "V")],
+					[DescListItemContent(
+						global.values["配电系统-市电输入-频率"] != null ?
+						global.values["配电系统-市电输入-频率"].status :
+						"0.00",
+						blocked: true,
+						suffixText: "kW",
+						horizontal: 10
+					)],
 					titleAlign: TextAlign.center,
 					contentAlign: TextAlign.center,
 					contentWidth: 200
@@ -207,9 +268,7 @@ class ElectronPageState extends State<Page> {
 			)
 		])),
 		Expanded(child: Row(children: <Widget>[
-			DataCard(title: "PDU", child: ListView(children: <Widget>[
-				_pduListItem("PDU 1")
-			])),
+			DataCard(title: "PDU", child: _buildPduListView()),
 			DataCard(title: "配电分析", flex: 4, child: Padding(
 				padding: EdgeInsets.all(5),
 				child: Row(children: <Widget>[
@@ -279,51 +338,66 @@ class ElectronPageState extends State<Page> {
 		]))
 	]);
 
-	Widget _pduListItem(String name) => ListTile(title: Text(name));
-
-	@override
-	String pageId() => "electron";
-
-	@override
-	void hdlDevices(data) => setState(() {
-		global.idenDevs = [];
-		if (data["ele"] != null) {
-			_mainEleID = Device.fromJSON(data["ele"]).id;
-			global.idenDevs.add(_mainEleID);
-		} else {
-			_mainEleID = "";
-		}
-
-		if (data["pdu"] == null) {
-			return;
-		}
-		_pdus = [];
-		for (var pdu in data["pdu"]) {
-			_pdus.add(Device.fromJSON(pdu));
-		}
-		if (global.currentDevID.isEmpty && _pdus.isNotEmpty) {
-			global.currentDevID = _pdus[0].id;
-		}
-		global.idenDevs.add(global.currentDevID);
-	});
-
-	@override
-	void hdlPointVals(dynamic data) => setState(() {
-		if (_mainEleID.isEmpty || global.currentDevID.isEmpty) {
-			return;
-		}
-		for (PointVal pv in data) {
-			if (pv.deviceId == _mainEleID) {
-				String poiName = global.protocolMapper[pv.id];
-				if (_eleVals[poiName] != null) {
-					_eleVals[poiName] = pv.value.toStringAsFixed(2);
-				}
-			} else if (pv.deviceId == global.currentDevID) {
-				String poiName = global.protocolMapper[pv.id];
-				if (_pduVals[poiName] != null) {
-					_pduVals[poiName] = pv.value.toStringAsFixed(2);
-				}
+	Widget _buildPduListView() {
+		var pduPois = global.values.values.where((ele) => ele.grpName == "PDU系统");
+		var pduMap = <String, Map<String, String>>{};
+		for (var pduPoi in pduPois) {
+			if (pduMap[pduPoi.bayName] != null) {
+				pduMap[pduPoi.bayName][pduPoi.poiName] = pduPoi.status;
+			} else {
+				pduMap[pduPoi.bayName] = {
+					"名字": pduPoi.bayName,
+					pduPoi.poiName: pduPoi.status
+				};
 			}
 		}
-	});
+		final idxTxtStyle = TextStyle(fontSize: 20, color: global.primaryColor);
+		return ListView(children: pduMap.values.map<Widget>((pdu) => Padding(
+			padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+			child: Column(children: <Widget>[
+				Padding(padding: EdgeInsets.only(bottom: 10), child: Row(
+					mainAxisAlignment: MainAxisAlignment.start,
+					children: <Widget>[Text(pdu["名字"], style: TextStyle(
+						fontSize: 25,
+						fontWeight: FontWeight.w600
+					))]
+				)),
+				Padding(padding: EdgeInsets.only(bottom: 5), child: Row(children: <Widget>[
+					Expanded(child: Row(children: <Widget>[
+						Expanded(child: Text(
+							pdu["A相电压"] != null ? pdu["A相电压"] : "0.00",
+							textAlign: TextAlign.left, style: idxTxtStyle
+						)),
+						Expanded(child: Text("V", style: idxTxtStyle))
+					])),
+					Expanded(child: Row(children: <Widget>[
+						Expanded(child: Text(
+							pdu["A相有功"] != null ? pdu["A相有功"] : "0.00",
+							textAlign: TextAlign.right, style: idxTxtStyle
+						)),
+						Expanded(child: Text("", style: idxTxtStyle))
+					]))
+				])),
+				Padding(padding: EdgeInsets.only(bottom: 5), child: Row(children: <Widget>[
+					Expanded(child: Row(children: <Widget>[
+						Expanded(child: Text(
+							pdu["A相电流"] != null ? pdu["A相电流"] : "0.00",
+							textAlign: TextAlign.left, style: idxTxtStyle
+						)),
+						Expanded(child: Text("A", style: idxTxtStyle))
+					])),
+					Expanded(child: Row(children: <Widget>[
+						Expanded(child: Text(
+							pdu["频率"] != null ? pdu["频率"] : "0.00",
+							textAlign: TextAlign.right, style: idxTxtStyle
+						)),
+						Expanded(child: Text("Hz",
+							textAlign: TextAlign.right, style: idxTxtStyle
+						))
+					]))
+				])),
+				Divider(color: global.primaryColor)
+			])
+		)).toList());
+	}
 }

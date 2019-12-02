@@ -11,7 +11,6 @@ class MainActivity: FlutterActivity() {
     super.onCreate(savedInstanceState)
     GeneratedPluginRegistrant.registerWith(this)
 //    LedCtrlPlugin.register(this, flutterView)
-//    BrightCtrlPlugin.register(this, flutterView)
     EventChannel(flutterView, DbHelpPlugin.ChannelName)
             .setStreamHandler(DbHelpPlugin)
   }

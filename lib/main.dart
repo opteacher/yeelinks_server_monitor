@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:toast/toast.dart';
+import 'package:yeelinks/async.dart';
 
 import 'components.dart';
 import 'global.dart' as global;
@@ -54,6 +55,18 @@ class MyAppState extends State<MyApp> {
 
 	_onRecvData(dynamic data) {
 		print(data);
+		for (var item in data) {
+			var pv = PointValDB(
+				item["GroupName"],
+				item["BayName"],
+				item["PointName"],
+				item["PointID"],
+				item["Statue"],
+				item["DateTime"]
+			);
+			var key = "${pv.grpName}-${pv.bayName}-${pv.poiName}";
+			global.values[key] = pv;
+		}
 		global.components[global.currentPageID].page.page.update();
 	}
 
@@ -114,44 +127,49 @@ class MyAppBarState extends State<MyAppBar> {
 	);
 
 	Widget _buildAdminLoginDlg(BuildContext context) {
-		final _formKey = GlobalKey<FormState>();
-		String _account = "";
-		String _password = "";
+		final formKey = GlobalKey<FormState>();
+		String account = "";
+		String password = "";
 		return SimpleDialog(
 			title: Text("管理员认证"),
-			children: <Widget>[Padding(padding: EdgeInsets.all(20), child: Form(key: _formKey, child: Column(children: <Widget>[
-				TextFormField(
-					decoration: InputDecoration(hintText: "输入管理员账号"),
-					autofocus: true,
-					onSaved: (content) {
-						_account = content;
-					},
-				),
-				TextFormField(
-					decoration: InputDecoration(hintText: "输入密码"),
-					obscureText: true,
-					onSaved: (content) {
-						_password = content;
-					},
-				),
-				Padding(padding: EdgeInsets.only(top: 16), child: FlatButton(
-					color: Theme.of(context).primaryColor,
-					child: Text("登录", style: TextStyle(color: Colors.white)),
-					onPressed: () {
-						var _form = _formKey.currentState;
-						if (!_form.validate()) {
-							return;
-						}
-						_form.save();
-						if (_account != "admin" || _password != "admin") {
-							Navigator.pop(context, global.ConfirmCancel.CANCELED);
-							Toast.show("管理员账户或密码错误！", context);
-						} else {
-							Navigator.pop(context, global.ConfirmCancel.CONFIRMED);
-						}
-					})
-				)
-			])))]
+			children: <Widget>[
+				Padding(padding: EdgeInsets.all(20), child: Form(
+					key: formKey,
+					child: Column(children: <Widget>[
+						TextFormField(
+							decoration: InputDecoration(hintText: "输入管理员账号"),
+							autofocus: true,
+							onSaved: (content) {
+								account = content;
+							},
+						),
+						TextFormField(
+							decoration: InputDecoration(hintText: "输入密码"),
+							obscureText: true,
+							onSaved: (content) {
+								password = content;
+							},
+						),
+						Padding(padding: EdgeInsets.only(top: 16), child: FlatButton(
+							color: Theme.of(context).primaryColor,
+							child: Text("登录", style: TextStyle(color: Colors.white)),
+							onPressed: () {
+								var form = formKey.currentState;
+								if (!form.validate()) {
+									return;
+								}
+								form.save();
+								if (account != "admin" || password != "admin") {
+									Navigator.pop(context, global.ConfirmCancel.CANCELED);
+									Toast.show("管理员账户或密码错误！", context);
+								} else {
+									Navigator.pop(context, global.ConfirmCancel.CONFIRMED);
+								}
+							})
+						)]
+					)
+				))
+			]
 		);
 	}
 

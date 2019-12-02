@@ -181,6 +181,17 @@ class PointVal {
 	String get desc => _desc;
 }
 
+class PointValDB {
+	final String grpName;
+	final String bayName;
+	final String poiName;
+	final String poiId;
+	String status;
+	String dateTime;
+
+	PointValDB(this.grpName, this.bayName, this.poiName, this.poiId, this.status, this.dateTime);
+}
+
 class EventRecord {
 	final int _id;
 	final String _name;

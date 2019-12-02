@@ -149,10 +149,17 @@ class DescListItem extends StatelessWidget {
 			titleWidth == -1 ? Expanded(child: ttl) : Container(width: titleWidth, child: ttl),
 			SizedBox(
 				width: contentWidth != -1 ? contentWidth : null,
-				child: Row(children: contents.map<Widget>((content) => Row(children: <Widget>[
-					_buildContent(content),
-					VerticalDivider(color: Colors.white, width: 10)
-				])).toList())
+				child: Row(
+					mainAxisAlignment: <TextAlign, MainAxisAlignment>{
+						TextAlign.left: MainAxisAlignment.start,
+						TextAlign.center: MainAxisAlignment.center,
+						TextAlign.right: MainAxisAlignment.end
+					}[contentAlign],
+					children: contents.map<Widget>((content) => Row(children: <Widget>[
+						_buildContent(content),
+						VerticalDivider(color: Colors.white, width: 10)
+					])).toList()
+				)
 			)
 		]));
 		return expanded ? Expanded(child: body) : body;

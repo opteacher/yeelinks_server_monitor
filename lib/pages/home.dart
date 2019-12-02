@@ -120,20 +120,44 @@ class HomePageState extends State<Page> {
 						DescListItem(
 							DescListItemTitle("温湿度 1", size: 20.0),
 							[
-								DescListItemContent("000.0", blocked: true, suffixText: "℃"),
-								DescListItemContent("100.0", blocked: true, suffixText: "%")
+								DescListItemContent(
+									global.values["温湿度系统-温湿度1-温度"] != null ?
+									global.values["温湿度系统-温湿度1-温度"].status :
+									"0.00",
+									blocked: true,
+									suffixText: "℃"
+								),
+								DescListItemContent(
+									global.values["温湿度系统-温湿度1-湿度"] != null ?
+									global.values["温湿度系统-温湿度1-湿度"].status :
+									"0.00",
+									blocked: true,
+									suffixText: "%"
+								)
 							],
-							contentAlign: TextAlign.center,
+							contentAlign: TextAlign.right,
 							contentWidth: 200,
 							horizontal: 30,
 						),
 						DescListItem(
-							DescListItemTitle("温湿度 1", size: 20.0),
+							DescListItemTitle("温湿度 2", size: 20.0),
 							[
-								DescListItemContent("000.0", blocked: true, suffixText: "℃"),
-								DescListItemContent("100.0", blocked: true, suffixText: "%")
+								DescListItemContent(
+									global.values["温湿度系统-温湿度2-温度"] != null ?
+									global.values["温湿度系统-温湿度2-温度"].status :
+									"0.00",
+									blocked: true,
+									suffixText: "℃"
+								),
+								DescListItemContent(
+									global.values["温湿度系统-温湿度2-湿度"] != null ?
+									global.values["温湿度系统-温湿度2-湿度"].status :
+									"0.00",
+									blocked: true,
+									suffixText: "%"
+								)
 							],
-							contentAlign: TextAlign.center,
+							contentAlign: TextAlign.right,
 							contentWidth: 200,
 							horizontal: 30
 						),
